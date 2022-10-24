@@ -22,6 +22,7 @@ export default function Login() {
   };
 
   const [checkState, setCheck] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const {
     handleSubmit,
     formState: { errors },
@@ -32,7 +33,9 @@ export default function Login() {
   const { Login } = useAuth();
 
   const onSubmit = async ({login, senha}: FormProps) => {
+    setLoading(false)
     await Login({login, senha});
+    setLoading(true)
   };
 
   const handleRememberPassword = async (checked: boolean) => {
@@ -91,6 +94,7 @@ export default function Login() {
         type="primary"
         size="full"
         onClick={handleSubmit(onSubmit)}
+        loading={loading}
       /> 
 
     </form>
