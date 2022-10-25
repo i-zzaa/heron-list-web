@@ -33,9 +33,9 @@ export default function Login() {
   const { Login } = useAuth();
 
   const onSubmit = async ({login, senha}: FormProps) => {
-    setLoading(false)
-    await Login({login, senha});
     setLoading(true)
+    await Login({login, senha});
+    setLoading(false)
   };
 
   const handleRememberPassword = async (checked: boolean) => {
