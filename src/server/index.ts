@@ -7,7 +7,7 @@ export interface ResponseSuccessProps {
 }
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || process.env.VITE_API_URL,
+  baseURL: "https://lfzqax.hospedagemelastica.com.br/",
   headers: {
     "Access-Control-Allow-Origin": "*",
     "Content-Type": "application/json",
