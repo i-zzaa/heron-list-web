@@ -70,7 +70,7 @@ export default function ScheduleCalendar() {
       });
 
       const response: any = await getList(
-        `/evento/filter/${moment.start}/${moment.end}?${filter.join('&')}`
+        `/evento/filtro/${moment.start}/${moment.end}?${filter.join('&')}`
       );
 
       setEventsList(response);
@@ -165,7 +165,7 @@ export default function ScheduleCalendar() {
 
       setFilter(_filter);
       const response: any = await getList(
-        `/evento/filter/${currentDate.start}/${currentDate.end}?${_filter.join(
+        `/evento/filtro/${currentDate.start}/${currentDate.end}?${_filter.join(
           '&'
         )}`
       );

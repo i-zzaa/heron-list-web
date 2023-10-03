@@ -25,7 +25,7 @@ export default function Avaliation() {
   const [patients, setPatients] = useState<PacientsProps[]>([]);
   const [patient, setPatient] = useState<any>();
   const [patientFormatCalendar, setPatientFormatCalendar] = useState<any>();
-  const [filterCurrent, setFilter] = useState<any>({});
+  const [filterCurrent, setFilter] = useState<any>({ naFila: true });
   const [pagination, setPagination] = useState<any>({
     currentPage: 1,
     pageSize: 10,
@@ -43,28 +43,28 @@ export default function Avaliation() {
 
   const { renderToast } = useToast();
 
-  const renderPatient = useCallback(async () => {
-    setLoading(true);
-    try {
-      setLoading(true);
-      setPatients([]);
-      const response = await getList(
-        `paciente?statusPacienteCod=${STATUS_PACIENT_COD.queue_avaliation}&page=${pagination.currentPage}&pageSize=${pagination.pageSize}`
-      );
-      setPatients(response.data);
-      setPagination(response.pagination)
+  // const renderPatient = useCallback(async () => {
+  //   setLoading(true);
+  //   try {
+  //     setLoading(true);
+  //     setPatients([]);
+  //     const response = await getList(
+  //       `paciente?statusPacienteCod=${STATUS_PACIENT_COD.queue_avaliation}&page=${pagination.currentPage}&pageSize=${pagination.pageSize}`
+  //     );
+  //     setPatients(response.data);
+  //     setPagination(response.pagination)
 
-      setLoading(false);
-    } catch ({ message }: any) {
-      setLoading(false);
-      renderToast({
-        type: 'failure',
-        title: 'Erro!',
-        message: 'Falha na conexão',
-        open: true,
-      });
-    }
-  }, []);
+  //     setLoading(false);
+  //   } catch ({ message }: any) {
+  //     setLoading(false);
+  //     renderToast({
+  //       type: 'failure',
+  //       title: 'Erro!',
+  //       message: 'Falha na conexão',
+  //       open: true,
+  //     });
+  //   }
+  // }, []);
 
   const handleDisabled = async () => {
     setOpenConfirm(false);
@@ -214,13 +214,9 @@ export default function Avaliation() {
   }, []);
 
   useEffect(() => {
-    !hasPermition('FILA_AVALIACAO_FILTRO_SELECT_AGENDADOS')
-      ? handleSubmitFilter({ naFila: true })
-      : renderPatient();
-
-    // handleSubmitFilter({ naFila: true })
+    handleSubmitFilter({ naFila: true })
     renderDropdown();
-  }, [renderPatient]);
+  }, []);
 
   return (
     <div className="grid">
@@ -230,7 +226,7 @@ export default function Avaliation() {
         fields={fieldsConst}
         screen="FILA_AVALIACAO"
         onSubmit={handleSubmitFilter}
-        onReset={renderPatient}
+        onReset={()=> handleSubmitFilter({ naFila: true })}
         loading={loading}
         dropdown={dropDownList}
         onInclude={() => {
@@ -275,7 +271,7 @@ export default function Avaliation() {
               STATUS_PACIENT_COD.queue_avaliation
             );
             setDropDownList({ ...dropDownList, pacientes });
-            renderPatient();
+            handleSubmitFilter({ naFila: true });
             setOpen(false);
           }}
           dropdown={dropDownList}
@@ -308,7 +304,7 @@ export default function Avaliation() {
                 { naFila: !patient.vaga.naFila }
               );
 
-              renderPatient();
+              handleSubmitFilter({ naFila: true });
               setOpenCalendarForm(false);
             }}
           />
