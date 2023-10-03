@@ -19,7 +19,7 @@ export default function LoginPage() {
 
   return (
     <>
-      <Header heading="Fila de Espera" />
+      <Header heading="Agenda | Multialcance" />
       <Login />
       <div className="text-xs absolute bottom-0 text-gray-300 left-0  w-full flex justify-center">
         <div className="">{version}</div>

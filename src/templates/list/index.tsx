@@ -154,7 +154,7 @@ export function List({
             buttonFooter.size = 'md';
             typeButtonFooter = 'agendar';
             break;
-          case screen !== 'FILA_DEVOLUTIVA' &&
+          case screen === 'FILA_DEVOLUTIVA' &&
             !item.vaga.naFila &&
             hasPermition(`${screen}_LISTA_BOTAO_RETORNAR_AGENDAR`):
             buttonFooter.text = 'Retornar';
