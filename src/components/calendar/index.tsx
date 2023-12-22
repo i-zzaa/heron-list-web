@@ -124,7 +124,7 @@ export const CalendarComponent = ({
           slotLabelInterval="5vw" // cada célula da grade ocupa 5% da largura da tela
           slotLabelFormat={{ hour: 'numeric', minute: '2-digit' }} // inclui o valor de slotLabelInterval
           slotDuration="00:20:00"
-          slotMinTime="08:00:00" // hora mínima para exibição
+          slotMinTime="07:00:00" // hora mínima para exibição
           slotMaxTime="20:00:00" // hora máxima para exibição
           allDaySlot={false}
           locale="pt"
@@ -151,7 +151,7 @@ export const CalendarComponent = ({
             // days of week. an array of zero-based day of week integers (0=Sunday)
             daysOfWeek: [1, 2, 3, 4, 5, 6], // Monday - Thursday
 
-            startTime: '08:00', // a start time (10am in this example)
+            startTime: '07:00', // a start time (10am in this example)
             endTime: '20:00', // an end time (6pm in this example)
           }}
           buttonText={{

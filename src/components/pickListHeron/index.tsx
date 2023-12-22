@@ -29,7 +29,7 @@ export const PickListHeron = ({
   };
 
   useEffect(() => {
-    if (selected.length) {
+    if (selected && selected.length) {
       const listItens = list.filter((item: any) => !selected.includes(item.id));
       const selectedItens = list.filter((item: any) =>
         selected.includes(item.id)
