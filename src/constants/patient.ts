@@ -228,7 +228,7 @@ export const patientTherapyFields = [
     },
   },
   {
-    labelText: 'Telefone',
+    labelText: 'Celular',
     id: 'telefone',
     name: 'telefone',
     type: 'tel',
