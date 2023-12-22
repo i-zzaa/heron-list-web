@@ -27,6 +27,8 @@ module.exports = {
       psico: '#8e24aa',
       fono: '#f6bf26',
       psicopedag: '#000000',
+      motricidade: '#8e24aa',
+      musicoterapia: '#795548',
 
       primary: '#662977',
       background: '#f9f9f9',
@@ -48,7 +50,7 @@ module.exports = {
       fontFamily: {
         sans: ['Raleway', 'sans-serif'],
         'sans-serif': 'sans-serif',
-        'inter': 'Inter'
+        inter: 'Inter',
       },
     },
   },

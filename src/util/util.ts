@@ -6,6 +6,8 @@ export const colorsData: any = {
   TO: '#ef6c00',
   FONO: '#f6bf26',
   PSICO: '#8e24aa',
+  MOTRICIDADE: '#8e24aa',
+  MUSICOTERAPIA: '#795548',
   PSICOPEDAG: '#000000',
 };
 
@@ -13,6 +15,8 @@ export const bgData: any = {
   TO: 'bg-to',
   FONO: 'bg-fono',
   PSICO: 'bg-psico',
+  MOTRICIDADE: 'bg-motricidade',
+  MUSICOTERAPIA: 'bg-musicoterapia',
   PSICOPEDAG: 'bg-psico-pdeg',
 };
 
@@ -20,6 +24,8 @@ export const colorsTextData: any = {
   TO: '#ffffff',
   FONO: '#ffffff',
   PSICO: '#ffffff',
+  MUSICOTERAPIA: '#ffffff',
+  MOTRICIDADE: '#ffffff',
   PSICOPEDAG: '#ffffff',
 };
 
@@ -34,6 +40,12 @@ export const corEspecialidade = (type: string): string => {
       break;
     case 'PSICO':
       tipo = 'bg-psico';
+      break;
+    case 'MOTRICIDADE':
+      tipo = 'bg-motricidade';
+      break;
+    case 'MUSICOTERAPIA':
+      tipo = 'bg-musicoterapia';
       break;
     case 'PSICOPEDAG':
       tipo = 'bg-psico-pdeg';
@@ -93,6 +105,7 @@ export const weekDay = [
 ];
 
 export const horariosUteis = [
+  '07:00',
   '08:00',
   '09:00',
   '10:00',
@@ -109,6 +122,7 @@ export const horariosUteis = [
 ];
 
 export const horariosUteisObj = {
+  '07:00': false,
   '08:00': false,
   '09:00': false,
   '10:00': false,

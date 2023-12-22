@@ -95,6 +95,7 @@ export default function CrudSimples({
       }
       setLoading(true);
       const response = await search(namelist, word.search);
+      setValue('search', '')
       const lista = response.status === 200 ? response.data : [];
       setList(lista);
       setPagination({
@@ -331,7 +332,7 @@ export default function CrudSimples({
             Object.keys(elemento).forEach((index: any) => {
               if (
                 typeof elemento[index] === 'object' &&
-                !Array.isArray(elemento[index]) &&
+                // !Array.isArray(elemento[index]) &&
                 index !== 'terapeuta' &&
                 index !== 'cargaHoraria' &&
                 index.indexOf('Id') === -1
