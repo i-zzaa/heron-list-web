@@ -6,7 +6,7 @@ export const colorsData: any = {
   TO: '#ef6c00',
   FONO: '#f6bf26',
   PSICO: '#8e24aa',
-  MOTRICIDADE: '#8e24aa',
+  MOTRICIDADE: '#4285F4',
   MUSICOTERAPIA: '#795548',
   PSICOPEDAG: '#000000',
 };
