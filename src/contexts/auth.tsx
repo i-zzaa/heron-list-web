@@ -82,12 +82,10 @@ export const AuthProvider = ({ children }: Props) => {
   };
 
   const msgError = (data: any) => {
-    const message = data?.data
-      ? data?.data.message
-      : 'Usuário não encontrado!';
+    const message = data?.data || data?.message || 'Usuário não encontrado!';
     renderToast({
       type: 'failure',
-      title: data.status,
+      title: data.status || '',
       message: message,
       open: true,
     });

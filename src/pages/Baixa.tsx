@@ -128,7 +128,7 @@ export default function Baixa() {
         <NotFound />
       }
       
-        {pagination.totalPages > 10 && <PaginationComponent totalPages={pagination.totalPages}  currentPage={pagination.currentPage} onChange={handlePagination}/>}
+        {pagination.totalPages > 1 && <PaginationComponent totalPages={pagination.totalPages}  currentPage={pagination.currentPage} onChange={handlePagination}/>}
       </Card>
 
 

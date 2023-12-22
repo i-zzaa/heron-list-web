@@ -256,7 +256,7 @@ export default function Avaliation() {
             setOpenConfirm(true);
           }}
         />
-        {pagination.totalPages > 10 && <PaginationComponent totalPages={pagination.totalPages}  currentPage={pagination.currentPage} onChange={handlePagination}/>}
+        {pagination.totalPages > 1 && <PaginationComponent totalPages={pagination.totalPages}  currentPage={pagination.currentPage} onChange={handlePagination}/>}
 
       </Card>
 

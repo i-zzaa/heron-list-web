@@ -102,9 +102,6 @@ export const CalendarComponent = ({
 
   useEffect(() => {
     if (calendarRef.current) {
-     
-      
-
       const calendar: any = document.querySelector('fieldset > div > div > div > div > div') 
       calendar.style.height = 'calc(100vh - 250px)'
       calendar.style.overflow = 'hidden'
