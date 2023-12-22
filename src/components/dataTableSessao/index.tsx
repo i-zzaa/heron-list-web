@@ -22,7 +22,6 @@ export const DataTableSessaoHeron = ({
       ? [
           { field: 'especialidade', header: 'Especialidade' },
           { field: 'valor', header: 'Valor' },
-          { field: 'km', header: 'KM' },
         ]
       : [
           { field: 'funcao', header: 'Função' },

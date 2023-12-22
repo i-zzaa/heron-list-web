@@ -52,12 +52,21 @@ export default function ScheduleCalendar() {
   async function renderEvents(moment: any = currentDate) {
     // if (!hasPermition('AGENDA_EVENTO_TODOS_EVENTOS') && perfil === PERFIL.terapeuta) {
     if (perfil.toLocaleLowerCase() === PERFIL.terapeuta.toLocaleLowerCase()) {
+      await setCurrentDate({
+        start: moment.start,
+        end: moment.end,
+      });
+
+  
       const auth: any = await sessionStorage.getItem('auth');
       const user = JSON.parse(auth);
+
+
       handleSubmitFilter({
         terapeutaId: {
           id: user.id,
         },
+        ...moment
       });
     } else {
       // const response: any = await getList(
@@ -165,7 +174,7 @@ export default function ScheduleCalendar() {
 
       setFilter(_filter);
       const response: any = await getList(
-        `/evento/filtro/${currentDate.start}/${currentDate.end}?${_filter.join(
+        `/evento/filtro/${formvalue.start || currentDate.start}/${formvalue.end || currentDate.end}?${_filter.join(
           '&'
         )}`
       );

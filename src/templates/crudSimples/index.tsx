@@ -97,6 +97,11 @@ export default function CrudSimples({
       const response = await search(namelist, word.search);
       const lista = response.status === 200 ? response.data : [];
       setList(lista);
+      setPagination({
+        pageSize: 0,
+        totalPage: 0,
+      })
+
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -376,7 +381,7 @@ export default function CrudSimples({
           }}
         />
 
-       {pagination.totalPages > 10 && <Pagination totalPages={pagination.totalPages}  currentPage={pagination.currentPage} onChange={renderList}/>}
+       {pagination.totalPages > 1 && <Pagination totalPages={pagination.totalPages}  currentPage={pagination.currentPage} onChange={renderList}/>}
 
       </Card>
 
