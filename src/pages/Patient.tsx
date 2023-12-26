@@ -93,11 +93,16 @@ export default function Patient() {
   };
 
   const handlePagination = async (pag: any) => {
-    setPagination(pag)
-    handleSubmitFilter()
+    const currentPage = {
+      ...pagination,
+      currentPage: pag
+    }
+
+    setPagination(currentPage)
+    handleSubmitFilter(filterCurrent, currentPage)
   }
 
-  const handleSubmitFilter = async (formState: any = filterCurrent) => {
+  const handleSubmitFilter = async (formState: any = filterCurrent, pag = pagination) => {
     setLoading(true);
     setFilter(formState)
     try {
@@ -113,7 +118,7 @@ export default function Patient() {
         format[key] = formState[key]?.id || undefined;
       });
 
-      const response: any = await filter('paciente', format, `page=${pagination.currentPage}&pageSize=${pagination.pageSize}`);
+      const response: any = await filter('paciente', format, `page=${pag.currentPage}&pageSize=${pag.pageSize}`);
       setPatients(response.data.data || response.data);
       setPagination(response.pagination || response.data.pagination)
       setLoading(false);
