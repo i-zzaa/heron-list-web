@@ -29,6 +29,7 @@ module.exports = {
       psicopedag: '#000000',
       motricidade: '#4285F4',
       musicoterapia: '#795548',
+      cancelado: '#f87171',
 
       primary: '#662977',
       background: '#f9f9f9',
