@@ -270,12 +270,16 @@ const usuariosFields: any = [
       required: 'Campo obrigatório!',
     },
   },
+
   {
-    labelText: 'Permissão',
-    id: 'permissoesId',
-    name: 'permissoes',
-    type: 'picker',
-    customCol: 'col-span-6 sm:col-span-6 mt-8',
+    labelText: 'Grupo',
+    id: 'grupoPermissaoId',
+    name: 'grupoPermissoes',
+    type: 'select',
+    customCol: 'col-span-6 sm:col-span-3',
+    validate: {
+      required: 'Campo obrigatório!',
+    },
   },
 
   {
@@ -326,6 +330,31 @@ const usuariosFields: any = [
     type: 'dataTable',
     customCol: 'col-span-6 sm:col-span-6 mb-12',
     hidden: true,
+  },
+];
+
+const grupoPermissoesFields: any = [
+  {
+    labelText: 'Nome',
+    id: 'nome',
+    name: 'nome',
+    type: 'text',
+    customCol: 'col-span-6 sm:col-span-6',
+    validate: {
+      pattern: {
+        value: /^[ a-zA-Zá]*$/i,
+        message: 'Apenas letras',
+      },
+      required: 'Campo obrigatório!',
+      minlength: 8,
+    },
+  },
+  {
+    labelText: 'Permissão',
+    id: 'permissoesId',
+    name: 'permissoes',
+    type: 'picker',
+    customCol: 'col-span-6 sm:col-span-6 mt-8',
   },
 ];
 
@@ -588,4 +617,5 @@ export const Fields: any = {
   modalidadeFields,
   frequenciaFields,
   statusEventosFields,
+  grupoPermissoesFields,
 };

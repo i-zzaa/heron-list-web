@@ -1,3 +1,3 @@
 export enum PERFIL {
-  terapeuta= 'terapeuta',
+  terapeuta = 'Terapeuta',
 }

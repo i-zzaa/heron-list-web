@@ -51,7 +51,7 @@ export default function ScheduleCalendar() {
   // const renderEvents = useCallback(async (moment: any = currentDate) => {
   async function renderEvents(moment: any = currentDate) {
     // if (!hasPermition('AGENDA_EVENTO_TODOS_EVENTOS') && perfil === PERFIL.terapeuta) {
-    if (perfil.toLocaleLowerCase() === PERFIL.terapeuta.toLocaleLowerCase()) {
+    if (perfil.toLowerCase() === PERFIL.terapeuta.toLowerCase()) {
       await setCurrentDate({
         start: moment.start,
         end: moment.end,
