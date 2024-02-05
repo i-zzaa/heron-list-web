@@ -32,7 +32,7 @@ export const Crud = () => {
 
   return (
     <div className="card">
-      <TabView className="tabview-custom">
+      <TabView className="tabview-custom">        
         {hasPermition('CADASTRO_PACIENTES') ? (
           <TabPanel header="Pacientes" leftIcon="pi pi-user">
             <Patient />
@@ -53,17 +53,6 @@ export const Crud = () => {
         ) : (
           <></>
         )}
-        {/* {hasPermition('CADASTRO_MODALIDADE') ? (
-          <TabPanel header="Modalidade" leftIcon="pi pi-sitemap">
-            <CrudSimples
-              screen="CADASTRO_MODALIDADE"
-              namelist="modalidade"
-              onClick={() => {}}
-            />
-          </TabPanel>
-        ) : (
-          <></>
-        )} */}
         {hasPermition('CADASTRO_STATUS_EVENTOS') ? (
           <TabPanel header="Status eventos" leftIcon="pi pi-calendar-plus">
             <CrudSimples
@@ -108,6 +97,18 @@ export const Crud = () => {
         ) : (
           <></>
         )}
+              {hasPermition('CADASTRO_GRUPO_PERMISSOES') ? (
+          <TabPanel header="Grupo Permissões" leftIcon="pi pi-sitemap">
+            <CrudSimples
+              screen="CADASTRO_GRUPO_PERMISSOES"
+              namelist="grupo-permissoes"
+              onClick={() => {}}
+            />
+          </TabPanel>
+        ) : (
+          <></>
+        )}
+
       </TabView>
     </div>
   );

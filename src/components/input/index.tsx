@@ -356,6 +356,7 @@ export function Input({
                 value={value || field.value}
                 key={field.id}
                 type={type}
+                
                 className={'inputAnimado ' + customClass}
                 autoComplete="off"
                 onInput={(e: any) => {

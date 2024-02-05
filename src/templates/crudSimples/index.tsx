@@ -16,6 +16,7 @@ import { Fields } from '../../constants/formFields';
 import { useDropdown } from '../../contexts/dropDown';
 import { moneyFormat } from '../../util/util';
 import Pagination from '../../components/Pagination';
+import { PERFIL } from '../../constants/user';
 
 interface Props {
   namelist: string;
@@ -32,11 +33,14 @@ export default function CrudSimples({
   textButtonFooter,
   screen,
 }: Props) {
-  const [list, setList] = useState<any>([]);
-  const [pagination, setPagination] = useState<any>({
+
+  const DEFAULT_PAGINATION = {
     pageSize: 0,
     totalPage: 0,
-  });
+  }
+
+  const [list, setList] = useState<any>([]);
+  const [pagination, setPagination] = useState<any>(DEFAULT_PAGINATION);
   const [item, setItem] = useState<any>({});
   const [value, setValues] = useState<any>([]);
   const [open, setOpen] = useState<boolean>(false);
@@ -146,6 +150,7 @@ export default function CrudSimples({
       }
 
       reset();
+      setPagination(DEFAULT_PAGINATION)
       renderList();
       setIsEdit(false);
       setOpen(false);
@@ -196,7 +201,7 @@ export default function CrudSimples({
   const actionFieldId = async (valueForm: any, fieldId: string) => {
     switch (fieldId) {
       case 'perfilId':
-        const valid = valueForm.nome !== 'Terapeuta' 
+        const valid = valueForm.nome !== PERFIL.terapeuta 
         setHidden(valid);
         if (!valid) {
           unregister(isTerapeuta, { keepDirtyValues: true });
@@ -283,6 +288,7 @@ export default function CrudSimples({
     let namelistField = `${namelist}Fields`
 
     if (namelist === 'status-eventos') namelistField = 'statusEventosFields'
+    if (namelist === 'grupo-permissoes') namelistField = 'grupoPermissoesFields'
 
     const _fields = Fields[namelistField];
     const fieldsState: any = {};
@@ -333,7 +339,7 @@ export default function CrudSimples({
               if (
                 typeof elemento[index] === 'object' &&
                 // !Array.isArray(elemento[index]) &&
-                index !== 'terapeuta' &&
+                index !==  PERFIL.terapeuta.toLowerCase() &&
                 index !== 'cargaHoraria' &&
                 index.indexOf('Id') === -1
               ) {
@@ -356,7 +362,7 @@ export default function CrudSimples({
             setItem(elemento);
             setOpen(true);
 
-            if (namelist === 'usuarios') {
+            if (namelist === 'grupo-permissoes') {
               setValues(elemento.permissoesId);
             }
 

@@ -95,7 +95,7 @@ export function List({
         item?.sala ||
         item?.especialidade?.nome;
       const textSecondLeft = item?.login || '';
-      const ATIVO = !!item?.ativo;
+      const ATIVO = item.hasOwnProperty('ativo') ?  item?.ativo :  true
 
       return (
         <ItemList.Simples
