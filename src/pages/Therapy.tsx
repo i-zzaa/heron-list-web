@@ -90,7 +90,10 @@ export default function Therapy() {
 
 
   const handlePagination = async (pag: any) => {
-    setPagination(pag)
+    setPagination({
+      ...pagination,
+      currentPage: pag
+    })
     handleSubmitFilter()
   }
 

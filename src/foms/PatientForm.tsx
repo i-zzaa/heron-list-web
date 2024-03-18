@@ -5,7 +5,7 @@ import { useToast } from '../contexts/toast';
 import { create, update } from '../server';
 import { ButtonHeron, Input } from '../components/index';
 import { moneyFormat, setColorChips } from '../util/util';
-import { STATUS_PACIENT_COD } from '../constants/patient';
+import { PERIODO, STATUS, STATUS_PACIENT_COD, TIPO_SESSAO } from '../constants/patient';
 
 export interface OptionProps {
   id: string;
@@ -77,10 +77,10 @@ export const PatientForm = ({
             }
           : {
               ...body,
-              periodoId: body?.periodoId ? body?.periodoId.id : 3, // padrao 3 de integral
+              periodoId: body?.periodoId ? body?.periodoId.id : PERIODO.integral, // padrao 3 de integral
               convenioId: body.convenioId.id,
-              statusId: body?.statusId ? body?.statusId.id : 1, // padrao 1 de padrao
-              tipoSessaoId: 2,
+              statusId: body?.statusId ? body?.statusId.id : STATUS.padrao, // padrao 1 de padrao
+              tipoSessaoId: TIPO_SESSAO.terapeuta,
               especialidades: body.especialidades.map(
                 (item: OptionProps) => item.id
               ),

@@ -6,6 +6,24 @@
 //   crud_therapy = 5,
 // }
 
+export enum TIPO_SESSAO {
+  av_neuropsico = 1,
+  av_psicodiag = 2,
+  terapeuta = 3,
+}
+
+export enum STATUS {
+  urgente = 1,
+  padrao = 2,
+  aba = 3,
+}
+
+export enum PERIODO {
+  integral = 1,
+  manha = 2,
+  tarde = 3,
+}
+
 export enum STATUS_PACIENT_COD {
   queue_avaliation = 'queue_avaliation',
   avaliation = 'avaliation',
