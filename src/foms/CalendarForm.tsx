@@ -97,7 +97,7 @@ export const CalendarForm = ({
       renderToast({
         type: 'success',
         title: '',
-        message: data.data.message,
+        message: isEdit ? 'Atualizado com sucesso!': 'Agendado com sucesso!',
         open: true,
       });
       setLoading(false);
