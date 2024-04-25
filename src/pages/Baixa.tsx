@@ -13,6 +13,7 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { STATUS_PACIENT_COD } from '../constants/patient';
 import { NotFound } from '../components/notFound';
+import { Tag } from '../components/tag';
 
 const fieldsConst = filterBaixaFields;
 const fieldsState: any = {};
@@ -95,6 +96,8 @@ export default function Baixa() {
     )
 };
 
+const especialidadeBodyTemplate = (rowData: any): any =>  <Tag type={rowData.especialidade} disabled={false} />
+
   useEffect(() => {
     handleSubmitFilter()
     renderDropdown();
@@ -121,9 +124,11 @@ export default function Baixa() {
             <Column field="carteirinha" header="Carteirinha"></Column>
             <Column field="convenio" header="Convenio"></Column>
             <Column field="dataEvento" header="Data Evento"></Column>
-            <Column field="dataBaixa" header="Data/Hora Baixa"></Column>
+            <Column field="especialidade" header="Especialidade" dataType="boolean" bodyClassName="text-center" headerStyle={{ textAlign: 'center' }}  style={{ minWidth: '8rem', textAlign: 'center' }} body={especialidadeBodyTemplate} />
+            <Column field="cargaHoraria" header="Carga Horária"></Column>
             <Column field="localidade" header="Local"></Column>
-            <Column field="usuario" header="Secretária"></Column>
+            <Column field="dataBaixa" header="Data/Hora Baixa"></Column>
+            <Column field="usuario" header="Usuário"></Column>
             <Column field="baixa" header="Baixa" dataType="boolean" bodyClassName="text-center" headerStyle={{ textAlign: 'center' }}  style={{ minWidth: '8rem', textAlign: 'center' }} body={verifiedBodyTemplate} />
         </DataTable> : 
         <NotFound />
