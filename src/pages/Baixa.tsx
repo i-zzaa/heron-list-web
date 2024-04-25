@@ -120,7 +120,8 @@ export default function Baixa() {
             <Column field="paciente" header="Paciente"></Column>
             <Column field="carteirinha" header="Carteirinha"></Column>
             <Column field="convenio" header="Convenio"></Column>
-            <Column field="dataBaixa" header="Data/Hora"></Column>
+            <Column field="dataEvento" header="Data Evento"></Column>
+            <Column field="dataBaixa" header="Data/Hora Baixa"></Column>
             <Column field="localidade" header="Local"></Column>
             <Column field="usuario" header="Secretária"></Column>
             <Column field="baixa" header="Baixa" dataType="boolean" bodyClassName="text-center" headerStyle={{ textAlign: 'center' }}  style={{ minWidth: '8rem', textAlign: 'center' }} body={verifiedBodyTemplate} />
@@ -130,8 +131,6 @@ export default function Baixa() {
       
         {pagination.totalPages > 1 && <PaginationComponent totalPages={pagination.totalPages}  currentPage={pagination.currentPage} onChange={handlePagination}/>}
       </Card>
-
-
     </div>
   );
 }
