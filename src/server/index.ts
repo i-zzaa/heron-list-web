@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { DEVICE } from '../util/util';
 
 export interface ResponseSuccessProps {
   data: {
@@ -11,7 +12,7 @@ export const api = axios.create({
   headers: {
     'Access-Control-Allow-Origin': '*',
     'Content-Type': 'application/json',
-    device: 'web',
+    device: DEVICE.web,
   },
 });
 

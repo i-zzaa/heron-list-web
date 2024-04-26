@@ -195,3 +195,8 @@ export const moneyFormat = new Intl.NumberFormat('pt-BR', {
 export const isInPast = (date: string) => {
   return moment(date).isBefore(new Date());
 };
+
+export enum DEVICE {
+  mobile = 'DEVICE_MOBILE',
+  web = 'DEVICE_WEB',
+}
