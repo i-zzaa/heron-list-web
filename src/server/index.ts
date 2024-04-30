@@ -33,6 +33,27 @@ export const intercepttRoute = (token: string, login: string) => {
       return config;
     },
     (error) => {
+      console.log('error', error);
+
+      return Promise.reject(error);
+    }
+  );
+
+  api.interceptors.response.use(
+    (response) => {
+      // Faça algo com a resposta
+      return response;
+    },
+    (error) => {
+      // Faça algo com o erro da resposta
+      if (error.response.status === 409 && error.config.url !== '/logout') {
+        sessionStorage.clear();
+        try {
+          api.get('/logout');
+        } catch (error) {
+          console.log(error);
+        }
+      }
       return Promise.reject(error);
     }
   );
