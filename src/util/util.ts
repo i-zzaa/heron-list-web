@@ -147,27 +147,27 @@ export const getDateFormat = (date: any) => {
 
 export const formtDatePatient = (value: PacientsProps) => {
   return {
-    id: value.id,
-    nome: value.nome,
-    dataNascimento: value.dataNascimento,
-    telefone: value.telefone,
-    responsavel: value.responsavel,
-    carteirinha: value.carteirinha,
-    periodoId: value.vaga.periodo,
-    convenioId: value.convenio,
-    statusId: value.status,
-    dataContato: value.vaga.dataContato,
-    dataVoltouAba: value?.vaga?.dataVoltouAba,
-    sessao: value?.sessao,
-    vagaId: value.vaga.id,
-    especialidades: value.vaga.especialidades.map((item: any) => {
+    id: value?.id,
+    nome: value?.nome || '',
+    dataNascimento: value?.dataNascimento || '',
+    telefone: value?.telefone || '',
+    responsavel: value?.responsavel || '',
+    carteirinha: value?.carteirinha || '',
+    periodoId: value?.vaga?.periodo || null,
+    convenioId: value?.convenio || null,
+    statusId: value?.status || null,
+    dataContato: value?.vaga?.dataContato || '',
+    dataVoltouAba: value?.vaga?.dataVoltouAba || '',
+    sessao: value?.sessao || [],
+    vagaId: value?.vaga?.id || null,
+    especialidades: (value?.vaga?.especialidades || []).map((item: any) => {
       return {
-        nome: item.especialidade.nome,
-        id: item.especialidade.id,
+        nome: item?.especialidade?.nome || '',
+        id: item?.especialidade?.id || null,
       };
     }),
-    tipoSessaoId: value.tipoSessao,
-    observacao: value.vaga.observacao,
+    tipoSessaoId: value?.tipoSessao || null,
+    observacao: value?.vaga?.observacao || '',
   };
 };
 

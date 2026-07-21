@@ -7,8 +7,6 @@ import { useAuth } from '../contexts/auth';
 import { useToast } from '../contexts/toast';
 
 const fields = loginFields;
-const fieldsState: any = {};
-fields.forEach((field: any) => (fieldsState[field.id] = ''));
 
 interface FormProps {
   username: string;
@@ -21,7 +19,11 @@ export default function Login() {
     password: '',
   };
 
-  const [checkState, setCheck] = useState<boolean>(false);
+  const [checkState, setCheck] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+
+    return localStorage.getItem('rememberCheck') === 'true';
+  });
   const [loading, setLoading] = useState<boolean>(false);
   const { renderToast } = useToast();
 
@@ -36,45 +38,51 @@ export default function Login() {
 
   const onSubmit = async ({ username, password }: FormProps) => {
     setLoading(true);
+
     try {
       await Login({ username, password });
-      setLoading(false);
     } catch (error) {
-      setLoading(false);
       renderToast({
         type: 'failure',
         title: 'Erro!',
         message: 'Falha na conexão',
         open: true,
       });
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleRememberPassword = async (checked: boolean) => {
     setCheck(checked);
 
-    localStorage.setItem('rememberCheck', JSON.stringify(checked));
+    localStorage.setItem('rememberCheck', checked ? 'true' : 'false');
     if (checked) {
-      localStorage.setItem('rememberCheck', 'true');
       localStorage.setItem(
         'rememberLogin',
-        JSON.stringify({ username: watch('username'), password: watch('password') })
+        JSON.stringify({
+          username: watch('username') ?? '',
+          password: watch('password') ?? '',
+        })
       );
     } else {
       localStorage.removeItem('rememberLogin');
-      localStorage.setItem('rememberCheck', 'false');
     }
   };
 
   useEffect(() => {
     const rememberLogin = localStorage.getItem('rememberLogin');
+    const rememberCheck = localStorage.getItem('rememberCheck') === 'true';
+
     if (rememberLogin) {
       const { username, password } = JSON.parse(rememberLogin);
-      setCheck(true);
+      setCheck(rememberCheck);
       setValue('username', username);
       setValue('password', password);
+    } else {
+      setCheck(false);
     }
-  }, []);
+  }, [setValue]);
 
   return (
     <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
@@ -101,13 +109,7 @@ export default function Login() {
         value={checkState}
       />
 
-      <ButtonHeron
-        text="Entrar"
-        type="primary"
-        size="full"
-        onClick={handleSubmit(onSubmit)}
-        loading={loading}
-      />
+      <ButtonHeron text="Entrar" type="primary" size="full" loading={loading} />
     </form>
   );
 }

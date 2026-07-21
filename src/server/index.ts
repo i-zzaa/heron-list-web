@@ -20,15 +20,8 @@ export const intercepttRoute = (token: string, login: string) => {
   api.interceptors.request.use(
     async (config: any) => {
       if (!config.url.endsWith('login')) {
-        // const userTokenExpiration = new Date(token);
-        // const today = new Date();
-        // if (today > userTokenExpiration) {
-        //   config.headers.Authorization = null;
-        // } else {
         config.headers.Authorization = `Bearer ${token}`;
         config.headers.login = login;
-
-        // }
       }
       return config;
     },
@@ -41,17 +34,15 @@ export const intercepttRoute = (token: string, login: string) => {
 
   api.interceptors.response.use(
     (response) => {
-      // Faça algo com a resposta
       return response;
     },
     (error) => {
-      // Faça algo com o erro da resposta
-      if (error.response.status === 409 && error.config.url !== '/logout') {
+      if (error?.response?.status === 409 && error?.config?.url !== '/logout') {
         sessionStorage.clear();
         try {
           api.get('/logout');
-        } catch (error) {
-          console.log(error);
+        } catch (logoutError) {
+          console.log(logoutError);
         }
       }
       return Promise.reject(error);
@@ -60,11 +51,16 @@ export const intercepttRoute = (token: string, login: string) => {
 };
 
 export const dropDown = async (type: string, query?: string) => {
-  const params = query ? `?${query}` : '';
-  const response = await api(`${type}/dropdown${params}`);
-  if (response.status === 200) {
-    return response.data?.data || response.data;
+  try {
+    const params = query ? `?${query}` : '';
+    const response = await api(`${type}/dropdown${params}`);
+    if (response.status === 200) {
+      return response.data?.data || response.data;
+    }
+  } catch (error) {
+    console.error(`Falha ao carregar dropdown ${type}:`, error);
   }
+
   return [];
 };
 

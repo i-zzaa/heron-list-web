@@ -198,7 +198,7 @@ export function Input({
             render={({ field }: any) => (
               <>
                 <Checkbox
-                  checked={value}
+                  checked={value ?? field.value}
                   type={type}
                   className={'inputAnimado ' + customClass}
                   onChange={(e: any) => {

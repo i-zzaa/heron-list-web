@@ -103,8 +103,6 @@ export default function Therapy() {
     setLoading(true);
     setFilter(formState)
     try {
-      setLoading(true);
-
       const format: any = {
         naFila: formState.naFila === undefined ? true : !formState.naFila,
         disabled: formState.disabled === undefined ? false : formState.disabled,
@@ -124,15 +122,15 @@ export default function Therapy() {
 
       setPatients(response.data.data || response.data);
       setPagination(response.pagination || response.data.pagination)
-      setLoading(false);
     } catch (error) {
-      setLoading(false);
       renderToast({
         type: 'failure',
         title: '401',
         message: 'Erro na conexão!',
         open: true,
       });
+    } finally {
+      setLoading(false);
     }
   };
 

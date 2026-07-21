@@ -104,25 +104,35 @@ export default function Devolutiva() {
     setLoading(true);
     setFilter(formState)
 
-    const format: any = {
-      naFila: formState.naFila === undefined ? true : !formState.naFila,
-      isDevolutiva:
-        formState.isDevolutiva === undefined ? false : formState.isDevolutiva,
-      disabled: formState.disabled === undefined ? false : formState.disabled,
-      statusPacienteCod: STATUS_PACIENT_COD.queue_devolutiva,
-    };
-    delete formState.naFila;
-    delete formState.disabled;
-    delete formState.isDevolutiva;
+    try {
+      const format: any = {
+        naFila: formState.naFila === undefined ? true : !formState.naFila,
+        isDevolutiva:
+          formState.isDevolutiva === undefined ? false : formState.isDevolutiva,
+        disabled: formState.disabled === undefined ? false : formState.disabled,
+        statusPacienteCod: STATUS_PACIENT_COD.queue_devolutiva,
+      };
+      delete formState.naFila;
+      delete formState.disabled;
+      delete formState.isDevolutiva;
 
-    await Object.keys(formState).map((key: any) => {
-      format[key] = formState[key]?.id || undefined;
-    });
+      await Object.keys(formState).map((key: any) => {
+        format[key] = formState[key]?.id || undefined;
+      });
 
-    const response: any = await filter('paciente', format, `page=${pag.currentPage}&pageSize=${pag.pageSize}`);
-    setPatients(response.data.data || response.data);
-    setPagination(response.pagination || response.data.pagination)
-    setLoading(false);
+      const response: any = await filter('paciente', format, `page=${pag.currentPage}&pageSize=${pag.pageSize}`);
+      setPatients(response.data.data || response.data);
+      setPagination(response.pagination || response.data.pagination)
+    } catch (err) {
+      renderToast({
+        type: 'failure',
+        title: '401',
+        message: 'Erro na conexão!',
+        open: true,
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const sendUpdate = async (url: string, body: any, filter: any) => {

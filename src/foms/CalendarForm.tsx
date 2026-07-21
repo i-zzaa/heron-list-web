@@ -71,6 +71,8 @@ export const CalendarForm = ({
 
   const onSubmit = async (formValueState: any, changeAll: boolean | null) => {
     setOpenConfirm(false);
+    setLoading(true);
+
     try {
       if (JSON.stringify(value) === JSON.stringify(formValueState)) {
         renderToast({
@@ -81,8 +83,6 @@ export const CalendarForm = ({
         });
         return;
       }
-
-      setLoading(true);
 
       let data;
       if (isEdit) {
@@ -97,10 +97,9 @@ export const CalendarForm = ({
       renderToast({
         type: 'success',
         title: '',
-        message: isEdit ? 'Atualizado com sucesso!': 'Agendado com sucesso!',
+        message: isEdit ? 'Atualizado com sucesso!' : 'Agendado com sucesso!',
         open: true,
       });
-      setLoading(false);
     } catch ({ message }: any) {
       renderToast({
         type: 'failure',
@@ -108,8 +107,8 @@ export const CalendarForm = ({
         message: `${message}`,
         open: true,
       });
+    } finally {
       setLoading(false);
-      return;
     }
   };
 
@@ -615,7 +614,6 @@ export const CalendarForm = ({
             text={isEdit ? 'Atualizar' : 'Agendar'}
             type={isEdit ? 'second' : 'primary'}
             size="full"
-            onClick={handleSubmit(handleConfirm)}
             loading={loading}
           />
         ) : null}

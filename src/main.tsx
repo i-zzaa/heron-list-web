@@ -4,9 +4,7 @@ import App from './App';
 // import * as serviceWorkerRegistration from './serviceWorkerRegistration'
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+  <App />
 );
 
 // serviceWorkerRegistration.register({});

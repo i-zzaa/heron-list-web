@@ -46,27 +46,27 @@ export default function Patient() {
 
   const { renderToast } = useToast();
 
-  const renderPatient = useCallback(async () => {
-    try {
-      setLoading(true);
-      setPatients([]);
-      const response = await getList(
-        `paciente?statusPacienteCod=${STATUS_PACIENT_COD.crud_therapy}&page=${pagination.currentPage}&pageSize=${pagination.pageSize}`
-      );
-      setPatients(response.data);
-      setPagination(response.pagination)
+  // const renderPatient = useCallback(async () => {
+  //   try {
+  //     setLoading(true);
+  //     setPatients([]);
+  //     const response = await getList(
+  //       `paciente?statusPacienteCod=${STATUS_PACIENT_COD.crud_therapy}&page=${pagination.currentPage}&pageSize=${pagination.pageSize}`
+  //     );
+  //     setPatients(response.data);
+  //     setPagination(response.pagination)
 
-      setLoading(false);
-    } catch (error) {
-      setLoading(false);
-      renderToast({
-        type: 'failure',
-        title: 'Erro!',
-        message: 'Falha na conexão',
-        open: true,
-      });
-    }
-  }, []);
+  //     setLoading(false);
+  //   } catch (error) {
+  //     setLoading(false);
+  //     renderToast({
+  //       type: 'failure',
+  //       title: 'Erro!',
+  //       message: 'Falha na conexão',
+  //       open: true,
+  //     });
+  //   }
+  // }, []);
 
   const handleDisabled = async () => {
     setOpenConfirm(false);
@@ -121,15 +121,15 @@ export default function Patient() {
       const response: any = await filter('paciente', format, `page=${pag.currentPage}&pageSize=${pag.pageSize}`);
       setPatients(response.data.data || response.data);
       setPagination(response.pagination || response.data.pagination)
-      setLoading(false);
     } catch (err) {
-      setLoading(false);
       renderToast({
         type: 'failure',
         title: '401',
         message: 'Erro na conexão!',
         open: true,
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -156,6 +156,10 @@ export default function Patient() {
         setOpenCalendarForm(true);
         break;
       case 'devolutiva':
+        if (!item?.vaga?.id) {
+          return;
+        }
+
         const body: any = {
           id: item.vaga.id,
           devolutiva: !item.vaga.devolutiva,
@@ -167,7 +171,13 @@ export default function Patient() {
         break;
 
       default:
-        if (item.vaga.especialidades.length === 1) {
+        if (!item?.vaga?.id) {
+          setPatient(item);
+          setOpen(true);
+          return;
+        }
+
+        if ((item?.vaga?.especialidades || []).length === 1) {
           const especialidade = item.vaga.especialidades[0];
           const body: any = {
             statusPacienteCod: STATUS_PACIENT_COD.crud_therapy,
@@ -201,6 +211,11 @@ export default function Patient() {
   };
 
   const handleScheduleResponse = (agendar: number[], desagendar: number[]) => {
+    if (!patient?.vaga?.id) {
+      setOpenSchedule(false);
+      return;
+    }
+
     const body: any = {
       pacienteId: patient.id,
       vagaId: patient.vaga.id,
@@ -229,9 +244,9 @@ export default function Patient() {
   useEffect(() => {
     !hasPermition('CADASTRO_PACIENTES_FILTRO_SELECT_AGENDADOS')
       ? handleSubmitFilter({ naFila: true, disabled: false })
-      : renderPatient();
+      : handleSubmitFilter();
     renderDropdown();
-  }, [renderPatient]);
+  }, []);
 
   return (
     <div className="grid">
@@ -241,7 +256,7 @@ export default function Patient() {
         fields={fields}
         screen={SCREEN}
         onSubmit={handleSubmitFilter}
-        onReset={renderPatient}
+        onReset={handleSubmitFilter}
         loading={loading}
         dropdown={dropDownList}
         onInclude={() => {
@@ -285,7 +300,7 @@ export default function Patient() {
               STATUS_PACIENT_COD.crud_therapy
             );
             setDropDownList({ ...dropDownList, pacientes });
-            renderPatient();
+            handleSubmitFilter();
             setOpen(false);
           }}
           dropdown={dropDownList}
@@ -318,7 +333,7 @@ export default function Patient() {
                 { naFila: !patient.vaga.naFila }
               );
 
-              renderPatient();
+              handleSubmitFilter();
               setOpenCalendarForm(false);
             }}
           />

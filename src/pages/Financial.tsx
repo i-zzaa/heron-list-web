@@ -76,8 +76,10 @@ export default function Financial() {
         response.status === 200 && response?.data ? response.data : [];
       setGeral(lista.geral);
       setList(lista.data);
-      setLoading(false);
     } catch (error) {
+      setGeral({});
+      setList([]);
+    } finally {
       setLoading(false);
     }
   };

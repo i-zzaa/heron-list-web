@@ -66,22 +66,22 @@ export const PatientForm = ({
         statusPacienteCod === STATUS_PACIENT_COD.queue_avaliation
           ? {
               ...body,
-              periodoId: body.periodoId.id,
-              convenioId: body.convenioId.id,
-              statusId: body.statusId.id,
-              tipoSessaoId: body.tipoSessaoId.id,
-              especialidades: body.especialidades.map(
+              periodoId: body?.periodoId?.id || PERIODO.integral,
+              convenioId: body?.convenioId?.id || null,
+              statusId: body?.statusId?.id || STATUS.padrao,
+              tipoSessaoId: body?.tipoSessaoId?.id || TIPO_SESSAO.terapeuta,
+              especialidades: (body?.especialidades || []).map(
                 (item: OptionProps) => item.id
               ),
               statusPacienteCod: statusPacienteCod,
             }
           : {
               ...body,
-              periodoId: body?.periodoId ? body?.periodoId.id : PERIODO.integral, // padrao 3 de integral
-              convenioId: body.convenioId.id,
-              statusId: body?.statusId ? body?.statusId.id : STATUS.padrao, // padrao 1 de padrao
-              tipoSessaoId: TIPO_SESSAO.terapeuta,
-              especialidades: body.especialidades.map(
+              periodoId: body?.periodoId?.id || PERIODO.integral, // padrao 3 de integral
+              convenioId: body?.convenioId?.id || null,
+              statusId: body?.statusId?.id || STATUS.padrao, // padrao 1 de padrao
+              tipoSessaoId: body?.tipoSessaoId?.id || TIPO_SESSAO.terapeuta,
+              especialidades: (body?.especialidades || []).map(
                 (item: OptionProps) => item.id
               ),
               statusPacienteCod: statusPacienteCod,
@@ -95,7 +95,6 @@ export const PatientForm = ({
       }
 
       reset();
-      setLoaging(false);
       renderToast({
         type: 'success',
         title: '',
@@ -105,13 +104,14 @@ export const PatientForm = ({
 
       return onClose();
     } catch (response: any) {
-      setLoaging(false); 
       renderToast({
         type: 'failure',
         title: response.status || '401',
         message: response.data.message || 'Erro de conexão',
         open: true,
       });
+    } finally {
+      setLoaging(false);
     }
   };
 
@@ -191,7 +191,6 @@ export const PatientForm = ({
         text={isEdit ? 'Atualizar' : 'Cadastrar'}
         type={isEdit ? 'second' : 'primary'}
         size="full"
-        onClick={handleSubmit(onSubmit)}
         loading={loading}
       />
     </form>

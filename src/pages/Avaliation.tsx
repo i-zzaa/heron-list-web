@@ -118,15 +118,15 @@ export default function Avaliation() {
       } else {
         setPatients([]);
       }
-      setLoading(false);
     } catch (err) {
-      setLoading(false);
       renderToast({
         type: 'failure',
         title: '401',
         message: 'Erro na conexão!',
         open: true,
       });
+    } finally {
+      setLoading(false);
     }
   };
 

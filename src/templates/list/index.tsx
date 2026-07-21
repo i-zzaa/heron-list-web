@@ -144,7 +144,7 @@ export function List({
 
       if (screen !== 'CADASTRO_PACIENTES') {
         switch (true) {
-          case item.vaga.naFila &&
+          case item?.vaga?.naFila &&
             item.statusPacienteCod !== STATUS_PACIENT_COD.queue_devolutiva &&
             item.statusPacienteCod !== STATUS_PACIENT_COD.devolutiva &&
             hasPermition(`${screen}_LISTA_BOTAO_AGENDAR`):
@@ -155,7 +155,7 @@ export function List({
             typeButtonFooter = 'agendar';
             break;
           case screen === 'FILA_DEVOLUTIVA' &&
-            !item.vaga.naFila &&
+            !item?.vaga?.naFila &&
             hasPermition(`${screen}_LISTA_BOTAO_RETORNAR_AGENDAR`):
             buttonFooter.text = 'Retornar';
             buttonFooter.icon = 'pi pi-sync';
@@ -187,10 +187,10 @@ export function List({
         }
       }
 
-      const tags = item?.vaga.especialidades.map((especialidade: any) => {
+      const tags = (item?.vaga?.especialidades || []).map((especialidade: any) => {
         return {
-          type: especialidade.especialidade.nome,
-          disabled: especialidade.agendado,
+          type: especialidade?.especialidade?.nome || 'Sem especialidade',
+          disabled: !!especialidade?.agendado,
         };
       });
 
@@ -251,7 +251,7 @@ export function List({
                   </>
                 )}
                 {renderStatus(item)}
-                {item.vaga?.dataDevolutiva && (
+                {item?.vaga?.dataDevolutiva && (
                   <TextSubtext
                     className="font-inter"
                     text="Devolutiva:"
