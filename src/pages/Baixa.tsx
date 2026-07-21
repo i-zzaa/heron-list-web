@@ -47,19 +47,22 @@ export default function Baixa() {
     setLoading(true);
     setFilter(formState)
 
-    const format: any = {
-      baixa: formState.baixa === undefined ? false : formState.baixa,
-    };
-    delete formState.baixa;
+    try {
+      const format: any = {
+        baixa: formState.baixa === undefined ? false : formState.baixa,
+      };
+      delete formState.baixa;
 
-    await Object.keys(formState).map((key: any) => {
-      format[key] = formState[key]?.id || undefined;
-    });
+      await Object.keys(formState).map((key: any) => {
+        format[key] = formState[key]?.id || undefined;
+      });
 
-    const { data }: any = await filter('baixa', format, `page=${pagination.currentPage}&pageSize=${pagination.pageSize}`);
-    setBaixas(data.data || data.data.data);
-    setPagination(data.pagination || data.data.pagination)
-    setLoading(false);
+      const { data }: any = await filter('baixa', format, `page=${pagination.currentPage}&pageSize=${pagination.pageSize}`);
+      setBaixas(data.data || data.data.data);
+      setPagination(data.pagination || data.data.pagination)
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleUpdate = async (rowData: any) => {

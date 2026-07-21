@@ -115,9 +115,9 @@ export default function CrudSimples({
   };
 
   const onSubmit = async (userState: any) => {
-    try {
-      setLoading(true);
+    setLoading(true);
 
+    try {
       let data;
       const formatValues = {
         ...userState,
@@ -167,8 +167,8 @@ export default function CrudSimples({
         message: `${message}`,
         open: true,
       });
+    } finally {
       setLoading(false);
-      return;
     }
   };
 
@@ -434,7 +434,6 @@ export default function CrudSimples({
               text={isEdit ? 'Atualizar' : 'Cadastrar'}
               type={isEdit ? 'second' : 'primary'}
               size="full"
-              onClick={handleSubmit(onSubmit)}
               loading={loading}
             />
           </form>
