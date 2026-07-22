@@ -1,6 +1,8 @@
+import { ReactNode } from 'react';
+
 export interface TitleProps {
   size?: 'xs' | 'sm' | 'md' | 'lg';
-  children: string;
+  children: ReactNode;
   color?:
     | 'gray'
     | 'gray-dark'
