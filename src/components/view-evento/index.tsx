@@ -2,6 +2,7 @@ import moment from 'moment';
 import { Dialog } from 'primereact/dialog';
 import { useEffect, useState } from 'react';
 import { ATENDENTE, DESENVOLVEDOR, TERAPEUTA, permissionAuth } from '../../contexts/permission';
+import { isProfile } from '../../util/permissions';
 import { diffWeek, isInPast, weekDay } from '../../util/util';
 import { ButtonHeron } from '../button';
 import { Tag } from '../tag';
@@ -28,6 +29,19 @@ export const ViewEvento = ({
 }: Props) => {
   const [buttonEdit, setButtonEdit] = useState(true);
   const { hasPermition, perfil } = permissionAuth();
+
+  const canMarkAsAttended =
+    (isProfile(perfil, DESENVOLVEDOR) || isProfile(perfil, TERAPEUTA)) &&
+    evento.statusEventos.nome !== STATUS_EVENTS.atendido &&
+    !isInPast(evento.date) &&
+    evento.paciente.nome !== STATUS_EVENTS.livre;
+
+  const canMarkAsAttested =
+    (isProfile(perfil, DESENVOLVEDOR) || isProfile(perfil, ATENDENTE)) &&
+    isInPast(evento.date) &&
+    evento.paciente.nome !== STATUS_EVENTS.livre &&
+    evento.statusEventos.nome !== STATUS_EVENTS.atendido &&
+    evento.statusEventos.nome !== STATUS_EVENTS.atestado;
 
   const avaliationCount = (evento: any) => {
     let text = evento.modalidade.nome;
@@ -140,7 +154,7 @@ export const ViewEvento = ({
 
 <div className='flex justify-between mt-8 gap-2'>
 
-        { (perfil === DESENVOLVEDOR ||  perfil === TERAPEUTA) && evento.statusEventos.nome !== STATUS_EVENTS.atendido &&  !isInPast(evento.date) &&  evento.paciente.nome !== STATUS_EVENTS.livre ? (
+        {canMarkAsAttended ? (
                <ButtonHeron
                 text="Atendido"
                 icon="pi pi-check"
@@ -150,7 +164,7 @@ export const ViewEvento = ({
                 onClick={onClick}
               />
         ) : null}
-        { (perfil == DESENVOLVEDOR ||  perfil === ATENDENTE  ) &&  isInPast(evento.date) &&  evento.paciente.nome !== STATUS_EVENTS.livre && evento.statusEventos.nome !== STATUS_EVENTS.atendido && evento.statusEventos.nome !== STATUS_EVENTS.atestado? (
+        {canMarkAsAttested ? (
                <ButtonHeron
                 text="Atestado"
                 icon="pi pi-book"

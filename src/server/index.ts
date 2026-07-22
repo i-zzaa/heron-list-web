@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { buildQueryString, normalizeDropdownList } from '../util/api';
 import { DEVICE } from '../util/util';
 
 export interface ResponseSuccessProps {
@@ -91,7 +92,11 @@ export const search = async (type: string, work: string) => {
 export const filter = async (type: string, _filter: object, query?: any) => {
   const params = query ? `?${query}` : '';
 
-  return await api.post(`${type}/filtro${params}`, _filter);
+  return await api.post(`${type}/filtro${params}`, _filter, {
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest',
+    },
+  });
 };
 
 export const getPost = async (type: string, _filter: object, query?: any) => {
@@ -105,18 +110,10 @@ export const filterAmilGuides = async (
   page = 1,
   limit = 10
 ) => {
-  const params = new URLSearchParams();
-
-  Object.entries(filterData).forEach(([key, value]) => {
-    if (value === '' || value === null || value === undefined) return;
-    params.append(key, value?.id || value);
-  });
-
-  params.set('page', String(page));
-  params.set('limit', String(limit));
+  const queryString = buildQueryString(filterData, { page, limit });
 
   try {
-    const response = await api.get(`/guias${params.toString() ? `?${params.toString()}` : ''}`);
+    const response = await api.get(`/guias${queryString ? `?${queryString}` : ''}`);
     if (response.status === 200) {
       return response.data;
     }
@@ -145,22 +142,24 @@ export const actionAmilGuide = async (guideId: number | string, action: string) 
 export const getAmilGuideDropdowns = async () => {
   try {
     const pacientesResponse = await dropDown('paciente');
-    const pacientes = Array.isArray(pacientesResponse)
-      ? pacientesResponse.map((item: any) => (typeof item === 'string' ? { id: item, nome: item } : item))
-      : [];
+    const pacientes = normalizeDropdownList(pacientesResponse);
 
     const guiaDropdownResponse = await api.get('/guias/dropdown').catch(() => null);
     const guiaDropdownPayload = guiaDropdownResponse?.status === 200
       ? (guiaDropdownResponse?.data?.data || guiaDropdownResponse?.data || {})
       : {};
 
-    const status = Array.isArray(guiaDropdownPayload?.status || guiaDropdownPayload?.statuses || guiaDropdownPayload?.statusEventos)
-      ? (guiaDropdownPayload?.status || guiaDropdownPayload?.statuses || guiaDropdownPayload?.statusEventos || []).map((item: any) => (typeof item === 'string' ? { id: item, nome: item } : item))
-      : [];
+    const status = normalizeDropdownList(
+      Array.isArray(guiaDropdownPayload?.status || guiaDropdownPayload?.statuses || guiaDropdownPayload?.statusEventos)
+        ? (guiaDropdownPayload?.status || guiaDropdownPayload?.statuses || guiaDropdownPayload?.statusEventos || [])
+        : []
+    );
 
-    const origens = Array.isArray(guiaDropdownPayload?.origens || guiaDropdownPayload?.origem || guiaDropdownPayload?.origins)
-      ? (guiaDropdownPayload?.origens || guiaDropdownPayload?.origem || guiaDropdownPayload?.origins || []).map((item: any) => (typeof item === 'string' ? { id: item, nome: item } : item))
-      : [];
+    const origens = normalizeDropdownList(
+      Array.isArray(guiaDropdownPayload?.origens || guiaDropdownPayload?.origem || guiaDropdownPayload?.origins)
+        ? (guiaDropdownPayload?.origens || guiaDropdownPayload?.origem || guiaDropdownPayload?.origins || [])
+        : []
+    );
 
     return {
       pacientes,

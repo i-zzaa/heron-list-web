@@ -1,3 +1,6 @@
+[0.11.0-beta.1]
+Refatoracao do projeto
+
 [0.11.0-beta.0]
 Relatório das alterações
 Implementamos um novo módulo de consulta e acompanhamento de guias Amil no frontend, sem impactar o fluxo existente das telas já presentes.
