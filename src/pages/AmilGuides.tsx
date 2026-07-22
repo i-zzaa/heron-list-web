@@ -61,7 +61,7 @@ const filterFields = [
     labelText: 'Número da guia',
     id: 'numeroGuia',
     name: 'numeroGuia',
-    customCol: 'col-span-6 sm:col-span-3',
+    customCol: 'col-span-6 sm:col-span-2',
     type: 'text',
   },
   {
@@ -69,7 +69,7 @@ const filterFields = [
     labelText: 'Número do lote',
     id: 'numeroLote',
     name: 'numeroLote',
-    customCol: 'col-span-6 sm:col-span-3',
+    customCol: 'col-span-6 sm:col-span-2',
     type: 'text',
   },
   {
@@ -77,7 +77,7 @@ const filterFields = [
     labelText: 'Protocolo',
     id: 'protocolo',
     name: 'protocolo',
-    customCol: 'col-span-6 sm:col-span-3',
+    customCol: 'col-span-6 sm:col-span-2',
     type: 'text',
   },
   {
@@ -85,7 +85,7 @@ const filterFields = [
     labelText: 'Paciente',
     id: 'paciente',
     name: 'pacientes',
-    customCol: 'col-span-6 sm:col-span-3',
+    customCol: 'col-span-6 sm:col-span-2',
     type: 'select',
   },
   {
@@ -93,7 +93,7 @@ const filterFields = [
     labelText: 'Status',
     id: 'status',
     name: 'status',
-    customCol: 'col-span-6 sm:col-span-3',
+    customCol: 'col-span-6 sm:col-span-2',
     type: 'select',
   },
   {
@@ -101,7 +101,7 @@ const filterFields = [
     labelText: 'Origem',
     id: 'origem',
     name: 'origens',
-    customCol: 'col-span-6 sm:col-span-3',
+    customCol: 'col-span-6 sm:col-span-2',
     type: 'select',
   },
   {
@@ -109,7 +109,7 @@ const filterFields = [
     labelText: 'Data início',
     id: 'dataInicio',
     name: 'dataInicio',
-    customCol: 'col-span-6 sm:col-span-3',
+    customCol: 'col-span-6 sm:col-span-1',
     type: 'date',
   },
   {
@@ -117,7 +117,7 @@ const filterFields = [
     labelText: 'Data fim',
     id: 'dataFim',
     name: 'dataFim',
-    customCol: 'col-span-6 sm:col-span-3',
+    customCol: 'col-span-6 sm:col-span-1',
     type: 'date',
   },
 ];
