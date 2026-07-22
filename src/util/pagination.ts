@@ -1,4 +1,8 @@
-export const buildPaginationState = (currentPage = 1, pageSize = 10, totalPages = 0) => ({
+export const buildPaginationState = (
+  currentPage = 1,
+  pageSize = 10,
+  totalPages = 0
+) => ({
   currentPage,
   pageSize,
   totalPages,
@@ -14,5 +18,9 @@ export const resolveResponsePagination = (response: any, fallback = {}) => {
 };
 
 export const resolveResponseData = (response: any) => {
+  if (Array.isArray(response)) {
+    return response;
+  }
+
   return response?.data?.data || response?.data || [];
 };
