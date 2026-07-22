@@ -21,6 +21,7 @@ export function SearchAdd({
   screen,
 }: SearchAddProps) {
   const { hasPermition } = permissionAuth();
+  const canCreate = hasPermition(`${screen}_BOTAO_CADASTRAR`);
 
   return (
     <div className="grid grid-cols-8 gap-2 justify-between">

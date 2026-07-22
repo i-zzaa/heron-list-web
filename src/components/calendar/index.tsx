@@ -1,38 +1,58 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
+import type { CalendarApi } from '@fullcalendar/core';
 import '@fullcalendar/react/dist/vdom';
 
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
-
 import '@fullcalendar/common/main.min.css';
 import '@fullcalendar/daygrid/main.min.css';
 import '@fullcalendar/timegrid/main.min.css';
 import rrulePlugin from '@fullcalendar/rrule';
 import interactionPlugin from '@fullcalendar/interaction';
-
-// import FullCalendar from "@fullcalendar/react"; // must go before plugins
-// import { FullCalendar } from 'primereact/fullcalendar';
-// import { EventService } from '../service/EventService';
-// import dayGridPlugin from '@fullcalendar/daygrid';
-// import timeGridPlugin from '@fullcalendar/timegrid';
-// import interactionPlugin from "@fullcalendar/interaction";
-// import '@fullcalendar/core/main.css';
-// import "@fullcalendar/daygrid/main.css";
-// import "@fullcalendar/timegrid/main.css";
-// import ptLocale from "@fullcalendar/common/locales/pt";
-
-import momentTimezonePlugin from '@fullcalendar/moment-timezone';
-// import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import {
-  formatdateeua,
   formatdateEuaAddDay,
   getPrimeiroDoMes,
   getUltimoDoMes,
 } from '../../util/util';
 import moment from 'moment';
-// import resourceTimelinePlugin from '@fullcalendar/resource-timeline';
+
+const calendarConfig = {
+  hiddenDays: [0],
+  slotLabelInterval: '5vw',
+  slotLabelFormat: { hour: 'numeric' as const, minute: '2-digit' as const },
+  slotDuration: '00:20:00',
+  slotMinTime: '07:00:00',
+  slotMaxTime: '20:00:00',
+  allDaySlot: false,
+  locale: 'pt',
+  navLinks: true,
+  timeZone: 'America/Sao_Paulo',
+  initialView: 'timeGridWeek',
+  dayMaxEventRows: true,
+  headerToolbar: {
+    left: 'prev,next',
+    center: 'title',
+    right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek',
+  },
+  buttonText: {
+    month: 'Mês',
+    week: 'Semana',
+    day: 'Dia',
+    list: 'Lista',
+  },
+  views: {
+    timeGrid: {
+      dayMaxEventRows: 8,
+    },
+  },
+  businessHours: {
+    daysOfWeek: [1, 2, 3, 4, 5, 6],
+    startTime: '07:00',
+    endTime: '20:00',
+  },
+};
 
 export const CalendarComponent = ({
   events,
@@ -45,68 +65,96 @@ export const CalendarComponent = ({
   const calendarRef = useRef(null);
 
   const getInfo = (calendar: any, eventType: string) => {
-    // let currentDate = calendar.getCurrentData().currentDate;
-
     const prev = eventType === 'prev';
-    let type = calendar.getCurrentData().currentViewType;
-    let month, year, start, end, startDate, endDate;
+    const currentViewType = calendar.getCurrentData().currentViewType;
+    const activeDate = calendar.getCurrentData().dateProfile.activeRange.end;
 
-    let activeDate = calendar.getCurrentData().dateProfile.activeRange.end;
-
-    switch (type) {
-      case 'dayGridMonth':
-        month = prev ? activeDate.getMonth() - 1 : activeDate.getMonth() + 1;
-        year = activeDate.getFullYear();
-        start = getPrimeiroDoMes(year, month);
-        end = getUltimoDoMes(year, month);
-
-        return { type: 'dayGridMonth', start, end };
+    switch (currentViewType) {
+      case 'dayGridMonth': {
+        const month = prev ? activeDate.getMonth() - 1 : activeDate.getMonth() + 1;
+        const year = activeDate.getFullYear();
+        return {
+          type: 'dayGridMonth',
+          start: getPrimeiroDoMes(year, month),
+          end: getUltimoDoMes(year, month),
+        };
+      }
 
       case 'timeGridWeek':
-      case 'listWeek':
-        startDate = calendar.getCurrentData().dateProfile.activeRange.start;
-        endDate = calendar.getCurrentData().dateProfile.activeRange.end;
-
-        const momentStart = moment(
-          calendar.getCurrentData().dateProfile.activeRange.start
-        );
-        const momentEnd = moment(
-          calendar.getCurrentData().dateProfile.activeRange.end
-        );
-        start = prev
-          ? momentStart.subtract(7, 'days')
-          : momentStart.add(7, 'days');
-        end = prev ? momentEnd.subtract(7, 'days') : momentEnd.add(7, 'days');
+      case 'listWeek': {
+        const momentStart = moment(calendar.getCurrentData().dateProfile.activeRange.start);
+        const momentEnd = moment(calendar.getCurrentData().dateProfile.activeRange.end);
+        const start = prev ? momentStart.subtract(7, 'days') : momentStart.add(7, 'days');
+        const end = prev ? momentEnd.subtract(7, 'days') : momentEnd.add(7, 'days');
 
         return {
           type: 'timeGridWeek',
           start: start.format('YYYY-MM-DD'),
           end: end.format('YYYY-MM-DD'),
         };
+      }
 
-      case 'timeGridDay':
-        startDate = prev
-          ? moment(activeDate).subtract(1, 'days')
-          : moment(activeDate).add(1, 'days');
-        endDate = prev ? moment(activeDate) : moment(activeDate).add(2, 'days');
+      case 'timeGridDay': {
+        const startDate = prev ? moment(activeDate).subtract(1, 'days') : moment(activeDate).add(1, 'days');
+        const endDate = prev ? moment(activeDate) : moment(activeDate).add(2, 'days');
         return {
           type: 'timeGridDay',
           start: startDate.format('YYYY-MM-DD'),
           end: endDate.format('YYYY-MM-DD'),
         };
+      }
 
       default:
-        break;
+        return undefined;
     }
   };
 
   useEffect(() => {
-    if (calendarRef.current) {
-      const calendar: any = document.querySelector('fieldset > div > div > div > div > div') 
-      calendar.style.height = 'calc(100vh - 250px)'
-      calendar.style.overflow = 'hidden'
+    const calendar = document.querySelector('fieldset > div > div > div > div > div') as HTMLElement | null;
+
+    if (calendar) {
+      calendar.style.height = 'calc(100vh - 250px)';
+      calendar.style.overflow = 'hidden';
     }
   }, []);
+
+  const renderEventContent = (arg: any) => {
+    const statusValue =
+      arg?.event?.extendedProps?.statusEventos?.nome ||
+      arg?.event?.extendedProps?.statusEventos ||
+      arg?.event?.extendedProps?.status ||
+      '';
+    const normalizedStatus = String(statusValue).trim().toLowerCase();
+    const isAttended = normalizedStatus === 'atendido';
+    const isCanceled = normalizedStatus.includes('cancelado');
+
+    return (
+      <div className="fc-event-title-container flex items-center gap-1 overflow-hidden">
+        <span className={`truncate ${isCanceled ? 'line-through' : ''}`}>
+          {arg.event.title}
+        </span>
+        {isAttended ? <i className="pi pi-check flex-shrink-0" title="Atendido" /> : null}
+      </div>
+    );
+  };
+
+  const handleCustomButton = (eventType: 'prev' | 'next') => {
+    const calendar = (calendarRef.current as { getApi?: () => CalendarApi } | null)?.getApi?.() ?? null;
+    const navigation = calendar ? getInfo(calendar, eventType) : undefined;
+
+    if (!calendar || !navigation) {
+      return;
+    }
+
+    if (eventType === 'prev') {
+      onPrev(navigation);
+      calendar.prev();
+      return;
+    }
+
+    onNext(navigation);
+    calendar.next();
+  };
 
   return (
     <div>
@@ -118,84 +166,22 @@ export const CalendarComponent = ({
             dayGridPlugin,
             listPlugin,
             timeGridPlugin,
-            // momentTimezonePlugin
           ]}
-          hiddenDays={[0]}
-          slotLabelInterval="5vw" // cada célula da grade ocupa 5% da largura da tela
-          slotLabelFormat={{ hour: 'numeric', minute: '2-digit' }} // inclui o valor de slotLabelInterval
-          slotDuration="00:20:00"
-          slotMinTime="07:00:00" // hora mínima para exibição
-          slotMaxTime="20:00:00" // hora máxima para exibição
-          allDaySlot={false}
-          locale="pt"
-          navLinks
-          timeZone="America/Sao_Paulo"
-          // locales={[ptLocale]}
-          initialView="timeGridWeek"
+          {...calendarConfig}
           events={events}
-          headerToolbar={{
-            left: 'prev,next',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek',
-          }}
           ref={calendarRef}
           eventClick={openModalEdit}
-          // eventChange={openModalEdit}
-          dayMaxEventRows={true}
-          views={{
-            timeGrid: {
-              dayMaxEventRows: 8,
-            },
-          }}
-          businessHours={{
-            // days of week. an array of zero-based day of week integers (0=Sunday)
-            daysOfWeek: [1, 2, 3, 4, 5, 6], // Monday - Thursday
-
-            startTime: '07:00', // a start time (10am in this example)
-            endTime: '20:00', // an end time (6pm in this example)
-          }}
-          buttonText={{
-            month: 'Mês',
-            week: 'Semana',
-            day: 'Dia',
-            list: 'Lista',
-          }}
           dateClick={({ date }) => dateClick(formatdateEuaAddDay(date))}
           eventMouseEnter={eventMouseEnter}
-          eventContent={(arg: any) => {
-            // let italicEl = document.createElement('i');
-            // if (arg.event.extendedProps.isUrgent) {
-            //   italicEl.innerHTML = 'urgent event';
-            // } else {
-            //   italicEl.innerHTML = 'normal event';
-            // }
-            // let arrayOfDomNodes = [italicEl];
-            // // return { domNodes: arrayOfDomNodes }
-          }}
+          eventContent={renderEventContent}
           customButtons={{
             prev: {
               text: 'prev',
-              click: (e: any) => {
-                const calendar =
-                  // @ts-ignore
-                  calendarRef.current && calendarRef.current.getApi();
-                let moment = getInfo(calendar, 'prev');
-                onPrev(moment);
-                // @ts-ignore
-                calendar && calendar.prev();
-              },
+              click: () => handleCustomButton('prev'),
             },
             next: {
               text: 'next',
-              click: (e: any) => {
-                const calendar =
-                  // @ts-ignore
-                  calendarRef.current && calendarRef.current.getApi();
-                let moment = getInfo(calendar, 'next');
-                onNext(moment);
-                // @ts-ignore
-                calendar && calendar.next();
-              },
+              click: () => handleCustomButton('next'),
             },
           }}
         />

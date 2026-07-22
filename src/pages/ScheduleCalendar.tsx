@@ -17,6 +17,8 @@ import { permissionAuth } from '../contexts/permission';
 import { useToast } from '../contexts/toast';
 import { useAuth } from '../contexts/auth';
 import { PERFIL } from '../constants/user';
+import { buildEventFilterUrl } from '../util/calendar';
+import { isProfile } from '../util/permissions';
 
 const fieldsConst = filterCalendarFields;
 const fieldsState: any = {};
@@ -51,13 +53,13 @@ export default function ScheduleCalendar() {
   // const renderEvents = useCallback(async (moment: any = currentDate) => {
   async function renderEvents(moment: any = currentDate) {
     // if (!hasPermition('AGENDA_EVENTO_TODOS_EVENTOS') && perfil === PERFIL.terapeuta) {
-    if (perfil.toLowerCase() === PERFIL.terapeuta.toLowerCase()) {
+    if (isProfile(perfil, PERFIL.terapeuta)) {
       await setCurrentDate({
         start: moment.start,
         end: moment.end,
       });
 
-  
+
       const auth: any = await sessionStorage.getItem('auth');
       const user = JSON.parse(auth);
 
@@ -78,9 +80,7 @@ export default function ScheduleCalendar() {
         end: moment.end,
       });
 
-      const response: any = await getList(
-        `/evento/filtro/${moment.start}/${moment.end}?${filter.join('&')}`
-      );
+      const response: any = await getList(buildEventFilterUrl(moment.start, moment.end, { ...currentDate, ...moment, ...filter }));
 
       setEventsList(response);
     }
@@ -165,19 +165,14 @@ export default function ScheduleCalendar() {
   // const handleSubmitFilter = useCallback(async (formvalue: any) => {
   async function handleSubmitFilter(formvalue: any) {
     try {
-      const _filter: string[] = [];
-      Object.keys(formvalue).map((key: string) => {
-        if (formvalue[key]?.id) {
-          _filter.push(`${key}=${formvalue[key].id}`);
-        }
-      });
-
-      setFilter(_filter);
-      const response: any = await getList(
-        `/evento/filtro/${formvalue.start || currentDate.start}/${formvalue.end || currentDate.end}?${_filter.join(
-          '&'
-        )}`
+      const _filter = buildEventFilterUrl(
+        formvalue.start || currentDate.start,
+        formvalue.end || currentDate.end,
+        formvalue
       );
+
+      setFilter(_filter.split('?')[1]?.split('&') || []);
+      const response: any = await getList(_filter);
 
       setEventsList(response);
     } catch (error) {

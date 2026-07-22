@@ -1,5 +1,6 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { getList } from '../server';
+import { hasPermissionRule } from '../util/permissions';
 import { useAuth } from './auth';
 
 interface PermissionContextData {
@@ -33,35 +34,26 @@ export const PermissionProvider = ({ children }: Props) => {
     setPermissions(permissionsList);
   };
 
-  const getPermissions = useMemo(async () => {
+  const getPermissions = useCallback(async () => {
     const sessionUser = sessionStorage.getItem('auth');
     const user = sessionUser ? JSON.parse(sessionUser) : [];
 
-    const list =  user.permissoes || await getList('permissao');
+    const list = user.permissoes || (await getList('permissao'));
     setPermissions(list);
   }, []);
 
   useEffect(() => {
     if (!permissions.length) {
-      getPermissions;
+      getPermissions();
     }
-  }, []);
+  }, [getPermissions, permissions.length]);
 
   const hasPermition = (rule: string = '') => {
-    switch (true) {
-      case !perfil:
-        throw new Error('Voce não tem permissao');
-      case rule === '*':
-        return true;
-      default:
-        if (
-          (permissions.length && permissions.includes(rule.toUpperCase())) ||
-          perfil === DESENVOLVEDOR
-        ) {
-          return true;
-        }
-        return false;
+    if (!perfil) {
+      throw new Error('Voce não tem permissao');
     }
+
+    return hasPermissionRule(permissions, rule, perfil, true);
   };
 
   return (

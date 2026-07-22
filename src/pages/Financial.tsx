@@ -34,6 +34,11 @@ const fieldsConstPaciente = filterFinancialPacienteFields;
 const fieldsState2: any = {};
 fieldsConstPaciente.forEach((field: any) => (fieldsState2[field.id] = ''));
 
+const getCurrentMonthDefaultValues = () => ({
+  dataInicio: moment().startOf('month').format('YYYY-MM-DD'),
+  datatFim: moment().endOf('month').format('YYYY-MM-DD'),
+});
+
 export default function Financial() {
   const [loading, setLoading] = useState<boolean>(false);
   const [dropDownList, setDropDownList] = useState<any>([]);
@@ -76,8 +81,10 @@ export default function Financial() {
         response.status === 200 && response?.data ? response.data : [];
       setGeral(lista.geral);
       setList(lista.data);
-      setLoading(false);
     } catch (error) {
+      setGeral({});
+      setList([]);
+    } finally {
       setLoading(false);
     }
   };
@@ -166,6 +173,7 @@ export default function Financial() {
           legend="Filtro"
           fields={fieldsConstTerapeuta}
           screen="FINANCEIRO"
+          defaultValues={getCurrentMonthDefaultValues()}
           onSubmit={(e: any) => handleSubmitFilter(e, 'terapeuta')}
           onReset={() => {}}
           loading={loading}
@@ -336,6 +344,7 @@ export default function Financial() {
           legend="Filtro"
           fields={fieldsConstPaciente}
           screen="FINANCEIRO"
+          defaultValues={getCurrentMonthDefaultValues()}
           onSubmit={(e: any) => handleSubmitFilter(e, 'paciente')}
           onReset={() => {}}
           loading={loading}

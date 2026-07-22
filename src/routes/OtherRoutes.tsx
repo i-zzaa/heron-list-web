@@ -8,6 +8,7 @@ import Home from '../pages/Home';
 import Queue from '../pages/Queue';
 import Schedule from '../pages/Schedule';
 import Financial from '../pages/Financial';
+import AmilGuides from '../pages/AmilGuides';
 import { useContext } from 'react';
 import { LayoutContext } from '../contexts/layout.context';
 
@@ -18,21 +19,24 @@ export enum CONSTANTES_ROUTERS {
   CRUD = 'cadastro',
   CALENDAR = 'agenda',
   FINANCEIRO = 'financeiro',
+  AMIL_GUIDES = 'guia',
 }
 export interface RoutesProps {
   path: string;
   componentRoute: any;
-  icon: string
+  icon: string;
+  permission?: string;
 }
 
 export const ROUTES = [
-  { path: '*', componentRoute: Home, icon: '' },
-  { path: CONSTANTES_ROUTERS.HOME, componentRoute: Home, icon: 'pi pi-home' },
+  { path: '*', componentRoute: Home, icon: '', permission: '*' },
+  { path: CONSTANTES_ROUTERS.HOME, componentRoute: Home, icon: 'pi pi-home', permission: CONSTANTES_ROUTERS.HOME },
   // { path: CONSTANTES_ROUTERS.DASHBOARD, componentRoute: Dashboard, icon: 'pi pi-chart-pie' },
-  { path: CONSTANTES_ROUTERS.CRUD, componentRoute: Crud, icon: 'pi pi-credit-card' },
-  { path: CONSTANTES_ROUTERS.QUEUE, componentRoute: Queue , icon: 'pi pi-sort-amount-down'},
-  { path: CONSTANTES_ROUTERS.CALENDAR, componentRoute: Schedule, icon: 'pi pi-calendar' },
-  { path: CONSTANTES_ROUTERS.FINANCEIRO, componentRoute: Financial , icon: 'pi pi-money-bill'},
+  { path: CONSTANTES_ROUTERS.CRUD, componentRoute: Crud, icon: 'pi pi-credit-card', permission: CONSTANTES_ROUTERS.CRUD },
+  { path: CONSTANTES_ROUTERS.QUEUE, componentRoute: Queue , icon: 'pi pi-sort-amount-down', permission: CONSTANTES_ROUTERS.QUEUE},
+  { path: CONSTANTES_ROUTERS.CALENDAR, componentRoute: Schedule, icon: 'pi pi-calendar', permission: CONSTANTES_ROUTERS.CALENDAR },
+  { path: CONSTANTES_ROUTERS.FINANCEIRO, componentRoute: Financial , icon: 'pi pi-money-bill', permission: CONSTANTES_ROUTERS.FINANCEIRO},
+  { path: CONSTANTES_ROUTERS.AMIL_GUIDES, componentRoute: AmilGuides, icon: 'pi pi-file', permission: 'GUIAS_AMIL' },
 ]
 
 const OtherRoutes = () => {
@@ -51,7 +55,7 @@ const OtherRoutes = () => {
               key={index}
               path={route.path}
               element={
-                hasPermition(route.path) ? (
+                hasPermition(route.permission || route.path) ? (
                   <Layout>
                     <route.componentRoute />
                   </Layout>

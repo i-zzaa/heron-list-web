@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { filter, update } from '../server';
+import { deleteItem, filter, update } from '../server';
 
 import { useToast } from '../contexts/toast';
 import { permissionAuth } from '../contexts/permission';
@@ -47,24 +47,41 @@ export default function Baixa() {
     setLoading(true);
     setFilter(formState)
 
-    const format: any = {
-      baixa: formState.baixa === undefined ? false : formState.baixa,
-    };
-    delete formState.baixa;
+    try {
+      const format: any = {
+        baixa: formState.baixa === undefined ? false : formState.baixa,
+      };
+      delete formState.baixa;
 
-    await Object.keys(formState).map((key: any) => {
-      format[key] = formState[key]?.id || undefined;
-    });
+      await Object.keys(formState).map((key: any) => {
+        format[key] = formState[key]?.id || undefined;
+      });
 
-    const { data }: any = await filter('baixa', format, `page=${pagination.currentPage}&pageSize=${pagination.pageSize}`);
-    setBaixas(data.data || data.data.data);
-    setPagination(data.pagination || data.data.pagination)
-    setLoading(false);
+      const { data }: any = await filter('baixa', format, `page=${pagination.currentPage}&pageSize=${pagination.pageSize}`);
+      setBaixas(data.data || data.data.data);
+      setPagination(data.pagination || data.data.pagination)
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleUpdate = async (rowData: any) => {
     try {
       await update('baixa', {id: rowData.id, usuarioId: user.id});
+      handleSubmitFilter();
+    } catch (response: any) {
+      renderToast({
+        type: 'failure',
+        title: '401',
+        message: response.data.message,
+        open: true,
+      });
+    }
+  };
+
+  const handleDelete = async (rowData: any) => {
+    try {
+      await deleteItem(`baixa/${rowData.id}`);
       handleSubmitFilter();
     } catch (response: any) {
       renderToast({
@@ -96,6 +113,21 @@ export default function Baixa() {
     )
 };
 
+const deleteBodyTemplate = (rowData: any): any => {
+  return hasPermition(`AGENDA_BAIXA_DELETE`) && (
+    <div className="text-center">
+      <ButtonHeron
+        text="Excluir"
+        icon="pi pi-trash"
+        type="transparent"
+        size="icon"
+        color='red'
+        onClick={()=> handleDelete(rowData)}
+      />
+    </div>
+  )
+};
+
 const especialidadeBodyTemplate = (rowData: any): any =>  <Tag type={rowData.especialidade} disabled={false} />
 
   useEffect(() => {
@@ -120,16 +152,17 @@ const especialidadeBodyTemplate = (rowData: any): any =>  <Tag type={rowData.esp
 
       {
         baixas?.length ? <DataTable value={baixas} showGridlines >
-            <Column field="paciente" header="Paciente"></Column>
+            <Column field="paciente" header="Paciente" style={{ minWidth: '9rem', textAlign: 'start', fontSize: '0.5rem' }}></Column>
             <Column field="carteirinha" header="Carteirinha"></Column>
             <Column field="convenio" header="Convenio"></Column>
             <Column field="dataEvento" header="Data Evento"></Column>
-            <Column field="especialidade" header="Especialidade" dataType="boolean" bodyClassName="text-center" headerStyle={{ textAlign: 'center' }}  style={{ minWidth: '8rem', textAlign: 'center' }} body={especialidadeBodyTemplate} />
+            <Column field="especialidade" header="Especialidade" dataType="boolean" bodyClassName="text-center" headerStyle={{ textAlign: 'center' }}   body={especialidadeBodyTemplate} />
             <Column field="cargaHoraria" header="Carga Horária"></Column>
             <Column field="localidade" header="Local"></Column>
             <Column field="dataBaixa" header="Data/Hora Baixa"></Column>
             <Column field="usuario" header="Usuário"></Column>
-            <Column field="baixa" header="Baixa" dataType="boolean" bodyClassName="text-center" headerStyle={{ textAlign: 'center' }}  style={{ minWidth: '8rem', textAlign: 'center' }} body={verifiedBodyTemplate} />
+            <Column field="baixa" header="Baixa" dataType="boolean" bodyClassName="text-center" headerStyle={{ textAlign: 'center' }}  body={verifiedBodyTemplate} />
+            <Column field="excluir" header="Excluir" dataType="boolean" bodyClassName="text-center" headerStyle={{ textAlign: 'center' }}  body={deleteBodyTemplate} />
         </DataTable> : 
         <NotFound />
       }

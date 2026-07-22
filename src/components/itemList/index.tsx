@@ -4,7 +4,7 @@ import { Tag, TagProps } from '../tag';
 import { Text } from '../text';
 import { clsx } from 'clsx';
 import { Tooltip } from 'primereact/tooltip';
-import { COORDENADOR, permissionAuth } from '../../contexts/permission';
+import { permissionAuth } from '../../contexts/permission';
 
 export interface ActionProps {
   onClickEdit?: () => void;
@@ -64,9 +64,8 @@ function actionButtons({
   actionTrash,
   actionReturn,
   screen,
-}: ActionProps) {
-  const { hasPermition } = permissionAuth();
-
+  hasPermition,
+}: ActionProps & { hasPermition: (rule: string) => boolean | void }) {
   return (
     <div
       className={clsx('', {
@@ -201,6 +200,8 @@ function itemListSimples({
   actionReturn,
   screen,
 }: itemListCompleteProps) {
+  const { hasPermition } = permissionAuth();
+
   return (
     <ItemList.Root
       textButtonFooter={textButtonFooter}
@@ -226,6 +227,7 @@ function itemListSimples({
             actionTrash,
             actionReturn,
             screen,
+            hasPermition,
           })}
         </div>
 
@@ -313,6 +315,7 @@ function itemListComplete({
               actionTrash,
               actionReturn,
               screen,
+              hasPermition,
             })
           ) : (
             <div></div>
