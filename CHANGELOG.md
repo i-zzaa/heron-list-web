@@ -3,6 +3,7 @@ Refatoracao do projeto
 Ajuste de seguranca hardening
 Ajuste de assets em prd
 Ajuste no COMPONENTE DE CALENDARIO
+Data default no filtro do financeiro
 
 [0.11.0-beta.0]
 Relatório das alterações
