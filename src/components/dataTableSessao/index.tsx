@@ -5,18 +5,31 @@ import { InputNumber } from 'primereact/inputnumber';
 import { Dropdown } from 'primereact/dropdown';
 import { moneyFormat } from '../../util/util';
 
+interface SessaoItem {
+  especialidade?: string;
+  funcao?: string;
+  valor?: string | number;
+  tipo?: string;
+  km?: number | string;
+}
+
 interface DataTableHeronProps {
-  value: any[];
+  value: SessaoItem[];
   onChange: (data: any) => void;
   type: string;
 }
+
+const TIPO_COMISSAO_OPTIONS = [
+  { id: 'fixo', nome: 'Fixo' },
+  { id: 'porcentagem', nome: '%' },
+];
 
 export const DataTableSessaoHeron = ({
   value,
   onChange,
   type,
 }: DataTableHeronProps) => {
-  const [sessoes, setSessoes] = useState(value);
+  const [sessoes, setSessoes] = useState<SessaoItem[]>(value || []);
   const columns =
     type === 'sessao'
       ? [
@@ -29,6 +42,15 @@ export const DataTableSessaoHeron = ({
           { field: 'tipo', header: 'Tipo Comissão' },
         ];
 
+  const updateSessaoCell = (rowIndex: number, field: string, rowValue: any) => {
+    const changeList = [...sessoes];
+    changeList[rowIndex] = {
+      ...changeList[rowIndex],
+      [field]: rowValue,
+    };
+    setSessoes(changeList);
+  };
+
   const cellEditor = (options: any) => {
     switch (options.field) {
       case 'valor':
@@ -36,11 +58,11 @@ export const DataTableSessaoHeron = ({
           return (
             <InputNumber
               onValueChange={(e: any) => {
-                const changeList = [...sessoes];
-                changeList[options.rowIndex].valor = moneyFormat.format(
-                  e.target.value
+                updateSessaoCell(
+                  options.rowIndex,
+                  'valor',
+                  moneyFormat.format(e.target.value)
                 );
-                setSessoes(changeList);
               }}
               mode="currency"
               currency="BRL"
@@ -52,9 +74,7 @@ export const DataTableSessaoHeron = ({
           return (
             <InputNumber
               onValueChange={(e: any) => {
-                const changeList = [...sessoes];
-                changeList[options.rowIndex].valor = e.target.value;
-                setSessoes(changeList);
+                updateSessaoCell(options.rowIndex, 'valor', e.target.value);
               }}
               suffix="%"
               className="font-inter"
@@ -67,9 +87,7 @@ export const DataTableSessaoHeron = ({
           <input
             type="number"
             onInput={(e: any) => {
-              const changeList = [...sessoes];
-              changeList[options.rowIndex].km = e.target.value;
-              setSessoes(changeList);
+              updateSessaoCell(options.rowIndex, 'km', e.target.value);
             }}
           />
         );
@@ -77,14 +95,9 @@ export const DataTableSessaoHeron = ({
         return (
           <Dropdown
             virtualScrollerOptions={{ itemSize: 38 }}
-            options={[
-              { id: 'fixo', nome: 'Fixo' },
-              { id: 'porcentagem', nome: '%' },
-            ]}
+            options={TIPO_COMISSAO_OPTIONS}
             onChange={(e: any) => {
-              const changeList = [...sessoes];
-              changeList[options.rowIndex].tipo = e.target.value.nome;
-              setSessoes(changeList);
+              updateSessaoCell(options.rowIndex, 'tipo', e.target.value.nome);
             }}
             optionLabel="nome"
           />
@@ -108,7 +121,7 @@ export const DataTableSessaoHeron = ({
   };
 
   useEffect(() => {
-    setSessoes(value);
+    setSessoes(value || []);
   }, [value]);
 
   return (
