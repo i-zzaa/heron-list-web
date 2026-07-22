@@ -11,12 +11,28 @@ interface OptionProps {
   nome: string;
 }
 
+interface PatientValue {
+  id?: string;
+  nome?: string;
+  especialidades?: OptionProps[];
+  [key: string]: any;
+}
+
+interface FieldProps {
+  id: string;
+  labelText: string;
+  type: string;
+  customCol?: string;
+  validate?: any;
+  name?: string;
+}
+
 interface Props {
   onClose: () => void;
-  dropdown: any;
-  value: any;
+  dropdown: Record<string, any[]>;
+  value?: PatientValue;
   statusPacienteCod: number;
-  fieldsCostant: any;
+  fieldsCostant: FieldProps[];
 }
 
 export const PatientTherapy = ({
@@ -26,10 +42,11 @@ export const PatientTherapy = ({
   statusPacienteCod,
   fieldsCostant,
 }: Props) => {
-  const [loading, setLoaging] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const { renderToast } = useToast();
-  const [fields, setFields] = useState(fieldsCostant);
-  const [especialidades, setEspecialidades] = useState([]);
+  const [especialidades, setEspecialidades] = useState<OptionProps[]>(
+    value?.especialidades || []
+  );
 
   const isEdit = !!value?.nome;
   const defaultValues = value || {};
@@ -41,35 +58,22 @@ export const PatientTherapy = ({
     control,
   } = useForm({ defaultValues });
 
+  const formatPayload = (body: any) => ({
+    ...body,
+    periodoId: body.periodoId.id,
+    convenioId: body.convenioId.id,
+    statusId: body.statusId.id,
+    tipoSessaoId: statusPacienteCod === 1 ? body.tipoSessaoId.id : 2,
+    especialidades: body.especialidades.map((item: OptionProps) => item.id),
+    statusPacienteCod,
+  });
+
   const onSubmit = async (body: any) => {
-    setLoaging(true);
+    setLoading(true);
 
     try {
       let data;
-      const formatValues =
-        statusPacienteCod === 1
-          ? {
-              ...body,
-              periodoId: body.periodoId.id,
-              convenioId: body.convenioId.id,
-              statusId: body.statusId.id,
-              tipoSessaoId: body.tipoSessaoId.id,
-              especialidades: body.especialidades.map(
-                (item: OptionProps) => item.id
-              ),
-              statusPacienteCod: statusPacienteCod,
-            }
-          : {
-              ...body,
-              periodoId: body.periodoId.id,
-              convenioId: body.convenioId.id,
-              statusId: body.statusId.id,
-              tipoSessaoId: 2,
-              especialidades: body.especialidades.map(
-                (item: OptionProps) => item.id
-              ),
-              statusPacienteCod: statusPacienteCod,
-            };
+      const formatValues = formatPayload(body);
 
       if (isEdit) {
         formatValues.id = value.id;
@@ -95,31 +99,19 @@ export const PatientTherapy = ({
         open: true,
       });
     } finally {
-      setLoaging(false);
+      setLoading(false);
     }
   };
 
-  const handleChange = (value: any, fieldId: string) => {
-    switch (fieldId) {
-      case 'especialidades':
-        setEspecialidades(value);
-        break;
-
-      default:
-        break;
+  const handleChange = (fieldValue: OptionProps[], fieldId: string) => {
+    if (fieldId === 'especialidades') {
+      setEspecialidades(fieldValue);
     }
   };
 
   useEffect(() => {
     value?.nome && setColorChips();
   }, [value]);
-
-  useEffect(() => {
-    const fieldsFormat = fieldsCostant;
-    const fieldsState: any = {};
-    fieldsFormat.forEach((field: any) => (fieldsState[field.id] = ''));
-    setFields(fieldsFormat);
-  }, []);
 
   return (
     <form
@@ -128,7 +120,7 @@ export const PatientTherapy = ({
       id="form-cadastro-patient"
     >
       <div className="grid grid-cols-6 gap-4 mb-4 min-h-[300px] overflow-y-auto">
-        {fields.map((field: any) => (
+        {fieldsCostant.map((field: FieldProps) => (
           <Input
             key={field.id}
             labelText={field.labelText}
@@ -139,10 +131,12 @@ export const PatientTherapy = ({
             validate={field.validate}
             value={field.id === 'sessao' ? especialidades : null}
             control={control}
-            onChange={(values: any) => handleChange(values, field.id)}
+            onChange={(values: OptionProps[]) => handleChange(values, field.id)}
             options={
               field.type === 'select' || field.type === 'multiselect'
-                ? dropdown[field.name]
+                ? field.name
+                  ? dropdown[field.name]
+                  : undefined
                 : undefined
             }
           />
