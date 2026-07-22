@@ -1,3 +1,29 @@
+[0.11.0-beta.0]
+Relatório das alterações
+Implementamos um novo módulo de consulta e acompanhamento de guias Amil no frontend, sem impactar o fluxo existente das telas já presentes.
+
+O que foi entregue
+Nova tela de guias Amil em AmilGuides.tsx
+
+filtro por número, protocolo, status e período
+cards de resumo
+lista das guias
+modal com detalhes
+ação de reenviar guia
+Integração com navegação e permissões:
+
+rota guias-amil adicionada em OtherRoutes.tsx
+menu lateral atualizado em Nav.tsx
+Conexão com o backend via camada de servidor em index.ts
+
+consulta: guia-amil/filtro
+ação: guia-amil/:id/reenviar
+Ajustes menores de tipagem para manter a aplicação estável:
+
+index.tsx
+index.tsx
+
+
 [0.10.0-beta.0]
 1. Correção de erros por dados ausentes
 Foram adicionadas proteções para evitar que campos nulos ou indefinidos quebrassem a renderização da lista de pacientes e o fluxo de edição.

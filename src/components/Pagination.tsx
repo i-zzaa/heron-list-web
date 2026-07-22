@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export interface PaginationProps {
   totalPages: number;
@@ -9,13 +9,19 @@ export interface PaginationProps {
 export default function Pagination( { totalPages, currentPage, onChange}: PaginationProps) {
   const [currentPageLocal, setCurrentPageLocal] = useState(currentPage || 1);
 
+  useEffect(() => {
+    setCurrentPageLocal(currentPage || 1);
+  }, [currentPage]);
+
   const handleNext = () => {
-    setCurrentPageLocal(currentPageLocal + 1)
-    onChange(currentPageLocal + 1)
+    const nextPage = currentPageLocal + 1;
+    setCurrentPageLocal(nextPage);
+    onChange(nextPage);
   };
   const handlePrev = () => {
-    setCurrentPageLocal(currentPageLocal - 1)
-    onChange(currentPageLocal - 1)
+    const prevPage = currentPageLocal - 1;
+    setCurrentPageLocal(prevPage);
+    onChange(prevPage);
   };
 
   return (
