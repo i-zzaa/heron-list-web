@@ -79,7 +79,6 @@ export const PatientTherapy = ({
       }
 
       reset();
-      setLoaging(false);
       renderToast({
         type: 'success',
         title: '',
@@ -89,13 +88,14 @@ export const PatientTherapy = ({
 
       return onClose();
     } catch (error) {
-      setLoaging(false);
       renderToast({
         type: 'failure',
         title: '401',
         message: 'Não cadastrado!',
         open: true,
       });
+    } finally {
+      setLoaging(false);
     }
   };
 
@@ -153,7 +153,6 @@ export const PatientTherapy = ({
         text={isEdit ? 'Atualizar' : 'Cadastrar'}
         type={isEdit ? 'second' : 'primary'}
         size="full"
-        onClick={handleSubmit(onSubmit)}
         loading={loading}
       />
     </form>

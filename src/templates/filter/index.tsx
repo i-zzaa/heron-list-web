@@ -14,6 +14,7 @@ export interface FilterProps {
   dropdown: any;
   screen: string;
   loading: boolean;
+  defaultValues?: any;
   onSubmit: (formState: any) => any;
   onInclude?: () => any;
   onReset: () => any;
@@ -27,15 +28,16 @@ export function Filter({
   loading,
   nameButton,
   dropdown,
+  defaultValues,
   onSubmit,
   onInclude,
   onReset,
 }: FilterProps) {
-  const { setValue, handleSubmit, control, reset } = useForm();
+  const { setValue, handleSubmit, control, reset } = useForm({ defaultValues });
   const { hasPermition } = permissionAuth();
 
   const handleReset = () => {
-    reset();
+    reset(defaultValues);
     onReset();
   };
 

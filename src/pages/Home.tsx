@@ -27,7 +27,6 @@ export default function Home() {
     try {
       senha.id = user.login;
       const { data }: any = await update(`/usuarios/reset-senha`, senha);
-      setDisabled(false);
       reset();
       renderToast({
         type: 'success',
@@ -43,7 +42,8 @@ export default function Home() {
         open: true,
       });
       reset();
-      return;
+    } finally {
+      setDisabled(false);
     }
   };
 

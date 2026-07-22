@@ -14,6 +14,7 @@ import { PickListHeron } from '../pickListHeron';
 import { DataTableHeron } from '../dataTable';
 import { InputNumber } from 'primereact/inputnumber';
 import { DataTableSessaoHeron } from '../dataTableSessao';
+import { getInputClassName, getInputValue } from '../../util/input';
 
 export interface InputProps {
   id: string;
@@ -61,7 +62,7 @@ export function Input({
             rules={validate}
             render={({ field }: any) => (
               <Dropdown
-                value={value || field.value}
+                value={getInputValue(value, field.value)}
                 virtualScrollerOptions={{ itemSize: 38 }}
                 options={options}
                 onChange={(e: any) => {
@@ -90,7 +91,7 @@ export function Input({
                 display="chip"
                 optionLabel="nome"
                 filter
-                value={value || field.value}
+                value={getInputValue(value, field.value)}
                 onChange={(e: any) => {
                   setColorChips();
                   onChange && onChange(e.value);
@@ -130,7 +131,7 @@ export function Input({
               <textarea
                 id={field.id}
                 {...field}
-                value={value || field.value}
+                value={getInputValue(value, field.value)}
                 className={customClass}
                 placeholder={field.placeholder}
                 disabled={disabled}
@@ -153,7 +154,7 @@ export function Input({
                   </span>
                   <div className="col-span-2">
                     <InputSwitch
-                      checked={value || field.value}
+                      checked={getInputValue(value, field.value)}
                       color="#685ec5"
                       value={value}
                       disabled={disabled}
@@ -180,7 +181,7 @@ export function Input({
                 value={value || field.value}
                 key={field.id}
                 type={type}
-                className={'inputAnimado font-inter font-light' + customClass}
+                className={getInputClassName(type, `font-light${customClass ? ` ${customClass}` : ''}`)}
                 mask="(99) 9 9999-9999"
                 onChange={(e: any) => {
                   return field.onChange(e.value);
@@ -198,9 +199,9 @@ export function Input({
             render={({ field }: any) => (
               <>
                 <Checkbox
-                  checked={value}
+                  checked={getInputValue(value, field.value)}
                   type={type}
-                  className={'inputAnimado ' + customClass}
+                  className={getInputClassName(type, customClass)}
                   onChange={(e: any) => {
                     field.onChange(e.target.checked);
                     onChange && onChange(e.target.checked);
@@ -224,10 +225,10 @@ export function Input({
               <input
                 id={field.id}
                 {...field}
-                value={value || field.value}
+                value={getInputValue(value, field.value)}
                 key={field.id}
                 type={type}
-                className={'inputAnimado font-inter ' + customClass}
+                className={getInputClassName(type, customClass)}
                 disabled={disabled}
                 onInput={(e: any) => {
                   field.onChange(e);
@@ -250,7 +251,7 @@ export function Input({
               >
                 <div className="p-inputgroup">
                   <InputNumber
-                    value={value || field.value}
+                    value={getInputValue(value, field.value)}
                     disabled={disabled}
                     onInput={(e: any) => {
                       field.onChange(e);
@@ -274,10 +275,10 @@ export function Input({
                 disabled={disabled}
                 id={field.id}
                 {...field}
-                value={value || field.value}
+                value={getInputValue(value, field.value)}
                 key={field.id}
                 type={type}
-                className={'inputAnimado ' + customClass}
+                className={getInputClassName(type, customClass)}
                 autoComplete="off"
                 min={validate?.min && validate.min}
                 onInput={(e: any) => {
@@ -353,11 +354,10 @@ export function Input({
                 disabled={disabled}
                 id={field.id}
                 {...field}
-                value={value || field.value}
+                value={getInputValue(value, field.value)}
                 key={field.id}
                 type={type}
-                
-                className={'inputAnimado ' + customClass}
+                className={getInputClassName(type, customClass)}
                 autoComplete="off"
                 onInput={(e: any) => {
                   field.onChange(e);

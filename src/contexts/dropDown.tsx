@@ -6,6 +6,7 @@ import {
   permissionAuth,
   TERAPEUTA,
 } from './permission';
+import { isProfile } from '../util/permissions';
 
 export interface DropdownContextData {
   renderPacientes: (statusPacienteCod: string) => void;
@@ -271,9 +272,9 @@ export const DropdownProvider = ({ children }: Props) => {
   const renderDropdownCalendar = async (statusPacienteCod: string) => {
     let pacientes;
     if (
-      perfil === COORDENADOR ||
-      perfil === COORDENADOR_TERAPEUTA ||
-      perfil === TERAPEUTA
+      isProfile(perfil, COORDENADOR) ||
+      isProfile(perfil, COORDENADOR_TERAPEUTA) ||
+      isProfile(perfil, TERAPEUTA)
     ) {
       const auth: any = await sessionStorage.getItem('auth');
       const user = JSON.parse(auth);

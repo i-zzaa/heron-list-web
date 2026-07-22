@@ -11,7 +11,7 @@ export interface TextSubtextProps {
     | 'black'
     | 'white'
     | 'red';
-  display: 'flex' | 'grid';
+  display: 'flex' | 'grid' | 'block';
   icon?: string;
   className?: string;
 }
