@@ -19,7 +19,7 @@ export enum CONSTANTES_ROUTERS {
   CRUD = 'cadastro',
   CALENDAR = 'agenda',
   FINANCEIRO = 'financeiro',
-  AMIL_GUIDES = 'guias-amil',
+  AMIL_GUIDES = 'guia',
 }
 export interface RoutesProps {
   path: string;
