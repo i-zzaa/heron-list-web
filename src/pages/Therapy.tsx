@@ -12,6 +12,8 @@ import { useDropdown } from '../contexts/dropDown';
 import { patientTherapyFields, STATUS_PACIENT_COD } from '../constants/patient';
 import { PacientsProps, PatientForm } from '../foms/PatientForm';
 import PaginationComponent from '../components/Pagination';
+import { buildPaginationState, resolveResponseData, resolveResponsePagination } from '../util/pagination';
+import { mapFormValuesToPayload } from '../util/forms';
 
 const fieldsConst = filterTerapyFields;
 const fieldsState: any = {};
@@ -25,11 +27,7 @@ export default function Therapy() {
   const [patient, setPatient] = useState<any>();
   const [patientFormatCalendar, setPatientFormatCalendar] = useState<any>();
   const [filterCurrent, setFilter] = useState<any>({});
-  const [pagination, setPagination] = useState<any>({
-    currentPage: 1,
-    pageSize: 10,
-    totalPages: 0,
-  });
+  const [pagination, setPagination] = useState<any>(buildPaginationState());
 
   const [open, setOpen] = useState<boolean>(false);
   const [openCalendarForm, setOpenCalendarForm] = useState<boolean>(false);
@@ -103,25 +101,20 @@ export default function Therapy() {
     setLoading(true);
     setFilter(formState)
     try {
-      const format: any = {
-        naFila: formState.naFila === undefined ? true : !formState.naFila,
-        disabled: formState.disabled === undefined ? false : formState.disabled,
-      };
-
-      format.statusPacienteCod = format.naFila
-        ? STATUS_PACIENT_COD.queue_therapy
-        : STATUS_PACIENT_COD.therapy;
-      delete formState.naFila;
-      delete formState.disabled;
-
-      await Object.keys(formState).map((key: any) => {
-        format[key] = formState[key]?.id || undefined;
-      });
+      const format: any = mapFormValuesToPayload(
+        {
+          ...formState,
+          naFila: formState.naFila === undefined ? true : !formState.naFila,
+          disabled: formState.disabled === undefined ? false : formState.disabled,
+          statusPacienteCod: formState.naFila === undefined ? STATUS_PACIENT_COD.queue_therapy : STATUS_PACIENT_COD.therapy,
+        },
+        { exclude: ['naFila', 'disabled'] }
+      );
 
       const response: any = await filter('paciente', format, `page=${pag.currentPage}&pageSize=${pag.pageSize}`);
 
-      setPatients(response.data.data || response.data);
-      setPagination(response.pagination || response.data.pagination)
+      setPatients(resolveResponseData(response));
+      setPagination(resolveResponsePagination(response, pag))
     } catch (error) {
       renderToast({
         type: 'failure',

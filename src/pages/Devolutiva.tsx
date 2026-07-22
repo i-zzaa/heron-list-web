@@ -15,6 +15,8 @@ import {
 import { PacientsProps, PatientForm } from '../foms/PatientForm';
 import { filterDevolutivaFields } from '../constants/formFields';
 import PaginationComponent from '../components/Pagination';
+import { buildPaginationState, resolveResponseData, resolveResponsePagination } from '../util/pagination';
+import { mapFormValuesToPayload } from '../util/forms';
 
 const fieldsConst = filterDevolutivaFields;
 const fieldsState: any = {};
@@ -26,11 +28,7 @@ export default function Devolutiva() {
   const [patient, setPatient] = useState<any>([]);
   const [patientFormatCalendar, setPatientFormatCalendar] = useState<any>();
   const [filterCurrent, setFilter] = useState<any>({});
-  const [pagination, setPagination] = useState<any>({
-    currentPage: 1,
-    pageSize: 10,
-    totalPages: 0,
-  });
+  const [pagination, setPagination] = useState<any>(buildPaginationState());
 
   const [open, setOpen] = useState<boolean>(false);
   const [openCalendarForm, setOpenCalendarForm] = useState<boolean>(false);
@@ -105,24 +103,21 @@ export default function Devolutiva() {
     setFilter(formState)
 
     try {
-      const format: any = {
-        naFila: formState.naFila === undefined ? true : !formState.naFila,
-        isDevolutiva:
-          formState.isDevolutiva === undefined ? false : formState.isDevolutiva,
-        disabled: formState.disabled === undefined ? false : formState.disabled,
-        statusPacienteCod: STATUS_PACIENT_COD.queue_devolutiva,
-      };
-      delete formState.naFila;
-      delete formState.disabled;
-      delete formState.isDevolutiva;
-
-      await Object.keys(formState).map((key: any) => {
-        format[key] = formState[key]?.id || undefined;
-      });
+      const format: any = mapFormValuesToPayload(
+        {
+          ...formState,
+          naFila: formState.naFila === undefined ? true : !formState.naFila,
+          isDevolutiva:
+            formState.isDevolutiva === undefined ? false : formState.isDevolutiva,
+          disabled: formState.disabled === undefined ? false : formState.disabled,
+          statusPacienteCod: STATUS_PACIENT_COD.queue_devolutiva,
+        },
+        { exclude: ['naFila', 'disabled', 'isDevolutiva'] }
+      );
 
       const response: any = await filter('paciente', format, `page=${pag.currentPage}&pageSize=${pag.pageSize}`);
-      setPatients(response.data.data || response.data);
-      setPagination(response.pagination || response.data.pagination)
+      setPatients(resolveResponseData(response));
+      setPagination(resolveResponsePagination(response, pag))
     } catch (err) {
       renderToast({
         type: 'failure',

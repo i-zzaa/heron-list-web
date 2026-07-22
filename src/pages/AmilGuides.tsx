@@ -9,6 +9,7 @@ import { NotFound } from '../components/notFound';
 import PaginationComponent from '../components/Pagination';
 import { useToast } from '../contexts/toast';
 import { actionAmilGuide, filterAmilGuides, getAmilGuideDropdowns } from '../server';
+import { getApiPayload, getPaginationMeta, normalizeFilterValue } from '../util/api';
 
 interface AmilGuideItem {
   id?: number;
@@ -156,18 +157,11 @@ export default function AmilGuides() {
       const format: Record<string, any> = {};
 
       Object.entries(currentFilter).forEach(([key, value]) => {
-        if (value === '' || value === null || value === undefined) {
-          return;
+        const normalizedValue = normalizeFilterValue(value);
+
+        if (normalizedValue !== undefined) {
+          format[key] = normalizedValue;
         }
-
-        const normalizedValue =
-          value && typeof value === 'object' && 'target' in value && value.target?.value !== undefined
-            ? value.target.value
-            : value && typeof value === 'object' && 'value' in value && value.value !== undefined
-              ? value.value
-              : value?.id || value;
-
-        format[key] = normalizedValue;
       });
 
       const response: any = await filterAmilGuides(
@@ -175,13 +169,14 @@ export default function AmilGuides() {
         pag.currentPage || 1,
         pag.pageSize || 10
       );
-      const payload = response?.data?.data ?? response?.data ?? [];
-      const items = Array.isArray(payload) ? payload : payload.items ?? [];
-      const metrics = response?.pagination ?? response?.meta ?? response?.data?.pagination ?? {};
+      const items = getApiPayload(response);
       const summaryFromBackend = response?.summary || response?.resumo || response?.data?.summary || response?.data?.resumo || {};
-      const totalItems = Number(metrics.total ?? summaryFromBackend.total ?? items.length ?? 0);
-      const pageSize = Number(metrics.limit ?? pag.pageSize ?? 10);
-      const totalPages = Number(metrics.totalPages || Math.ceil(totalItems / pageSize) || 0);
+      const { pageSize, currentPage, totalPages, totalItems } = getPaginationMeta(
+        response,
+        pag.currentPage || 1,
+        pag.pageSize || 10,
+        summaryFromBackend.total ?? items.length ?? 0
+      );
 
       setGuides(items);
       setSummary({
@@ -192,7 +187,7 @@ export default function AmilGuides() {
       });
       setPagination({
         ...pag,
-        currentPage: Number(metrics.page ?? pag.currentPage ?? 1),
+        currentPage,
         pageSize,
         totalPages,
       });

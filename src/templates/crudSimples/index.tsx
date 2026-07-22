@@ -17,6 +17,7 @@ import { useDropdown } from '../../contexts/dropDown';
 import { moneyFormat } from '../../util/util';
 import Pagination from '../../components/Pagination';
 import { PERFIL } from '../../constants/user';
+import { buildPaginationState, resolveResponseData, resolveResponsePagination } from '../../util/pagination';
 
 interface Props {
   namelist: string;
@@ -34,13 +35,8 @@ export default function CrudSimples({
   screen,
 }: Props) {
 
-  const DEFAULT_PAGINATION = {
-    pageSize: 0,
-    totalPage: 0,
-  }
-
   const [list, setList] = useState<any>([]);
-  const [pagination, setPagination] = useState<any>(DEFAULT_PAGINATION);
+  const [pagination, setPagination] = useState<any>(buildPaginationState(1, 10, 0));
   const [item, setItem] = useState<any>({});
   const [value, setValues] = useState<any>([]);
   const [open, setOpen] = useState<boolean>(false);
@@ -80,8 +76,8 @@ export default function CrudSimples({
 
     try {
       const response = await getList(`${namelist}?page=${page}&pageSize=${pageSize}`);
-      setList(response.data);
-      setPagination(response.pagination)
+      setList(resolveResponseData(response));
+      setPagination(resolveResponsePagination(response, buildPaginationState(page, pageSize, 0)))
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -94,7 +90,7 @@ export default function CrudSimples({
   const handleClick = async (word: any) => {
     try {
       if (word.search === undefined || word.search === ""){
-        renderList();  
+        renderList();
         return;
       }
       setLoading(true);
@@ -102,10 +98,7 @@ export default function CrudSimples({
       setValue('search', '')
       const lista = response.status === 200 ? response.data : [];
       setList(lista);
-      setPagination({
-        pageSize: 0,
-        totalPage: 0,
-      })
+      setPagination(buildPaginationState(1, 0, 0))
 
       setLoading(false);
     } catch (error) {
@@ -150,7 +143,7 @@ export default function CrudSimples({
       }
 
       reset();
-      setPagination(DEFAULT_PAGINATION)
+      setPagination(buildPaginationState(1, 10, 0))
       renderList();
       setIsEdit(false);
       setOpen(false);
@@ -201,7 +194,7 @@ export default function CrudSimples({
   const actionFieldId = async (valueForm: any, fieldId: string) => {
     switch (fieldId) {
       case 'perfilId':
-        const valid = valueForm.nome !== PERFIL.terapeuta 
+        const valid = valueForm.nome !== PERFIL.terapeuta
         setHidden(valid);
         if (!valid) {
           unregister(isTerapeuta, { keepDirtyValues: true });
