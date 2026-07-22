@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { deleteItem, getList, update } from '../server';
 import { Card, Confirm, Filter, Modal } from '../components';
 import { CalendarComponent } from '../components/calendar';
@@ -19,16 +19,15 @@ import { useAuth } from '../contexts/auth';
 import { PERFIL } from '../constants/user';
 import { buildEventFilterUrl } from '../util/calendar';
 import { isProfile } from '../util/permissions';
+import { resolveResponseData } from '../util/pagination';
 
 const fieldsConst = filterCalendarFields;
-const fieldsState: any = {};
-fieldsConst.forEach((field: any) => (fieldsState[field.id] = ''));
 
 export default function ScheduleCalendar() {
   const current = new Date();
   const { perfil } = useAuth();
 
-  const [filter, setFilter] = useState<string[]>([]);
+  const [filter, setFilter] = useState<Record<string, any>>({});
 
   const { hasPermition } = permissionAuth();
 
@@ -36,7 +35,7 @@ export default function ScheduleCalendar() {
   const { renderToast } = useToast();
 
   const [dropDownList, setDropDownList] = useState<any>([]);
-  const { renderDropdownCalendar, renderPacientes } = useDropdown();
+  const { renderDropdownCalendar } = useDropdown();
 
   const [event, setEvent] = useState<any>();
   const [open, setOpen] = useState<boolean>(false);
@@ -50,40 +49,138 @@ export default function ScheduleCalendar() {
     end: getUltimoDoMes(current.getFullYear(), current.getMonth() + 1),
   });
 
-  // const renderEvents = useCallback(async (moment: any = currentDate) => {
-  async function renderEvents(moment: any = currentDate) {
-    // if (!hasPermition('AGENDA_EVENTO_TODOS_EVENTOS') && perfil === PERFIL.terapeuta) {
-    if (isProfile(perfil, PERFIL.terapeuta)) {
-      await setCurrentDate({
-        start: moment.start,
-        end: moment.end,
+  const normalizeCalendarEvents = (events: any[] = []) => {
+    const eventList = Array.isArray(events)
+      ? events
+      : events && typeof events === 'object'
+      ? Object.values(events)
+      : [];
+
+    return eventList.map((eventItem: any, index: number) => {
+      const date = eventItem.date || eventItem.dataInicio;
+      const startTime = eventItem.startTime || eventItem.start;
+      const endTime = eventItem.endTime || eventItem.end;
+      const isRecurringEvent =
+        eventItem?.frequencia?.id === 2 ||
+        String(eventItem?.frequencia?.nome || '').toLowerCase() ===
+          'recorrente';
+
+      const normalizedId =
+        eventItem.id && eventItem.id !== 0
+          ? String(eventItem.id)
+          : `${eventItem.groupId || 'evento'}-${date || 'sem-data'}-${
+              startTime || 'sem-inicio'
+            }-${endTime || 'sem-fim'}-${index}`;
+
+      const normalizedEvent = {
+        ...eventItem,
+        id: normalizedId,
+      };
+
+      if (date && startTime && endTime && !isRecurringEvent) {
+        const sanitizedEvent = {
+          ...normalizedEvent,
+          start: `${date}T${startTime}`,
+          end: `${date}T${endTime}`,
+        } as Record<string, any>;
+
+        delete sanitizedEvent.rrule;
+        delete sanitizedEvent.daysOfWeek;
+        delete sanitizedEvent.startTime;
+        delete sanitizedEvent.endTime;
+        delete sanitizedEvent.startRecur;
+        delete sanitizedEvent.endRecur;
+
+        return sanitizedEvent;
+      }
+
+      if (isRecurringEvent) {
+        return {
+          ...normalizedEvent,
+          daysOfWeek:
+            Array.isArray(eventItem?.diasFrequencia) &&
+            eventItem.diasFrequencia.length
+              ? eventItem.diasFrequencia.map((day: string | number) =>
+                  Number(day)
+                )
+              : normalizedEvent.daysOfWeek,
+        };
+      }
+
+      const fallbackEvent = {
+        ...normalizedEvent,
+        rrule: undefined,
+        daysOfWeek: undefined,
+        startTime: undefined,
+        endTime: undefined,
+        startRecur: undefined,
+        endRecur: undefined,
+      };
+
+      return {
+        ...fallbackEvent,
+        id: normalizedId,
+      };
+    });
+  };
+
+  const fetchEventsWithFilter = async (
+    dateRange: any,
+    activeFilter: Record<string, any> = {}
+  ) => {
+    setLoading(true);
+
+    try {
+      const filterUrl = buildEventFilterUrl(
+        dateRange.start,
+        dateRange.end,
+        activeFilter
+      );
+      const separator = filterUrl.includes('?') ? '&' : '?';
+      const response: any = await getList(
+        `${filterUrl}${separator}_ts=${Date.now()}`
+      );
+      setEventsList(normalizeCalendarEvents(resolveResponseData(response)));
+    } catch (error) {
+      renderToast({
+        type: 'failure',
+        title: '401',
+        message: 'Não foi possível carregar os eventos da agenda!',
+        open: true,
       });
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  async function renderEvents(
+    moment: any = currentDate,
+    overrideFilter?: Record<string, any>
+  ) {
+    const nextDate = {
+      start: moment.start,
+      end: moment.end,
+    };
+    const baseFilter = overrideFilter ?? filter;
 
+    setCurrentDate(nextDate);
+
+    if (isProfile(perfil, PERFIL.terapeuta)) {
       const auth: any = await sessionStorage.getItem('auth');
       const user = JSON.parse(auth);
-
-
-      handleSubmitFilter({
+      const nextFilter = {
+        ...baseFilter,
         terapeutaId: {
           id: user.id,
         },
-        ...moment
-      });
-    } else {
-      // const response: any = await getList(
-      //   `/evento/${moment.start}/${moment.end}`
-      // );
+      };
 
-      setCurrentDate({
-        start: moment.start,
-        end: moment.end,
-      });
-
-      const response: any = await getList(buildEventFilterUrl(moment.start, moment.end, { ...currentDate, ...moment, ...filter }));
-
-      setEventsList(response);
+      setFilter(nextFilter);
+      await fetchEventsWithFilter(nextDate, nextFilter);
+      return;
     }
+
+    await fetchEventsWithFilter(nextDate, baseFilter);
   }
 
   async function deleteEvent() {
@@ -112,7 +209,6 @@ export default function ScheduleCalendar() {
     try {
       await update('/evento/check', event);
 
-
       setOpenView(false);
       renderToast({
         type: 'success',
@@ -120,11 +216,7 @@ export default function ScheduleCalendar() {
         message: 'Evento atualizado!',
         open: true,
       });
-
-      setTimeout(() => {
-        renderEvents()
-      }, 1000);
-
+      renderEvents();
     } catch (error) {
       console.error(error);
       renderToast({
@@ -146,11 +238,7 @@ export default function ScheduleCalendar() {
         message: 'Evento atualizado!',
         open: true,
       });
-
-      setTimeout(() => {
-        renderEvents()
-      }, 1000);
-
+      renderEvents();
     } catch (error) {
       console.error(error);
       renderToast({
@@ -162,28 +250,38 @@ export default function ScheduleCalendar() {
     }
   }
 
-  // const handleSubmitFilter = useCallback(async (formvalue: any) => {
   async function handleSubmitFilter(formvalue: any) {
     try {
-      const _filter = buildEventFilterUrl(
-        formvalue.start || currentDate.start,
-        formvalue.end || currentDate.end,
-        formvalue
-      );
+      const nextDate = {
+        start: formvalue.start || currentDate.start,
+        end: formvalue.end || currentDate.end,
+      };
+      const nextFilter = { ...formvalue };
 
-      setFilter(_filter.split('?')[1]?.split('&') || []);
-      const response: any = await getList(_filter);
-
-      setEventsList(response);
+      setCurrentDate(nextDate);
+      setFilter(nextFilter);
+      await fetchEventsWithFilter(nextDate, nextFilter);
     } catch (error) {
-      setLoading(false);
+      renderToast({
+        type: 'failure',
+        title: '401',
+        message: 'Não foi possível aplicar o filtro!',
+        open: true,
+      });
     }
   }
 
-  const rendeFiltro = useMemo(async () => {
-    const list = await renderDropdownCalendar(STATUS_PACIENT_COD.therapy);
-    setDropDownList(list);
-  }, []);
+  const handleResetFilter = async () => {
+    const clearedFilter = {};
+    setFilter(clearedFilter);
+    await renderEvents(
+      {
+        start: currentDate.start,
+        end: currentDate.end,
+      },
+      clearedFilter
+    );
+  };
 
   const renderModalView = ({ event }: any) => {
     const evento = {
@@ -205,59 +303,39 @@ export default function ScheduleCalendar() {
     setIsEdit(true);
   };
 
-  // const renderCalendar = () => {
-  //   if (!loading) {
-  //     return evenetsList.length ? (
-  //       <div className="flex-1">
-  //         <CalendarComponent
-  //           openModalEdit={renderModalView}
-  //           events={evenetsList}
-  //           onNext={(moment: any) => renderEvents(moment)}
-  //           onPrev={(moment: any) => renderEvents(moment)}
-  //         />
-  //       </div>
-  //     ) : (
-  //       <NotFound />
-  //     );
-  //   } else {
-  //     return <LoadingHeron />;
-  //   }
-  // };
-
   useEffect(() => {
-    rendeFiltro;
+    const loadFilters = async () => {
+      const list = await renderDropdownCalendar(STATUS_PACIENT_COD.therapy);
+      setDropDownList(list);
+    };
+
+    loadFilters();
   }, []);
 
   useEffect(() => {
-    setLoading(true);
     renderEvents();
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
   }, []);
 
   return (
     <div className="h-max-screen">
-      {
-        hasPermition('AGENDA_CALENDARIO_FILTRO_BOTAO_PESQUISAR') ? (
-          <Filter
-        id="form-filter-patient"
-        legend="Filtro"
-        nameButton="Agendar"
-        fields={fieldsConst}
-        onSubmit={handleSubmitFilter}
-        onReset={renderEvents}
-        screen="AGENDA_CALENDARIO"
-        loading={loading}
-        dropdown={dropDownList}
-        onInclude={() => {
-          setEvent(null);
-          setOpen(true);
-          setIsEdit(false);
-        }}
-      />
-        ): <></>
-      }
+      {hasPermition('AGENDA_CALENDARIO_FILTRO_BOTAO_PESQUISAR') ? (
+        <Filter
+          id="form-filter-patient"
+          legend="Filtro"
+          nameButton="Agendar"
+          fields={fieldsConst}
+          onSubmit={handleSubmitFilter}
+          onReset={handleResetFilter}
+          screen="AGENDA_CALENDARIO"
+          loading={loading}
+          dropdown={dropDownList}
+          onInclude={() => {
+            setEvent(null);
+            setOpen(true);
+            setIsEdit(false);
+          }}
+        />
+      ) : null}
 
       <Card>
         <div className="flex-1">
