@@ -22,7 +22,7 @@ export default function Login() {
   const [checkState, setCheck] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
 
-    return localStorage.getItem('rememberCheck') === 'true';
+    return sessionStorage.getItem('rememberCheck') === 'true';
   });
   const [loading, setLoading] = useState<boolean>(false);
   const { renderToast } = useToast();
@@ -56,9 +56,9 @@ export default function Login() {
   const handleRememberPassword = async (checked: boolean) => {
     setCheck(checked);
 
-    localStorage.setItem('rememberCheck', checked ? 'true' : 'false');
+    sessionStorage.setItem('rememberCheck', checked ? 'true' : 'false');
     if (checked) {
-      localStorage.setItem(
+      sessionStorage.setItem(
         'rememberLogin',
         JSON.stringify({
           username: watch('username') ?? '',
@@ -66,13 +66,13 @@ export default function Login() {
         })
       );
     } else {
-      localStorage.removeItem('rememberLogin');
+      sessionStorage.removeItem('rememberLogin');
     }
   };
 
   useEffect(() => {
-    const rememberLogin = localStorage.getItem('rememberLogin');
-    const rememberCheck = localStorage.getItem('rememberCheck') === 'true';
+    const rememberLogin = sessionStorage.getItem('rememberLogin');
+    const rememberCheck = sessionStorage.getItem('rememberCheck') === 'true';
 
     if (rememberLogin) {
       const { username, password } = JSON.parse(rememberLogin);
