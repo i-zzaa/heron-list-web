@@ -1,6 +1,7 @@
 [0.11.0-beta.1]
 Refatoracao do projeto
 Ajuste de seguranca hardening
+Ajuste de assets em prd
 
 [0.11.0-beta.0]
 Relatório das alterações
