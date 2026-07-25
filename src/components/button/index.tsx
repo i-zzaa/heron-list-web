@@ -6,6 +6,7 @@ export interface ButtonProps {
   text: string;
   loading?: boolean;
   onClick?: () => void;
+  testId?: string;
 }
 import { clsx } from 'clsx';
 import { Button } from 'primereact';
@@ -18,9 +19,11 @@ export function ButtonHeron({
   text,
   loading,
   onClick,
+  testId,
 }: ButtonProps) {
   return (
     <Button
+      data-testid={testId}
       icon={icon}
       loading={loading}
       label={size === 'icon' ? '' : text}

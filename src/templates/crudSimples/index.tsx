@@ -363,6 +363,7 @@ export default function CrudSimples({
         control={control}
         loading={loading}
         screen={screen}
+        addButtonTestId={`cadastro-add-${namelist}`}
       />
 
       <Card>
@@ -534,6 +535,7 @@ export default function CrudSimples({
             onSubmit={handleSubmit(onSubmit)}
             action="#"
             className="grid gap-6"
+            data-testid={`crud-form-${namelist}`}
           >
             <div className="grid grid-cols-6 items-center gap-2">
               {fields.map((field: any) => (
@@ -563,6 +565,7 @@ export default function CrudSimples({
               type={isEdit ? 'second' : 'primary'}
               size="full"
               loading={loading}
+              testId={`crud-save-${namelist}`}
             />
           </form>
         }

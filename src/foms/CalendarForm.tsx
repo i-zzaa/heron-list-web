@@ -165,6 +165,9 @@ export const CalendarForm = ({
         <Input
           labelText="Especialidade"
           id={`especialidade${index}`}
+          testId={
+            index ? `especialidade-select-${index}` : 'especialidade-field'
+          }
           type="select"
           customCol="col-span-6 sm:col-span-2"
           errors={errors}
@@ -182,6 +185,7 @@ export const CalendarForm = ({
         <Input
           labelText="Terapeuta"
           id={`terapeuta${index}`}
+          testId={index ? `terapeuta-select-${index}` : 'terapeuta-select'}
           type="select"
           customCol="col-span-6 sm:col-span-2"
           errors={errors}
@@ -198,6 +202,7 @@ export const CalendarForm = ({
         <Input
           labelText="Função"
           id={`funcao${index}`}
+          testId={index ? `funcao-select-${index}` : 'funcao-select'}
           type="select"
           customCol="col-span-6 sm:col-span-2"
           errors={errors}
@@ -322,11 +327,13 @@ export const CalendarForm = ({
         action="#"
         onSubmit={handleSubmit(handleConfirm)}
         id="form-cadastro-agendamento"
+        data-testid="agenda-form"
       >
         <div className="grid grid-cols-6 gap-4 mb-8 overflow-y-auto">
           <Input
             labelText="Modalidade"
             id="modalidade"
+            testId="modalidade-select"
             type="select"
             customCol={`col-span-6 ${
               isAvaliacao || isEdit ? 'sm:col-span-2' : 'sm:col-span-3'
@@ -354,6 +361,7 @@ export const CalendarForm = ({
           <Input
             labelText="Data"
             id="dataInicio"
+            testId="data-inicial-input"
             type="date"
             customCol={`col-span-6 font-inter font-light ${
               isAvaliacao || isEdit ? 'sm:col-span-2' : 'sm:col-span-3'
@@ -396,6 +404,7 @@ export const CalendarForm = ({
           <Input
             labelText="Horario Inicial"
             id="start"
+            testId="hora-inicio-input"
             type="time"
             customCol={`col-span-6 ${
               hasFrequencia ? 'sm:col-span-3' : 'sm:col-span-2'
@@ -431,6 +440,7 @@ export const CalendarForm = ({
           <Input
             labelText="Horario Final"
             id="end"
+            testId="hora-fim-input"
             type="time"
             customCol={`col-span-6 ${
               hasFrequencia ? 'sm:col-span-3' : 'sm:col-span-2'
@@ -447,6 +457,7 @@ export const CalendarForm = ({
             <Input
               labelText="Frequência"
               id="frequencia"
+              testId="frequencia-select"
               type="select"
               customCol={`col-span-6 ${
                 hasFrequencia ? 'sm:col-span-2' : 'sm:col-span-2'
@@ -477,6 +488,7 @@ export const CalendarForm = ({
             <Input
               labelText="Intervalo"
               id="intervalo"
+              testId="intervalo-select"
               type="select"
               customCol="col-span-6 sm:col-span-2"
               errors={errors}
@@ -572,6 +584,7 @@ export const CalendarForm = ({
           <Input
             labelText="Local"
             id="localidade"
+            testId="localidade-select"
             type="select"
             customCol={`col-span-6 sm:col-span-${isExterno ? '2' : '3'}`}
             errors={errors}
@@ -585,6 +598,7 @@ export const CalendarForm = ({
           <Input
             labelText="Status Eventos"
             id="statusEventos"
+            testId="status-evento-select"
             type="select"
             customCol="col-span-6 sm:col-span-2"
             errors={errors}
@@ -615,6 +629,7 @@ export const CalendarForm = ({
             type={isEdit ? 'second' : 'primary'}
             size="full"
             loading={loading}
+            testId="salvar-agendamento-button"
           />
         ) : null}
       </form>
@@ -629,6 +644,8 @@ export const CalendarForm = ({
         open={openConfirm}
         acceptLabel="Atual e eventos futuros"
         rejectLabel="Atual"
+        acceptClassName="botao-aplicar-atual-futuros"
+        rejectClassName="botao-aplicar-atual"
       />
     </>
   );
