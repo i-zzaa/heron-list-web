@@ -164,6 +164,7 @@ export const PatientForm = ({
       action="#"
       onSubmit={handleSubmit(onSubmit)}
       id="form-cadastro-patient"
+      data-testid="patient-form"
     >
       <div className="grid grid-cols-6 gap-2 mb-4 min-h-[300px] overflow-y-auto">
         {fields.map((field: any) => (
@@ -192,6 +193,7 @@ export const PatientForm = ({
         type={isEdit ? 'second' : 'primary'}
         size="full"
         loading={loading}
+        testId="patient-save"
       />
     </form>
   );

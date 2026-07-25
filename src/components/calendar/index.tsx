@@ -75,6 +75,29 @@ export const CalendarComponent = ({
     return value.includes('T') ? value : value.replace(' ', 'T');
   };
 
+  const normalizeExdates = (value: unknown) => {
+    if (!Array.isArray(value)) {
+      return undefined;
+    }
+
+    const exdates = value
+      .map((item) => {
+        if (typeof item !== 'string') {
+          return undefined;
+        }
+
+        const sanitized = item.trim();
+        if (!sanitized) {
+          return undefined;
+        }
+
+        return toIsoDateTime(sanitized);
+      })
+      .filter(Boolean);
+
+    return exdates.length ? exdates : undefined;
+  };
+
   const normalizedEvents = useMemo(() => {
     if (!Array.isArray(events)) {
       return [];
@@ -116,6 +139,7 @@ export const CalendarComponent = ({
             }-${rawStart}-${rawEnd}-${index}`;
 
       if (isRecurringEvent && eventItem?.rrule?.freq) {
+        const exdate = normalizeExdates(eventItem?.exdate);
         const recurringEvent = {
           id,
           title: eventItem?.title || eventItem?.paciente?.nome || 'Evento',
@@ -124,6 +148,7 @@ export const CalendarComponent = ({
             dtstart: toIsoDateTime(eventItem?.rrule?.dtstart),
             until: toIsoDateTime(eventItem?.rrule?.until),
           },
+          exdate,
           backgroundColor: eventItem?.backgroundColor || eventItem?.color,
           borderColor: eventItem?.borderColor || eventItem?.color,
           textColor: eventItem?.textColor,
@@ -131,13 +156,6 @@ export const CalendarComponent = ({
             ...eventItem,
           },
         } as Record<string, any>;
-
-        if (
-          Array.isArray(eventItem?.daysOfWeek) &&
-          eventItem.daysOfWeek.length
-        ) {
-          recurringEvent.daysOfWeek = eventItem.daysOfWeek;
-        }
 
         acc.push(recurringEvent);
         return acc;
@@ -249,8 +267,14 @@ export const CalendarComponent = ({
     const isCanceled = normalizedStatus.includes('cancelado');
 
     return (
-      <div className="fc-event-title-container flex items-center gap-1 overflow-hidden">
-        <span className={`truncate ${isCanceled ? 'line-through' : ''}`}>
+      <div
+        className="fc-event-title-container flex items-center gap-1 overflow-hidden"
+        data-testid="calendar-event-slot"
+      >
+        <span
+          className={`truncate ${isCanceled ? 'line-through' : ''}`}
+          data-testid="calendar-event-title"
+        >
           {arg.event.title}
         </span>
         {isAttended ? (
@@ -299,6 +323,24 @@ export const CalendarComponent = ({
           dateClick={({ date }) => dateClick(formatdateEuaAddDay(date))}
           eventMouseEnter={eventMouseEnter}
           eventContent={renderEventContent}
+          eventDidMount={(info) => {
+            const statusName = String(
+              info?.event?.extendedProps?.statusEventos?.nome ||
+                info?.event?.extendedProps?.statusEventos ||
+                ''
+            )
+              .trim()
+              .toLowerCase();
+            const isCanceled = statusName.includes('cancelado');
+
+            info.el.setAttribute('data-testid', 'calendar-event-slot');
+            info.el.setAttribute('data-event-id', String(info.event.id || ''));
+            info.el.setAttribute('data-event-start', info.event.startStr || '');
+
+            if (isCanceled) {
+              info.el.classList.add('calendar-event-canceled');
+            }
+          }}
           customButtons={{
             prev: {
               text: 'prev',

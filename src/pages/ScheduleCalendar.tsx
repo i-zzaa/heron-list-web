@@ -317,7 +317,7 @@ export default function ScheduleCalendar() {
   }, []);
 
   return (
-    <div className="h-max-screen">
+    <div className="h-max-screen" data-testid="agenda-page">
       {hasPermition('AGENDA_CALENDARIO_FILTRO_BOTAO_PESQUISAR') ? (
         <Filter
           id="form-filter-patient"
@@ -329,6 +329,7 @@ export default function ScheduleCalendar() {
           screen="AGENDA_CALENDARIO"
           loading={loading}
           dropdown={dropDownList}
+          includeButtonTestId="novo-agendamento-button"
           onInclude={() => {
             setEvent(null);
             setOpen(true);

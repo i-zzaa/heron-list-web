@@ -254,6 +254,7 @@ export default function Patient() {
         onReset={handleSubmitFilter}
         loading={loading}
         dropdown={dropDownList}
+        includeButtonTestId="patient-add"
         onInclude={() => {
           setPatient(null);
           setOpen(true);

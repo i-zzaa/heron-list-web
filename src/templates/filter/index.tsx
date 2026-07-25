@@ -17,6 +17,7 @@ export interface FilterProps {
   defaultValues?: any;
   onSubmit: (formState: any) => any;
   onInclude?: () => any;
+  includeButtonTestId?: string;
   onReset: () => any;
 }
 
@@ -31,6 +32,7 @@ export function Filter({
   defaultValues,
   onSubmit,
   onInclude,
+  includeButtonTestId,
   onReset,
 }: FilterProps) {
   const { setValue, handleSubmit, control, reset } = useForm({ defaultValues });
@@ -95,6 +97,7 @@ export function Filter({
                       type="primary"
                       size="sm"
                       onClick={onInclude}
+                      testId={includeButtonTestId}
                     />
                   </div>
                 )}

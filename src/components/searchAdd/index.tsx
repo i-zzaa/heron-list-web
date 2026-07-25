@@ -6,6 +6,7 @@ export interface SearchAddProps {
   control: any;
   loading?: boolean;
   screen: string;
+  addButtonTestId?: string;
 }
 import { permissionAuth } from '../../contexts/permission';
 import { ButtonHeron } from '../button';
@@ -19,6 +20,7 @@ export function SearchAdd({
   control,
   loading,
   screen,
+  addButtonTestId,
 }: SearchAddProps) {
   const { hasPermition } = permissionAuth();
   const canCreate = hasPermition(`${screen}_BOTAO_CADASTRAR`);
@@ -38,6 +40,7 @@ export function SearchAdd({
               type="primary"
               size="full"
               onClick={onClick}
+              testId={addButtonTestId}
             />
           </div>
         ) : null}
@@ -50,6 +53,7 @@ export function SearchAdd({
               type="primary"
               size="icon"
               onClick={onClick}
+              testId={addButtonTestId}
             />
           </div>
         ) : null}
