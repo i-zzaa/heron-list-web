@@ -1,7 +1,20 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useContext,
+  useRef,
+  useCallback,
+} from 'react';
 import { api, intercepttRoute } from '../server';
 import { permissionAuth } from './permission';
 import { useToast } from './toast';
+
+const DEFAULT_IDLE_TIMEOUT_MINUTES = 30;
+const idleTimeoutMinutes = Number(import.meta.env.VITE_IDLE_TIMEOUT_MINUTES);
+const IDLE_TIMEOUT_MS = Number.isFinite(idleTimeoutMinutes) && idleTimeoutMinutes > 0
+  ? idleTimeoutMinutes * 60 * 1000
+  : DEFAULT_IDLE_TIMEOUT_MINUTES * 60 * 1000;
 
 interface AuthContextData {
   signed: boolean;
@@ -21,6 +34,7 @@ export const AuthProvider = ({ children }: Props) => {
 
   const [user, setUser] = useState();
   const [perfil, setPerfil] = useState<string>('');
+  const inactivityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { setPermissionsLogin } = permissionAuth();
   const { renderToast } = useToast();
 
@@ -37,19 +51,92 @@ export const AuthProvider = ({ children }: Props) => {
     }
   }, []);
 
+  const clearInactivityTimer = useCallback(() => {
+    if (!inactivityTimerRef.current) {
+      return;
+    }
+
+    clearTimeout(inactivityTimerRef.current);
+    inactivityTimerRef.current = null;
+  }, []);
+
+  const Logout = useCallback(async() => {
+    clearInactivityTimer();
+    setUser(undefined);
+    sessionStorage.clear();
+
+    try {
+      await api.get('/logout');
+    } catch (error) {
+      console.log(error);
+    }
+  }, [clearInactivityTimer]);
+
+  const logoutByInactivity = useCallback(async () => {
+    await Logout();
+    renderToast({
+      type: 'failure',
+      title: 'Sessão encerrada',
+      message: 'Você foi deslogado por inatividade.',
+      open: true,
+    });
+  }, [Logout, renderToast]);
+
+  const resetInactivityTimer = useCallback(() => {
+    clearInactivityTimer();
+    inactivityTimerRef.current = setTimeout(() => {
+      void logoutByInactivity();
+    }, IDLE_TIMEOUT_MS);
+  }, [clearInactivityTimer, logoutByInactivity]);
+
+  useEffect(() => {
+    if (!user) {
+      clearInactivityTimer();
+      return;
+    }
+
+    const activityEvents: Array<keyof WindowEventMap> = [
+      'mousemove',
+      'mousedown',
+      'keydown',
+      'scroll',
+      'touchstart',
+    ];
+
+    const handleUserActivity = () => {
+      if (document.visibilityState === 'hidden') {
+        return;
+      }
+
+      resetInactivityTimer();
+    };
+
+    activityEvents.forEach((eventName) => {
+      window.addEventListener(eventName, handleUserActivity);
+    });
+
+    document.addEventListener('visibilitychange', handleUserActivity);
+    resetInactivityTimer();
+
+    return () => {
+      clearInactivityTimer();
+
+      activityEvents.forEach((eventName) => {
+        window.removeEventListener(eventName, handleUserActivity);
+      });
+
+      document.removeEventListener('visibilitychange', handleUserActivity);
+    };
+  }, [user, resetInactivityTimer, clearInactivityTimer]);
+
   const Login = async (loginState: { username: string, password: string}) => {
     try {
       const response = await api.post('/login', {
         ...loginState,
         password: parseInt(loginState.password)
       });
-      
-      const auth = response.data;
 
-      setTimeout(() => {
-         Logout()
-      //  },  import.meta.env.VITE_API_URL_EXPIRES_IN_SECONDS);
-       },  8000000);
+      const auth = response.data;
 
       const user = auth?.user || auth.data;
       const accessToken = auth?.accessToken || auth.data.accessToken;
@@ -89,17 +176,6 @@ export const AuthProvider = ({ children }: Props) => {
       message: message,
       open: true,
     });
-  };
-
-   const Logout = async() => {
-    setUser(undefined);
-    sessionStorage.clear();
-
-    try {
-      await api.get('/logout');
-    } catch (error) {
-      console.log(error);
-    }
   };
 
   return (
