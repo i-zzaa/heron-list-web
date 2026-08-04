@@ -69,11 +69,42 @@ export const CalendarForm = ({
     trigger,
   } = useForm({ defaultValues });
 
+  const lockScheduleFields = isEdit;
+
+  const immutableEventFields = [
+    'modalidade',
+    'dataInicio',
+    'dataFim',
+    'start',
+    'end',
+    'frequencia',
+    'intervalo',
+    'diasFrequencia',
+  ];
+
+  const normalizeEditPayload = (payload: any) => {
+    if (!isEdit || !value) {
+      return payload;
+    }
+
+    const normalizedPayload = { ...payload };
+
+    immutableEventFields.forEach((fieldName) => {
+      if (value[fieldName] !== undefined) {
+        normalizedPayload[fieldName] = value[fieldName];
+      }
+    });
+
+    return normalizedPayload;
+  };
+
   const onSubmit = async (formValueState: any, changeAll: boolean | null) => {
     setOpenConfirm(false);
     setLoading(true);
 
     try {
+      const payload = normalizeEditPayload(formValueState);
+
       if (JSON.stringify(value) === JSON.stringify(formValueState)) {
         renderToast({
           type: 'warning',
@@ -86,14 +117,14 @@ export const CalendarForm = ({
 
       let data;
       if (isEdit) {
-        formValueState.id = value.id;
-        formValueState.changeAll = changeAll;
-        data = await update('evento', formValueState);
+        payload.id = value.id;
+        payload.changeAll = changeAll;
+        data = await update('evento', payload);
       } else {
-        data = await create('evento', formValueState);
+        data = await create('evento', payload);
       }
 
-      onClose(formValueState);
+      onClose(payload);
       renderToast({
         type: 'success',
         title: '',
@@ -356,7 +387,10 @@ export const CalendarForm = ({
             validate={{
               required: true,
             }}
-            disabled={!hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_MODALIDADE')}
+            disabled={
+              !hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_MODALIDADE') ||
+              lockScheduleFields
+            }
           />
           <Input
             labelText="Data"
@@ -383,7 +417,10 @@ export const CalendarForm = ({
               required: true,
               min: moment(new Date()).format('YYYY-MM-DD'),
             }}
-            disabled={!hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_DATA_INICIO')}
+            disabled={
+              !hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_DATA_INICIO') ||
+              lockScheduleFields
+            }
           />
 
           {isAvaliacao && (
@@ -397,7 +434,10 @@ export const CalendarForm = ({
               validate={{
                 min: minFinal.format('YYYY-MM-DD'),
               }}
-              disabled={!hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_DATA_FIM')}
+              disabled={
+                !hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_DATA_FIM') ||
+                lockScheduleFields
+              }
             />
           )}
 
@@ -435,7 +475,10 @@ export const CalendarForm = ({
             validate={{
               required: true,
             }}
-            disabled={!hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_HORA_INICIO')}
+            disabled={
+              !hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_HORA_INICIO') ||
+              lockScheduleFields
+            }
           />
           <Input
             labelText="Horario Final"
@@ -450,7 +493,10 @@ export const CalendarForm = ({
             validate={{
               required: true,
             }}
-            disabled={!hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_HORA_FIM')}
+            disabled={
+              !hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_HORA_FIM') ||
+              lockScheduleFields
+            }
           />
 
           {!isDevolutiva && (!value || value.id === value.groupId) && (
@@ -479,7 +525,8 @@ export const CalendarForm = ({
                 required: true,
               }}
               disabled={
-                !hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_FREQUENCIA') || isEdit
+                !hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_FREQUENCIA') ||
+                lockScheduleFields
               }
             />
           )}
@@ -499,7 +546,8 @@ export const CalendarForm = ({
                 required: true,
               }}
               disabled={
-                !hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_INTERVALO') || isEdit
+                !hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_INTERVALO') ||
+                lockScheduleFields
               }
             />
           )}
@@ -516,7 +564,7 @@ export const CalendarForm = ({
                 }}
                 disabled={
                   !hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_DIAS_FREQUENCIA') ||
-                  isEdit
+                  lockScheduleFields
                 }
               />
             </div>
@@ -593,7 +641,10 @@ export const CalendarForm = ({
             validate={{
               required: true,
             }}
-            disabled={!hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_LOCALIDADE')}
+            disabled={
+              !hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_LOCALIDADE') ||
+              isExterno
+            }
           />
           <Input
             labelText="Status Eventos"

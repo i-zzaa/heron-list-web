@@ -365,6 +365,7 @@ As opções deverão ser filtradas de acordo com as funções vinculadas à tera
 Ao ativar o toggle de local externo:
 
 * O campo de local cadastrado deverá ser desabilitado;
+* O campo de km deverá ser apresentado;
 * O sistema deverá permitir informar a descrição ou o endereço do local externo.
 
 ---

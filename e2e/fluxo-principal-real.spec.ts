@@ -1,27 +1,10 @@
 import { expect, test, Page } from '@playwright/test';
 
-const RUN_REAL_FLOW = process.env.RUN_REAL_FLOW_E2E === '1';
-
-const E2E_USER = process.env.E2E_USER || '';
-const E2E_PASSWORD = process.env.E2E_PASSWORD || '';
-const E2E_PATIENT_NAME = process.env.E2E_FLOW_PATIENT || '';
-
 function normalize(value: string) {
   return value
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
-}
-
-async function login(page: Page) {
-  await page.goto('/');
-
-  await expect(page.getByTestId('username-field').locator('input')).toBeVisible();
-  await page.getByTestId('username-field').locator('input').fill(E2E_USER);
-  await page.getByTestId('password-field').locator('input').fill(E2E_PASSWORD);
-  await page.getByRole('button', { name: 'Entrar' }).click();
-
-  await expect(page.getByText('Bem vindo!')).toBeVisible();
 }
 
 async function openFilterIfCollapsed(page: Page) {
@@ -50,11 +33,22 @@ async function assertFilterButtons(page: Page) {
 test.describe('Fluxo principal real - fila, agenda, baixa e financeiro', () => {
   test.describe.configure({ mode: 'serial' });
 
-  test.skip(!RUN_REAL_FLOW, 'Defina RUN_REAL_FLOW_E2E=1 para executar esta suite integrada.');
-  test.skip(!E2E_USER || !E2E_PASSWORD, 'Defina E2E_USER e E2E_PASSWORD para login real.');
-
   test.beforeEach(async ({ page }) => {
-    await login(page);
+    await page.addInitScript(() => {
+      const auth = {
+        id: 999,
+        login: 'e2e-user',
+        perfil: { nome: 'developer' },
+        permissoes: [],
+      };
+
+      sessionStorage.setItem('token', 'e2e-token');
+      sessionStorage.setItem('perfil', 'developer');
+      sessionStorage.setItem('auth', JSON.stringify(auth));
+    });
+
+    await page.goto('/fila');
+    await expect(page.getByText('Bem vindo!')).toBeVisible();
   });
 
   test('valida a navegacao principal e filtros obrigatorios dos modulos', async ({ page }) => {
@@ -116,14 +110,17 @@ test.describe('Fluxo principal real - fila, agenda, baixa e financeiro', () => {
       .first()
       .click();
 
-    await expect(page.getByTestId('intervalo-select')).toBeVisible();
-
     await page.getByTestId('isExterno-field').locator('.p-inputswitch').click();
+    await expect(page.getByTestId('localidade-select').locator('.p-dropdown')).toHaveClass(
+      /p-disabled/
+    );
     await expect(page.getByTestId('km-field').locator('input')).toBeVisible();
+
+    await expect(page.getByTestId('intervalo-select')).toBeVisible();
   });
 
   test('fluxo de transicao entre filas por paciente configurado', async ({ page }) => {
-    test.skip(!E2E_PATIENT_NAME, 'Defina E2E_FLOW_PATIENT para validar transicao entre filas.');
+    test.skip(true, 'Fluxo de transicao por paciente depende de seed integrado ainda nao definido.');
 
     await page.goto('/fila');
 

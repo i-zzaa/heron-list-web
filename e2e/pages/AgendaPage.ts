@@ -132,6 +132,46 @@ export class AgendaPage {
     await this.aplicarEdicao('Atual');
   }
 
+  async validarCamposImutaveisEmEdicao(): Promise<void> {
+    await this.abrirModalEdicao();
+
+    await expect(
+      this.page.getByTestId('modalidade-select').locator('.p-dropdown')
+    ).toHaveClass(/p-disabled/);
+    await expect(
+      this.page.getByTestId('data-inicial-input').locator('input')
+    ).toBeDisabled();
+    await expect(
+      this.page.getByTestId('hora-inicio-input').locator('input')
+    ).toBeDisabled();
+    await expect(
+      this.page.getByTestId('hora-fim-input').locator('input')
+    ).toBeDisabled();
+
+    const frequenciaDropdown = this.page
+      .getByTestId('frequencia-select')
+      .locator('.p-dropdown');
+    if ((await frequenciaDropdown.count()) > 0) {
+      await expect(frequenciaDropdown.first()).toHaveClass(/p-disabled/);
+    }
+
+    const intervaloDropdown = this.page
+      .getByTestId('intervalo-select')
+      .locator('.p-dropdown');
+    if ((await intervaloDropdown.count()) > 0) {
+      await expect(intervaloDropdown.first()).toHaveClass(/p-disabled/);
+    }
+
+    const diasFrequencia = this.page
+      .getByTestId('diasFrequencia-select-button')
+      .locator('.p-selectbutton');
+    if ((await diasFrequencia.count()) > 0) {
+      await expect(diasFrequencia.first()).toHaveClass(/p-disabled/);
+    }
+
+    await this.fecharModalAgendamento();
+  }
+
   async editarEventoAtualEFuturos(dados: EditOptions): Promise<void> {
     await this.abrirModalEdicao();
     await this.preencherEdicao(dados);
@@ -277,6 +317,16 @@ export class AgendaPage {
       .first();
 
     await modal.getByRole('button', { name: /^Atualizar$/ }).click();
+  }
+
+  private async fecharModalAgendamento(): Promise<void> {
+    const closeButton = this.page
+      .locator('.p-dialog:visible .p-dialog-header-icon')
+      .last();
+
+    await expect(closeButton).toBeVisible();
+    await closeButton.click();
+    await expect(this.page.getByTestId('agenda-form')).not.toBeVisible();
   }
 
   private async aplicarEdicao(aplicacao: 'Atual' | 'Atual e eventos futuros') {

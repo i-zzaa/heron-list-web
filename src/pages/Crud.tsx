@@ -52,6 +52,14 @@ export const Crud = () => {
       onClick: noop,
     },
     {
+      permission: 'CADASTRO_ESPECIALIDADE',
+      header: 'Especialidade',
+      leftIcon: 'pi pi-tag',
+      screen: 'CADASTRO_ESPECIALIDADE',
+      namelist: 'especialidade',
+      onClick: noop,
+    },
+    {
       permission: 'CADASTRO_FUNCAO',
       header: 'Função',
       leftIcon: 'pi pi-slack',

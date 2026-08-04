@@ -387,6 +387,23 @@ const funcaoFields = [
   },
 ];
 
+const especialidadeFields = [
+  {
+    labelText: 'Nome',
+    labelFor: 'nome',
+    id: 'nome',
+    name: 'nome',
+    autoComplete: 'nome',
+    isRequired: true,
+    placeholder: 'Nome',
+    customCol: 'col-span-6',
+    type: 'text',
+    validate: {
+      required: true,
+    },
+  },
+];
+
 const localidadeFields = [
   {
     labelText: 'Casa',
@@ -612,6 +629,7 @@ export {
 
 export const Fields: any = {
   usuariosFields,
+  especialidadeFields,
   funcaoFields,
   localidadeFields,
   modalidadeFields,
