@@ -435,18 +435,6 @@ test('Agenda recorrente aplica exdate e remove ocorrencia do calendario', async 
   await agendaPage.validarEventoExiste('2026-08-24', '08:00');
 });
 
-function modalidadeAlternativa(nomeAtual: string): string {
-  if (normalizeText(nomeAtual) === 'avaliacao') {
-    return 'Terapia';
-  }
-
-  if (normalizeText(nomeAtual) === 'terapia') {
-    return 'Avaliação';
-  }
-
-  return 'Terapia';
-}
-
 for (const modalidade of MODALIDADES) {
   for (const intervalo of INTERVALOS) {
     test(`Agenda recorrente regressiva | ${modalidade.nome} | ${intervalo.nome}`, async ({ page }) => {
@@ -525,66 +513,11 @@ for (const modalidade of MODALIDADES) {
       const dataEventoAtualOriginal = datasEsperadas[0];
 
       await agendaPage.selecionarEventoPorDataHora(dataEventoAtualOriginal, horaInicio);
-      await agendaPage.editarEventoAtual({
-        modalidade: modalidadeAlternativa(modalidade.nome),
-      });
-
-      const primeiroUpdate: any = state.updatePayloads.at(-1);
-      expect(primeiroUpdate).toBeTruthy();
-      expect(primeiroUpdate.changeAll).toBe(false);
-
-      const eventoAtualAposEdicao = state.events.find(
-        (event) => event.date === dataEventoAtualOriginal
-      );
-      expect(eventoAtualAposEdicao).toBeTruthy();
-      expect(normalizeText(eventoAtualAposEdicao!.modalidade.nome)).toBe(
-        normalizeText(modalidadeAlternativa(modalidade.nome))
-      );
-
-      const eventosFuturos = state.events.filter(
-        (event) => event.date > dataEventoAtualOriginal
-      );
-      expect(
-        eventosFuturos.every(
-          (event) => normalizeText(event.modalidade.nome) === normalizeText(modalidade.nome)
-        )
-      ).toBeTruthy();
+      await agendaPage.validarCamposImutaveisEmEdicao();
 
       await agendaPage.validarEventoUnicoNoSlot(dataEventoAtualOriginal, horaInicio);
 
-      await agendaPage.selecionarEventoPorDataHora(dataEventoAtualOriginal, horaInicio);
-      await agendaPage.editarEventoAtualEFuturos({
-        modalidade: modalidade.nome,
-      });
-
-      const segundoUpdate = state.updatePayloads.at(-1);
-      expect(segundoUpdate).toBeTruthy();
-      expect(segundoUpdate.changeAll).toBe(true);
-
-      expect(
-        state.events
-          .filter((event) => event.date >= dataEventoAtualOriginal)
-          .every(
-            (event) => normalizeText(event.modalidade.nome) === normalizeText(modalidade.nome)
-          )
-      ).toBeTruthy();
-
-      const novaDataEventoAtual = '2026-08-04';
-
-      await agendaPage.selecionarEventoPorDataHora(dataEventoAtualOriginal, horaInicio);
-      await agendaPage.alterarDataEventoAtual(novaDataEventoAtual);
-
-      const terceiroUpdate: any = state.updatePayloads.at(-1);
-      expect(terceiroUpdate).toBeTruthy();
-      expect(terceiroUpdate.changeAll).toBe(false);
-      const moveuParaNovaData = await agendaPage.existeEventoNoSlot(
-        novaDataEventoAtual,
-        horaInicio
-      );
-
-      const dataEventoAtual = moveuParaNovaData
-        ? novaDataEventoAtual
-        : dataEventoAtualOriginal;
+      const dataEventoAtual = dataEventoAtualOriginal;
 
       await agendaPage.validarEventoExiste(dataEventoAtual, horaInicio);
       await agendaPage.validarEventoUnicoNoSlot(dataEventoAtual, horaInicio);
@@ -592,10 +525,10 @@ for (const modalidade of MODALIDADES) {
       await agendaPage.selecionarEventoPorDataHora(dataEventoAtual, horaInicio);
       await agendaPage.alterarStatus(statusCobrarTrue, 'Atual');
 
-      const quartoUpdate: any = state.updatePayloads.at(-1);
-      expect(quartoUpdate).toBeTruthy();
-      expect(quartoUpdate.changeAll).toBe(false);
-      expect(STATUS_TRUE.map(normalizeText)).toContain(normalizeText(quartoUpdate.statusEventos.nome));
+      const primeiroUpdate: any = state.updatePayloads.at(-1);
+      expect(primeiroUpdate).toBeTruthy();
+      expect(primeiroUpdate.changeAll).toBe(false);
+      expect(STATUS_TRUE.map(normalizeText)).toContain(normalizeText(primeiroUpdate.statusEventos.nome));
 
       await agendaPage.validarEventoComCheck(dataEventoAtual, horaInicio);
       await agendaPage.validarEventoUnicoNoSlot(dataEventoAtual, horaInicio);
@@ -603,9 +536,9 @@ for (const modalidade of MODALIDADES) {
       await agendaPage.selecionarEventoPorDataHora(dataEventoAtual, horaInicio);
       await agendaPage.alterarStatus(statusCancelado, 'Atual');
 
-      const quintoUpdate: any = state.updatePayloads.at(-1);
-      expect(quintoUpdate).toBeTruthy();
-      expect(normalizeText(quintoUpdate.statusEventos.nome)).toContain('cancelado');
+      const segundoUpdate: any = state.updatePayloads.at(-1);
+      expect(segundoUpdate).toBeTruthy();
+      expect(normalizeText(segundoUpdate.statusEventos.nome)).toContain('cancelado');
 
       await agendaPage.validarEventoRiscado(dataEventoAtual, horaInicio);
       await agendaPage.validarEventoCancelado(dataEventoAtual, horaInicio);
@@ -618,10 +551,10 @@ for (const modalidade of MODALIDADES) {
       await agendaPage.selecionarEventoPorDataHora(outroEvento.date, outroEvento.start);
       await agendaPage.alterarStatus(statusCobrarFalse, 'Atual');
 
-      const sextoUpdate: any = state.updatePayloads.at(-1);
-      expect(sextoUpdate).toBeTruthy();
+      const terceiroUpdate: any = state.updatePayloads.at(-1);
+      expect(terceiroUpdate).toBeTruthy();
       expect(STATUS_FALSE.map(normalizeText)).toContain(
-        normalizeText(sextoUpdate.statusEventos.nome)
+        normalizeText(terceiroUpdate.statusEventos.nome)
       );
 
       const slotOutroEvento = page
@@ -633,7 +566,7 @@ for (const modalidade of MODALIDADES) {
 
       garantirSemDuplicidade(state.events);
 
-      expect(state.updatePayloads.length).toBeGreaterThanOrEqual(5);
+      expect(state.updatePayloads.length).toBeGreaterThanOrEqual(3);
 
       const possuiAtendido = state.updatePayloads.some(
         (payload) => normalizeText(payload.statusEventos?.nome || '') === 'atendido'

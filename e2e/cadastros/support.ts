@@ -18,6 +18,12 @@ type Funcao = {
   ativo: boolean;
 };
 
+type Especialidade = {
+  id: number;
+  nome: string;
+  ativo: boolean;
+};
+
 type Localidade = {
   id: number;
   casa: string;
@@ -47,6 +53,7 @@ type Paciente = {
 
 type MockState = {
   usuarios: Usuario[];
+  especialidade: Especialidade[];
   funcao: Funcao[];
   localidade: Localidade[];
   'status-eventos': StatusEvento[];
@@ -116,6 +123,13 @@ export function createMockState(): MockState {
         ativo: true,
       },
     ],
+    especialidade: [
+      {
+        id: 1,
+        nome: 'Fono',
+        ativo: true,
+      },
+    ],
     funcao: [
       {
         id: 1,
@@ -161,6 +175,7 @@ export function createMockState(): MockState {
 export function createCrudRouteHandler(state: MockState) {
   const counters = {
     usuarios: 100,
+    especialidade: 100,
     funcao: 100,
     localidade: 100,
     'status-eventos': 100,
@@ -190,7 +205,7 @@ export function createCrudRouteHandler(state: MockState) {
     }
 
     if (method === 'GET' && path === '/especialidade/dropdown') {
-      return json(especialidades);
+      return json(state.especialidade.map((item) => ({ id: item.id, nome: item.nome })));
     }
 
     if (method === 'GET' && path === '/perfil/dropdown') {
@@ -235,7 +250,7 @@ export function createCrudRouteHandler(state: MockState) {
 
     if (
       method === 'GET' &&
-      /^\/(usuarios|funcao|localidade|status-eventos|grupo-permissoes)$/.test(path)
+      /^\/(usuarios|especialidade|funcao|localidade|status-eventos|grupo-permissoes)$/.test(path)
     ) {
       const key = path.slice(1) as keyof MockState;
       return json(paginatedResponse(state[key] as any[]));
@@ -247,11 +262,20 @@ export function createCrudRouteHandler(state: MockState) {
 
     if (
       method === 'POST' &&
-      /^\/(usuarios|funcao|localidade|status-eventos|grupo-permissoes)$/.test(path)
+      /^\/(usuarios|especialidade|funcao|localidade|status-eventos|grupo-permissoes)$/.test(path)
     ) {
       const key = path.slice(1) as keyof MockState;
       const body = getBody(request);
       const id = counters[key as keyof typeof counters]++;
+
+      if (key === 'especialidade') {
+        const nova: Especialidade = {
+          id,
+          nome: body.nome,
+          ativo: true,
+        };
+        state.especialidade.push(nova);
+      }
 
       if (key === 'usuarios') {
         const novo: Usuario = {
@@ -272,7 +296,7 @@ export function createCrudRouteHandler(state: MockState) {
           id,
           nome: body.nome,
           especialidade:
-            especialidades.find((item) => item.id === body.especialidadeId) || null,
+            state.especialidade.find((item) => item.id === body.especialidadeId) || null,
           ativo: true,
         };
         state.funcao.push(nova);
@@ -324,7 +348,7 @@ export function createCrudRouteHandler(state: MockState) {
 
     if (
       method === 'PUT' &&
-      /^\/(usuarios|funcao|localidade|status-eventos|grupo-permissoes)$/.test(path)
+      /^\/(usuarios|especialidade|funcao|localidade|status-eventos|grupo-permissoes)$/.test(path)
     ) {
       const key = path.slice(1) as keyof MockState;
       const body = getBody(request);
