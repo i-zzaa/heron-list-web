@@ -10,6 +10,7 @@ import PaginationComponent from '../components/Pagination';
 import { useToast } from '../contexts/toast';
 import { actionAmilGuide, filterAmilGuides, getAmilGuideDropdowns } from '../server';
 import { getApiPayload, getPaginationMeta, normalizeFilterValue } from '../util/api';
+import { buildErrorToast } from '../util/error';
 
 interface AmilGuideItem {
   id?: number;
@@ -191,14 +192,9 @@ export default function AmilGuides() {
         pageSize,
         totalPages,
       });
-    } catch (error: any) {
+    } catch (error) {
       setGuides([]);
-      renderToast({
-        type: 'failure',
-        title: 'Falha ao consultar guias',
-        message: error?.message || 'Não foi possível carregar as guias no momento.',
-        open: true,
-      });
+      renderToast(buildErrorToast(error, 'Não foi possível carregar as guias no momento.'));
     } finally {
       setLoading(false);
     }
@@ -249,13 +245,8 @@ export default function AmilGuides() {
         open: true,
       });
       loadGuides(filterState);
-    } catch (error: any) {
-      renderToast({
-        type: 'failure',
-        title: 'Não foi possível reenviar',
-        message: error?.message || 'Tente novamente em alguns instantes.',
-        open: true,
-      });
+    } catch (error) {
+      renderToast(buildErrorToast(error, 'Tente novamente em alguns instantes.'));
     }
   };
 

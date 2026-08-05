@@ -9,8 +9,9 @@ import React, {
 import { api, intercepttRoute } from '../server';
 import { permissionAuth } from './permission';
 import { useToast } from './toast';
+import { buildErrorToast } from '../util/error';
 
-const DEFAULT_IDLE_TIMEOUT_MINUTES = 30;
+const DEFAULT_IDLE_TIMEOUT_MINUTES = 20;
 const idleTimeoutMinutes = Number(import.meta.env.VITE_IDLE_TIMEOUT_MINUTES);
 const IDLE_TIMEOUT_MS = Number.isFinite(idleTimeoutMinutes) && idleTimeoutMinutes > 0
   ? idleTimeoutMinutes * 60 * 1000
@@ -82,12 +83,24 @@ export const AuthProvider = ({ children }: Props) => {
     });
   }, [Logout, renderToast]);
 
+  // Mantido em ref para que `resetInactivityTimer` não precise depender de
+  // `logoutByInactivity`: essa função muda de identidade sempre que o
+  // contexto de toast re-renderiza (ex: qualquer toast exibido em qualquer
+  // tela), e se ela fosse dependência, o efeito abaixo reiniciaria os
+  // listeners E o timer a cada uma dessas ocorrências, fazendo a contagem
+  // de inatividade nunca chegar ao fim de fato.
+  const logoutByInactivityRef = useRef(logoutByInactivity);
+
+  useEffect(() => {
+    logoutByInactivityRef.current = logoutByInactivity;
+  }, [logoutByInactivity]);
+
   const resetInactivityTimer = useCallback(() => {
     clearInactivityTimer();
     inactivityTimerRef.current = setTimeout(() => {
-      void logoutByInactivity();
+      void logoutByInactivityRef.current();
     }, IDLE_TIMEOUT_MS);
-  }, [clearInactivityTimer, logoutByInactivity]);
+  }, [clearInactivityTimer]);
 
   useEffect(() => {
     if (!user) {
@@ -164,18 +177,8 @@ export const AuthProvider = ({ children }: Props) => {
         open: true,
       });
     } catch (error) {
-      msgError(error);
+      renderToast(buildErrorToast(error, 'Usuário não encontrado!'));
     }
-  };
-
-  const msgError = (data: any) => {
-    const message = data?.data || data?.message || 'Usuário não encontrado!';
-    renderToast({
-      type: 'failure',
-      title: data.status || '',
-      message: message,
-      open: true,
-    });
   };
 
   return (

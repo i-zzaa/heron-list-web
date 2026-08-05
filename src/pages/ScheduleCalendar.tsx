@@ -20,6 +20,7 @@ import { PERFIL } from '../constants/user';
 import { buildEventFilterUrl } from '../util/calendar';
 import { isProfile } from '../util/permissions';
 import { resolveResponseData } from '../util/pagination';
+import { buildErrorToast } from '../util/error';
 
 const fieldsConst = filterCalendarFields;
 
@@ -142,12 +143,7 @@ export default function ScheduleCalendar() {
       );
       setEventsList(normalizeCalendarEvents(resolveResponseData(response)));
     } catch (error) {
-      renderToast({
-        type: 'failure',
-        title: '401',
-        message: 'Não foi possível carregar os eventos da agenda!',
-        open: true,
-      });
+      renderToast(buildErrorToast(error, 'Não foi possível carregar os eventos da agenda!'));
     } finally {
       setLoading(false);
     }
@@ -196,12 +192,7 @@ export default function ScheduleCalendar() {
       });
     } catch (error) {
       console.error(error);
-      renderToast({
-        type: 'failure',
-        title: '401',
-        message: 'Evento não excluído!',
-        open: true,
-      });
+      renderToast(buildErrorToast(error, 'Evento não excluído!'));
     }
   }
 
@@ -219,12 +210,7 @@ export default function ScheduleCalendar() {
       renderEvents();
     } catch (error) {
       console.error(error);
-      renderToast({
-        type: 'failure',
-        title: '401',
-        message: 'Evento não atualizado!',
-        open: true,
-      });
+      renderToast(buildErrorToast(error, 'Evento não atualizado!'));
     }
   }
   async function handleSubmitAtestadoEvent() {
@@ -241,12 +227,7 @@ export default function ScheduleCalendar() {
       renderEvents();
     } catch (error) {
       console.error(error);
-      renderToast({
-        type: 'failure',
-        title: '401',
-        message: 'Evento não atualizado!',
-        open: true,
-      });
+      renderToast(buildErrorToast(error, 'Evento não atualizado!'));
     }
   }
 
@@ -262,12 +243,7 @@ export default function ScheduleCalendar() {
       setFilter(nextFilter);
       await fetchEventsWithFilter(nextDate, nextFilter);
     } catch (error) {
-      renderToast({
-        type: 'failure',
-        title: '401',
-        message: 'Não foi possível aplicar o filtro!',
-        open: true,
-      });
+      renderToast(buildErrorToast(error, 'Não foi possível aplicar o filtro!'));
     }
   }
 

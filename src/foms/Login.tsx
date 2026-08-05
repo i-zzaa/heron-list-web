@@ -5,6 +5,7 @@ import { ButtonHeron, Input } from '../components/index';
 import { loginFields } from '../constants/formFields';
 import { useAuth } from '../contexts/auth';
 import { useToast } from '../contexts/toast';
+import { buildErrorToast } from '../util/error';
 
 const fields = loginFields;
 
@@ -42,12 +43,7 @@ export default function Login() {
     try {
       await Login({ username, password });
     } catch (error) {
-      renderToast({
-        type: 'failure',
-        title: 'Erro!',
-        message: 'Falha na conexão',
-        open: true,
-      });
+      renderToast(buildErrorToast(error, 'Falha na conexão'));
     } finally {
       setLoading(false);
     }

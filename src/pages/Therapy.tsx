@@ -14,6 +14,7 @@ import { PacientsProps, PatientForm } from '../foms/PatientForm';
 import PaginationComponent from '../components/Pagination';
 import { buildPaginationState, resolveResponseData, resolveResponsePagination } from '../util/pagination';
 import { mapFormValuesToPayload } from '../util/forms';
+import { buildErrorToast } from '../util/error';
 
 const fieldsConst = filterTerapyFields;
 const fieldsState: any = {};
@@ -53,12 +54,7 @@ export default function Therapy() {
       setLoading(false);
     } catch (error) {
       setLoading(false);
-      renderToast({
-        type: 'failure',
-        title: 'Erro!',
-        message: 'Falha na conexão',
-        open: true,
-      });
+      renderToast(buildErrorToast(error, 'Falha na conexão'));
     }
   }, []);
 
@@ -77,12 +73,7 @@ export default function Therapy() {
         open: true,
       });
     } catch (error) {
-      renderToast({
-        type: 'failure',
-        title: 'Erro!',
-        message: 'Não foi possível excluí-lo',
-        open: true,
-      });
+      renderToast(buildErrorToast(error, 'Não foi possível excluí-lo'));
     }
   };
 
@@ -116,12 +107,7 @@ export default function Therapy() {
       setPatients(resolveResponseData(response));
       setPagination(resolveResponsePagination(response, pag))
     } catch (error) {
-      renderToast({
-        type: 'failure',
-        title: '401',
-        message: 'Erro na conexão!',
-        open: true,
-      });
+      renderToast(buildErrorToast(error, 'Erro na conexão!'));
     } finally {
       setLoading(false);
     }
@@ -132,13 +118,8 @@ export default function Therapy() {
       await update(url, body);
       setOpenSchedule(false);
       handleSubmitFilter(filter);
-    } catch ({ response }: any) {
-      renderToast({
-        type: 'failure',
-        title: '401',
-        message: 'Não foi possível agendá-lo!',
-        open: true,
-      });
+    } catch (error) {
+      renderToast(buildErrorToast(error, 'Não foi possível agendá-lo!'));
     }
   };
 

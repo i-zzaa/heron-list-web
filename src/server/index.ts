@@ -111,18 +111,12 @@ export const filterAmilGuides = async (
 ) => {
   const queryString = buildQueryString(filterData, { page, limit });
 
-  try {
-    const response = await api.get(
-      `/guias${queryString ? `?${queryString}` : ''}`
-    );
-    if (response.status === 200) {
-      return response.data;
-    }
-  } catch (error) {
-    console.error('Falha ao consultar guias Amil:', error);
-  }
-
-  return { data: [] };
+  // Propaga o erro (em vez de engolir e devolver uma lista vazia) para que a
+  // tela consiga capturá-lo e exibir a mensagem/código de erro do backend.
+  const response = await api.get(
+    `/guias${queryString ? `?${queryString}` : ''}`
+  );
+  return response.data;
 };
 
 export const actionAmilGuide = async (
@@ -130,14 +124,10 @@ export const actionAmilGuide = async (
   action: string
 ) => {
   if (action === 'reenviar') {
-    try {
-      const response = await api.post(`/guias/${guideId}/enviar`, {});
-      if (response.status === 200 || response.status === 201) {
-        return response.data;
-      }
-    } catch (error) {
-      console.error('Falha ao reenviar guia Amil:', error);
-    }
+    // Propaga o erro para a tela em vez de devolver uma mensagem de sucesso
+    // falsa quando o reenvio efetivamente falhou no backend.
+    const response = await api.post(`/guias/${guideId}/enviar`, {});
+    return response.data;
   }
 
   return { data: { message: 'Ação enviada para o backend.' } };

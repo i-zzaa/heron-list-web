@@ -9,6 +9,8 @@ import {
   Title,
 } from '../components/index';
 import { permissionAuth } from '../contexts/permission';
+import { useToast } from '../contexts/toast';
+import { buildErrorToast } from '../util/error';
 import {
   filterFinancialFields,
   filterFinancialPacienteFields,
@@ -45,6 +47,7 @@ export default function Financial() {
 
   const { hasPermition } = permissionAuth();
   const { renderDropdownFinancial } = useDropdown();
+  const { renderToast } = useToast();
 
   const [list, setList] = useState<any>([]);
   const [geral, setGeral] = useState<any>({});
@@ -84,6 +87,7 @@ export default function Financial() {
     } catch (error) {
       setGeral({});
       setList([]);
+      renderToast(buildErrorToast(error, 'Não foi possível carregar o financeiro.'));
     } finally {
       setLoading(false);
     }
