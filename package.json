@@ -68,7 +68,7 @@
   "devDependencies": {
     "@babel/core": "7.19.3",
     "@playwright/test": "^1.54.2",
-    "@types/node": "^26.1.2",
+    "@types/node": "^18.11.9",
     "@types/react": "18.0.17",
     "@types/react-dom": "18.0.6",
     "@vitejs/plugin-react": "2.1.0",
