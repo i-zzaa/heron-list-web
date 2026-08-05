@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 
 import { useToast } from '../contexts/toast';
 import { create, update } from '../server';
+import { buildErrorToast } from '../util/error';
 import { ButtonHeron, Input } from '../components/index';
 import { moneyFormat, setColorChips } from '../util/util';
 import { PERIODO, STATUS, STATUS_PACIENT_COD, TIPO_SESSAO } from '../constants/patient';
@@ -103,13 +104,8 @@ export const PatientForm = ({
       });
 
       return onClose();
-    } catch (response: any) {
-      renderToast({
-        type: 'failure',
-        title: response.status || '401',
-        message: response.data.message || 'Erro de conexão',
-        open: true,
-      });
+    } catch (error) {
+      renderToast(buildErrorToast(error, 'Erro de conexão'));
     } finally {
       setLoaging(false);
     }
@@ -164,6 +160,7 @@ export const PatientForm = ({
       action="#"
       onSubmit={handleSubmit(onSubmit)}
       id="form-cadastro-patient"
+      data-testid="patient-form"
     >
       <div className="grid grid-cols-6 gap-2 mb-4 min-h-[300px] overflow-y-auto">
         {fields.map((field: any) => (
@@ -192,6 +189,7 @@ export const PatientForm = ({
         type={isEdit ? 'second' : 'primary'}
         size="full"
         loading={loading}
+        testId="patient-save"
       />
     </form>
   );

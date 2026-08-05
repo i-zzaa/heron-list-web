@@ -4,6 +4,8 @@ export interface ConfirmProps {
   icon?: string;
   acceptLabel?: string;
   rejectLabel?: string;
+  acceptClassName?: string;
+  rejectClassName?: string;
   open: boolean;
   onAccept?: () => void;
   onReject: () => void;
@@ -21,6 +23,8 @@ export function Confirm({
   onClose,
   rejectLabel = 'Não',
   acceptLabel = 'Sim',
+  acceptClassName,
+  rejectClassName,
 }: ConfirmProps) {
   return (
     <ConfirmDialog
@@ -33,6 +37,8 @@ export function Confirm({
       reject={onReject}
       acceptLabel={acceptLabel}
       rejectLabel={rejectLabel}
+      acceptClassName={acceptClassName}
+      rejectClassName={rejectClassName}
     />
   );
 }

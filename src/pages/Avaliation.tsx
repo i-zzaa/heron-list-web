@@ -17,6 +17,7 @@ import { PacientsProps, PatientForm } from '../foms/PatientForm';
 import PaginationComponent from '../components/Pagination';
 import { buildPaginationState, resolveResponseData, resolveResponsePagination } from '../util/pagination';
 import { mapFormValuesToPayload } from '../util/forms';
+import { buildErrorToast } from '../util/error';
 
 const fieldsConst = filterAvaliationFields;
 const fieldsState: any = {};
@@ -79,12 +80,7 @@ export default function Avaliation() {
         open: true,
       });
     } catch (error) {
-      renderToast({
-        type: 'failure',
-        title: 'Erro!',
-        message: 'Não foi possível excluí-lo',
-        open: true,
-      });
+      renderToast(buildErrorToast(error, 'Não foi possível excluí-lo'));
     }
   };
 
@@ -115,13 +111,8 @@ export default function Avaliation() {
       } else {
         setPatients([]);
       }
-    } catch (err) {
-      renderToast({
-        type: 'failure',
-        title: '401',
-        message: 'Erro na conexão!',
-        open: true,
-      });
+    } catch (error) {
+      renderToast(buildErrorToast(error, 'Erro na conexão!'));
     } finally {
       setLoading(false);
     }
@@ -132,14 +123,9 @@ export default function Avaliation() {
       await update(url, body);
       setOpenSchedule(false);
       handleSubmitFilter();
-    } catch ({ response }: any) {
+    } catch (error) {
       setLoading(false);
-      renderToast({
-        type: 'failure',
-        title: '401',
-        message: 'Não foi possível agendá-lo!',
-        open: true,
-      });
+      renderToast(buildErrorToast(error, 'Não foi possível agendá-lo!'));
     }
   };
 

@@ -30,6 +30,7 @@ export interface InputProps {
   errors?: any;
   hidden?: any;
   control?: any;
+  testId?: string;
 }
 
 export interface OptionsProps {
@@ -51,6 +52,7 @@ export function Input({
   control,
   disabled,
   hidden,
+  testId,
 }: InputProps) {
   const renderType = () => {
     switch (type) {
@@ -372,6 +374,7 @@ export function Input({
 
   return (
     <div
+      data-testid={testId || `${id}-field`}
       className={clsx(
         'label-float',
         { 'my-5': !customCol, hidden: hidden && hidden },

@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import { permissionAuth } from '../contexts/permission';
 import { Layout } from '../foms/Layout';
 import { Nav } from '../components/Nav';
+import { MustChangePasswordModal } from '../components/mustChangePasswordModal';
 import { Crud } from '../pages/Crud';
 import Dashboard from '../pages/Dashboard';
 import Home from '../pages/Home';
@@ -11,6 +12,7 @@ import Financial from '../pages/Financial';
 import AmilGuides from '../pages/AmilGuides';
 import { useContext } from 'react';
 import { LayoutContext } from '../contexts/layout.context';
+import { useAuth } from '../contexts/auth';
 
 export enum CONSTANTES_ROUTERS {
   HOME = 'home',
@@ -42,6 +44,7 @@ export const ROUTES = [
 const OtherRoutes = () => {
   const { hasPermition } = permissionAuth();
   const { open } = useContext(LayoutContext);
+  const { mustChangePassword } = useAuth();
 
   const routes: RoutesProps[] = ROUTES;
 
@@ -49,22 +52,29 @@ const OtherRoutes = () => {
     <div className="min-h-full overflow-hidden bg-background h-screen w-full">
       <Nav />
       <main className={`${ open ? 'ml-36' : 'ml-14'} p-4 duration-700`}>
-        <Routes>
-          {routes.map((route: RoutesProps, index: number) => (
-            <Route
-              key={index}
-              path={route.path}
-              element={
-                hasPermition(route.permission || route.path) ? (
-                  <Layout>
-                    <route.componentRoute />
-                  </Layout>
-                ) : null
-              }
-            />
-          ))}
-        </Routes>
+        {/* Enquanto a troca de senha obrigatória estiver pendente, as
+            páginas não são montadas: evita que telas por trás do modal
+            disparem requisições que o backend vai bloquear (e encher a tela
+            de toasts de erro) antes do usuário conseguir trocar a senha. */}
+        {!mustChangePassword && (
+          <Routes>
+            {routes.map((route: RoutesProps, index: number) => (
+              <Route
+                key={index}
+                path={route.path}
+                element={
+                  hasPermition(route.permission || route.path) ? (
+                    <Layout>
+                      <route.componentRoute />
+                    </Layout>
+                  ) : null
+                }
+              />
+            ))}
+          </Routes>
+        )}
       </main>
+      <MustChangePasswordModal />
     </div>
   );
 };

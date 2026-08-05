@@ -17,6 +17,7 @@ import { PacientsProps, PatientForm } from '../foms/PatientForm';
 import PaginationComponent from '../components/Pagination';
 import { buildPaginationState, resolveResponseData, resolveResponsePagination } from '../util/pagination';
 import { mapFormValuesToPayload } from '../util/forms';
+import { buildErrorToast } from '../util/error';
 
 const fieldsConst = filterCurdPatientFields;
 const fieldsState: any = {};
@@ -81,12 +82,7 @@ export default function Patient() {
         open: true,
       });
     } catch (error) {
-      renderToast({
-        type: 'failure',
-        title: 'Erro!',
-        message: 'Não foi possível excluí-lo',
-        open: true,
-      });
+      renderToast(buildErrorToast(error, 'Não foi possível excluí-lo'));
     }
   };
 
@@ -116,13 +112,8 @@ export default function Patient() {
       const response: any = await filter('paciente', format, `page=${pag.currentPage}&pageSize=${pag.pageSize}`);
       setPatients(resolveResponseData(response));
       setPagination(resolveResponsePagination(response, pag))
-    } catch (err) {
-      renderToast({
-        type: 'failure',
-        title: '401',
-        message: 'Erro na conexão!',
-        open: true,
-      });
+    } catch (error) {
+      renderToast(buildErrorToast(error, 'Erro na conexão!'));
     } finally {
       setLoading(false);
     }
@@ -133,13 +124,8 @@ export default function Patient() {
       await update(url, body);
       setOpenSchedule(false);
       handleSubmitFilter();
-    } catch ({ response }: any) {
-      renderToast({
-        type: 'failure',
-        title: '401',
-        message: 'Não foi possível agendá-lo!',
-        open: true,
-      });
+    } catch (error) {
+      renderToast(buildErrorToast(error, 'Não foi possível agendá-lo!'));
     }
   };
 
@@ -254,6 +240,7 @@ export default function Patient() {
         onReset={handleSubmitFilter}
         loading={loading}
         dropdown={dropDownList}
+        includeButtonTestId="patient-add"
         onInclude={() => {
           setPatient(null);
           setOpen(true);

@@ -78,7 +78,7 @@ export const deleteItem = async (url: string) => {
 
 export const getList = async (type: string) => {
   const response = await api(type);
-  if (response.status === 200) {
+  if (response.status === 200 || response.status === 304) {
     return response.data;
   }
   return [];
@@ -111,28 +111,23 @@ export const filterAmilGuides = async (
 ) => {
   const queryString = buildQueryString(filterData, { page, limit });
 
-  try {
-    const response = await api.get(`/guias${queryString ? `?${queryString}` : ''}`);
-    if (response.status === 200) {
-      return response.data;
-    }
-  } catch (error) {
-    console.error('Falha ao consultar guias Amil:', error);
-  }
-
-  return { data: [] };
+  // Propaga o erro (em vez de engolir e devolver uma lista vazia) para que a
+  // tela consiga capturá-lo e exibir a mensagem/código de erro do backend.
+  const response = await api.get(
+    `/guias${queryString ? `?${queryString}` : ''}`
+  );
+  return response.data;
 };
 
-export const actionAmilGuide = async (guideId: number | string, action: string) => {
+export const actionAmilGuide = async (
+  guideId: number | string,
+  action: string
+) => {
   if (action === 'reenviar') {
-    try {
-      const response = await api.post(`/guias/${guideId}/enviar`, {});
-      if (response.status === 200 || response.status === 201) {
-        return response.data;
-      }
-    } catch (error) {
-      console.error('Falha ao reenviar guia Amil:', error);
-    }
+    // Propaga o erro para a tela em vez de devolver uma mensagem de sucesso
+    // falsa quando o reenvio efetivamente falhou no backend.
+    const response = await api.post(`/guias/${guideId}/enviar`, {});
+    return response.data;
   }
 
   return { data: { message: 'Ação enviada para o backend.' } };
@@ -143,20 +138,37 @@ export const getAmilGuideDropdowns = async () => {
     const pacientesResponse = await dropDown('paciente');
     const pacientes = normalizeDropdownList(pacientesResponse);
 
-    const guiaDropdownResponse = await api.get('/guias/dropdown').catch(() => null);
-    const guiaDropdownPayload = guiaDropdownResponse?.status === 200
-      ? (guiaDropdownResponse?.data?.data || guiaDropdownResponse?.data || {})
-      : {};
+    const guiaDropdownResponse = await api
+      .get('/guias/dropdown')
+      .catch(() => null);
+    const guiaDropdownPayload =
+      guiaDropdownResponse?.status === 200
+        ? guiaDropdownResponse?.data?.data || guiaDropdownResponse?.data || {}
+        : {};
 
     const status = normalizeDropdownList(
-      Array.isArray(guiaDropdownPayload?.status || guiaDropdownPayload?.statuses || guiaDropdownPayload?.statusEventos)
-        ? (guiaDropdownPayload?.status || guiaDropdownPayload?.statuses || guiaDropdownPayload?.statusEventos || [])
+      Array.isArray(
+        guiaDropdownPayload?.status ||
+          guiaDropdownPayload?.statuses ||
+          guiaDropdownPayload?.statusEventos
+      )
+        ? guiaDropdownPayload?.status ||
+            guiaDropdownPayload?.statuses ||
+            guiaDropdownPayload?.statusEventos ||
+            []
         : []
     );
 
     const origens = normalizeDropdownList(
-      Array.isArray(guiaDropdownPayload?.origens || guiaDropdownPayload?.origem || guiaDropdownPayload?.origins)
-        ? (guiaDropdownPayload?.origens || guiaDropdownPayload?.origem || guiaDropdownPayload?.origins || [])
+      Array.isArray(
+        guiaDropdownPayload?.origens ||
+          guiaDropdownPayload?.origem ||
+          guiaDropdownPayload?.origins
+      )
+        ? guiaDropdownPayload?.origens ||
+            guiaDropdownPayload?.origem ||
+            guiaDropdownPayload?.origins ||
+            []
         : []
     );
 
@@ -172,7 +184,8 @@ export const getAmilGuideDropdowns = async () => {
   try {
     const fallbackResponse = await api.get('/guias');
     if (fallbackResponse.status === 200) {
-      const payload = fallbackResponse?.data?.data || fallbackResponse?.data || [];
+      const payload =
+        fallbackResponse?.data?.data || fallbackResponse?.data || [];
       const items = Array.isArray(payload) ? payload : payload.items || [];
 
       return {
@@ -180,8 +193,12 @@ export const getAmilGuideDropdowns = async () => {
           .map((item: any) => item?.paciente?.nome || item?.pacienteNome)
           .filter(Boolean)
           .map((name: string) => ({ id: name, nome: name })),
-        status: Array.from(new Set(items.map((item: any) => item?.status).filter(Boolean))).map((value) => ({ id: value, nome: value })),
-        origens: Array.from(new Set(items.map((item: any) => item?.origem).filter(Boolean))).map((value) => ({ id: value, nome: value })),
+        status: Array.from(
+          new Set(items.map((item: any) => item?.status).filter(Boolean))
+        ).map((value) => ({ id: value, nome: value })),
+        origens: Array.from(
+          new Set(items.map((item: any) => item?.origem).filter(Boolean))
+        ).map((value) => ({ id: value, nome: value })),
       };
     }
   } catch (fallbackError) {

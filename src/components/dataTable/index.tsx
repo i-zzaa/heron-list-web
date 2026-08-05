@@ -15,7 +15,6 @@ export const DataTableHeron = ({
   control,
 }: DataTableHeronProps) => {
   const HOURS = {
-    '07:00': false,
     '08:00': false,
     '09:00': false,
     '10:00': false,

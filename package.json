@@ -1,6 +1,6 @@
 {
   "name": "@heron-list/web",
-  "version": "0.11.0-beta.2",
+  "version": "0.1.0-rc.0",
   "private": true,
   "type": "module",
   "stack": "heroku-20",
@@ -11,7 +11,13 @@
     "sb": "start-storybook -p 6006",
     "format": "prettier --write \"src/**/*.{ts,js,tsx}\"",
     "lint": "eslint \"src/**/*.{ts,js}\" --quiet",
-    "build": "export NODE_OPTIONS='--max-old-space-size=8192' && tsc && vite build"
+    "build": "export NODE_OPTIONS='--max-old-space-size=8192' && tsc && vite build",
+    "test:e2e": "playwright test",
+    "test:e2e:agenda": "playwright test e2e/agenda-regressivo.spec.ts",
+    "test:e2e:agenda:visual": "playwright test e2e/agenda-regressivo.spec.ts --headed",
+    "test:e2e:fluxo-real": "playwright test e2e/fluxo-principal-real.spec.ts",
+    "test:e2e:financeiro-real": "playwright test e2e/financeiro-status-cobranca-real.spec.ts",
+    "test:e2e:fluxo-api-real": "playwright test e2e/fluxo-principal-api-real.spec.ts"
   },
   "dependencies": {
     "@fullcalendar/core": "5.11.3",
@@ -61,6 +67,8 @@
   },
   "devDependencies": {
     "@babel/core": "7.19.3",
+    "@playwright/test": "^1.54.2",
+    "@types/node": "^18.11.9",
     "@types/react": "18.0.17",
     "@types/react-dom": "18.0.6",
     "@vitejs/plugin-react": "2.1.0",

@@ -20,7 +20,7 @@ export const SelectButtonComponent = ({
   disabled,
 }: SelectButtonProps) => {
   return (
-    <div>
+    <div data-testid={`${id}-select-button`}>
       <div className="card">
         <Text size="sm" color="violet" text={title} />
         <Controller
