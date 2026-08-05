@@ -4,6 +4,20 @@
 
 Organizar a correcao das lacunas mais criticas de aderencia as regras de negocio e elevar a confiabilidade dos testes do fluxo principal.
 
+## Andamento atual
+
+- P0.1: concluido no frontend e refletido em testes de agenda.
+- P0.2: concluido no frontend (toggle local externo desabilita localidade, exibe km e campo de descricao/endereco).
+- P0.3: concluido no frontend (faixa de atendimento ajustada para 08:00-20:00 em agenda e carga horaria).
+- P2.1: concluido (cadastro de especialidade com cobertura E2E CRUD).
+- P2.2: concluido no frontend (tabela de financeiro do paciente ajustada com horario, valor por km, comissao e valor total).
+- P1.2: concluido com cobertura integrada deterministica por API real (matriz de status e flag cobrar validada em backend) e fallback por credenciais reais via variaveis de ambiente.
+- P1.1: concluido com suite integrada deterministica por API real cobrindo fila (avaliacao/devolutiva/terapia), baixa e financeiro com contratos validados em backend autenticado.
+
+Validacao final executada em 2026-08-04:
+- `npm run test:e2e:financeiro-real` -> 2 passed.
+- `npm run test:e2e:fluxo-api-real` -> 1 passed.
+
 ## Prioridade P0 (bloqueante para aderencia funcional)
 
 ### P0.1 Restringir edicao de campos bloqueados em evento recorrente (Regra 14.3)

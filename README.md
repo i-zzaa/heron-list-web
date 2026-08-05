@@ -40,6 +40,46 @@ $ yarn dev
 VITE_API_URL=http://localhost:3333
 ```
 
+### ✅ Testes E2E Integrados (API Real)
+
+Os cenarios P1.1 e P1.2 possuem suites deterministicas por API integrada.
+
+Variaveis necessarias em runtime:
+
+```
+E2E_API_URL=https://seu-backend
+E2E_LOGIN=seu.login
+E2E_PASSWORD=sua_senha
+E2E_FINANCIAL_PERIOD_START=2026-01-01
+E2E_FINANCIAL_PERIOD_END=2026-12-31
+```
+
+Execucao P1.2 (cobranca por status):
+
+```bash
+E2E_API_URL='https://seu-backend' \
+E2E_LOGIN='seu.login' \
+E2E_PASSWORD='sua_senha' \
+E2E_FINANCIAL_PERIOD_START='2026-01-01' \
+E2E_FINANCIAL_PERIOD_END='2026-12-31' \
+npm run test:e2e:financeiro-real
+```
+
+Execucao P1.1 (fluxo principal integrado por API):
+
+```bash
+E2E_API_URL='https://seu-backend' \
+E2E_LOGIN='seu.login' \
+E2E_PASSWORD='sua_senha' \
+E2E_FINANCIAL_PERIOD_START='2026-01-01' \
+E2E_FINANCIAL_PERIOD_END='2026-12-31' \
+npm run test:e2e:fluxo-api-real
+```
+
+Observacao:
+- Nao persistir credenciais em arquivo versionado.
+- Use apenas variaveis em runtime, shell local ou secret store do CI.
+
 ### 🛠 Tecnologias
 
 As seguintes ferramentas foram usadas na construção do projeto:

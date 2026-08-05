@@ -443,32 +443,57 @@ export default function Financial() {
                         ></Column>
                         <Column
                           sortable
-                          field="status"
-                          header="Status"
-                        ></Column>
-                        <Column sortable field="km" header="km"></Column>
-                        <Column
-                          sortable
-                          field="especialidade"
-                          header="especialidade"
-                          body={({ especialidade }: any) => (
-                            <div className="flex gap-2 items-center">
-                              <div
-                                className={`h-2 w-2 rounded-full ${
-                                  bgData[especialidade.toUpperCase()]
-                                }`}
-                              ></div>
-                              <span> {especialidade} </span>
-                            </div>
+                          field="horas"
+                          header="Horário"
+                          body={(rowData: any) => (
+                            <span className="font-inter">
+                              {rowData.horas || rowData.horario || '-'}
+                            </span>
                           )}
                         ></Column>
                         <Column
                           sortable
-                          field="sessao"
-                          header="Valor da Sessão"
-                          body={({ sessao }: any) => (
+                          field="km"
+                          header="Quilometragem"
+                          body={(rowData: any) =>
+                            rowData.km === 0 || rowData.km === null || rowData.km === undefined
+                              ? '-'
+                              : rowData.km
+                          }
+                        ></Column>
+                        <Column
+                          sortable
+                          field="valorKm"
+                          header="Valor por km"
+                          body={(rowData: any) =>
+                            rowData.valorKm === 0 ||
+                            rowData.valorKm === null ||
+                            rowData.valorKm === undefined
+                              ? '-'
+                              : moneyFormat.format(rowData.valorKm)
+                          }
+                        ></Column>
+                        <Column
+                          sortable
+                          field="valorSessao"
+                          header="Comissão"
+                          body={(rowData: any) => (
                             <span className="font-inter">
-                              {moneyFormat.format(sessao)}
+                              {moneyFormat.format(
+                                rowData.valorSessao || rowData.comissao || 0
+                              )}
+                            </span>
+                          )}
+                        ></Column>
+                        <Column
+                          sortable
+                          field="valorTotal"
+                          header="Valor Total"
+                          body={(rowData: any) => (
+                            <span className="font-inter">
+                              {moneyFormat.format(
+                                rowData.valorTotal || rowData.total || 0
+                              )}
                             </span>
                           )}
                         ></Column>
