@@ -23,7 +23,7 @@ const calendarConfig = {
   slotLabelInterval: '5vw',
   slotLabelFormat: { hour: 'numeric' as const, minute: '2-digit' as const },
   slotDuration: '00:20:00',
-  slotMinTime: '07:00:00',
+  slotMinTime: '08:00:00',
   slotMaxTime: '20:00:00',
   allDaySlot: false,
   locale: 'pt',
@@ -49,7 +49,7 @@ const calendarConfig = {
   },
   businessHours: {
     daysOfWeek: [1, 2, 3, 4, 5, 6],
-    startTime: '07:00',
+    startTime: '08:00',
     endTime: '20:00',
   },
 };

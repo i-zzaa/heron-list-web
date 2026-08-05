@@ -15,7 +15,9 @@
     "test:e2e": "playwright test",
     "test:e2e:agenda": "playwright test e2e/agenda-regressivo.spec.ts",
     "test:e2e:agenda:visual": "playwright test e2e/agenda-regressivo.spec.ts --headed",
-    "test:e2e:fluxo-real": "playwright test e2e/fluxo-principal-real.spec.ts"
+    "test:e2e:fluxo-real": "playwright test e2e/fluxo-principal-real.spec.ts",
+    "test:e2e:financeiro-real": "playwright test e2e/financeiro-status-cobranca-real.spec.ts",
+    "test:e2e:fluxo-api-real": "playwright test e2e/fluxo-principal-api-real.spec.ts"
   },
   "dependencies": {
     "@fullcalendar/core": "5.11.3",

@@ -52,6 +52,7 @@ export const CalendarForm = ({
     terapeuta: '',
     funcao: '',
     localidade: '',
+    localExternoDescricao: '',
     frequencia: '',
     statusEventos: '',
     diasFrequencia: [],
@@ -614,6 +615,10 @@ export const CalendarForm = ({
             disabled={!hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_LOCALIDADE')}
             onChange={(e: any) => {
               setIsExterno(e);
+              if (!e) {
+                setValue('km', '');
+                setValue('localExternoDescricao', '');
+              }
             }}
           />
 
@@ -625,6 +630,21 @@ export const CalendarForm = ({
               customCol="col-span-6 sm:col-span-1 font-inter font-light"
               errors={errors}
               control={control}
+              disabled={!hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_LOCALIDADE')}
+            />
+          )}
+
+          {isExterno && (
+            <Input
+              labelText="Descrição/Endereço Local Externo"
+              id="localExternoDescricao"
+              type="text"
+              customCol="col-span-6 sm:col-span-2"
+              errors={errors}
+              control={control}
+              validate={{
+                required: true,
+              }}
               disabled={!hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_LOCALIDADE')}
             />
           )}

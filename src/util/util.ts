@@ -105,7 +105,6 @@ export const weekDay = [
 ];
 
 export const horariosUteis = [
-  '07:00',
   '08:00',
   '09:00',
   '10:00',
@@ -122,7 +121,6 @@ export const horariosUteis = [
 ];
 
 export const horariosUteisObj = {
-  '07:00': false,
   '08:00': false,
   '09:00': false,
   '10:00': false,

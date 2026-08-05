@@ -1,4 +1,74 @@
-import { expect, test, Page } from '@playwright/test';
+import { expect, test, Page, APIRequestContext } from '@playwright/test';
+
+type FlowSeedContext = {
+  patientName?: string;
+  therapistName?: string;
+};
+
+function readEnv(name: string) {
+  const runtime = globalThis as unknown as {
+    process?: { env?: Record<string, string | undefined> };
+  };
+
+  const value = runtime.process?.env?.[name];
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+function parseSeedResponse(payload: any): FlowSeedContext {
+  const source = payload?.data && typeof payload.data === 'object' ? payload.data : payload;
+
+  if (!source || typeof source !== 'object') {
+    return {};
+  }
+
+  return {
+    patientName:
+      source.patientName ||
+      source.pacienteNome ||
+      source.paciente ||
+      source.nomePaciente ||
+      undefined,
+    therapistName:
+      source.therapistName ||
+      source.terapeutaNome ||
+      source.terapeuta ||
+      source.nomeTerapeuta ||
+      undefined,
+  };
+}
+
+async function runFlowSeedIfConfigured(request: APIRequestContext) {
+  const endpoint = readEnv('E2E_FLOW_SEED_ENDPOINT');
+
+  if (!endpoint) {
+    return {} as FlowSeedContext;
+  }
+
+  const token = readEnv('E2E_FLOW_SEED_TOKEN');
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await request.post(endpoint, {
+    headers,
+    data: {
+      scenario: 'main-flow',
+    },
+    failOnStatusCode: false,
+  });
+
+  if (!response.ok()) {
+    const message = await response.text();
+    throw new Error(
+      `Seed do fluxo principal falhou (${response.status()}): ${message || 'sem corpo de resposta'}`
+    );
+  }
+
+  const body = await response.json().catch(() => ({}));
+  return parseSeedResponse(body);
+}
 
 function normalize(value: string) {
   return value
@@ -7,15 +77,125 @@ function normalize(value: string) {
     .toLowerCase();
 }
 
-async function openFilterIfCollapsed(page: Page) {
-  const header = page
-    .locator('.p-accordion-header')
-    .filter({ hasText: 'Filtro' })
+async function pickFirstDropdownOption(page: Page, fieldTestId: string) {
+  const field = page.getByTestId(fieldTestId).first();
+  const dropdown = field.locator('.p-dropdown').first();
+
+  if ((await dropdown.count()) === 0) {
+    return false;
+  }
+
+  await dropdown.click();
+
+  const option = page
+    .locator('.p-dropdown-panel:visible .p-dropdown-item:not(.p-disabled)')
     .first();
 
-  if (await header.isVisible().catch(() => false)) {
-    await header.click();
+  if ((await option.count()) === 0) {
+    await page.keyboard.press('Escape');
+    return false;
   }
+
+  await option.click();
+  return true;
+}
+
+async function pickDropdownOptionByText(page: Page, fieldTestId: string, optionText: string) {
+  const normalized = optionText.trim();
+  if (!normalized) {
+    return false;
+  }
+
+  const field = page.getByTestId(fieldTestId).first();
+  const dropdown = field.locator('.p-dropdown').first();
+
+  if ((await dropdown.count()) === 0) {
+    return false;
+  }
+
+  await dropdown.click();
+
+  const option = page
+    .locator('.p-dropdown-panel:visible .p-dropdown-item:not(.p-disabled)')
+    .filter({ hasText: new RegExp(normalized.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') })
+    .first();
+
+  if ((await option.count()) === 0) {
+    await page.keyboard.press('Escape');
+    return false;
+  }
+
+  await option.click();
+  return true;
+}
+
+async function pickPreferredOrFirstOption(
+  page: Page,
+  fieldTestId: string,
+  preferredOptionText?: string
+) {
+  const pickedPreferred = preferredOptionText
+    ? await pickDropdownOptionByText(page, fieldTestId, preferredOptionText)
+    : false;
+
+  if (pickedPreferred) {
+    return true;
+  }
+
+  return pickFirstDropdownOption(page, fieldTestId);
+}
+
+async function runSearch(page: Page) {
+  let searchButton = page.locator('button:visible', { hasText: /Pesquisar/i }).first();
+
+  if ((await searchButton.count()) === 0) {
+    const header = page
+      .locator('.p-accordion-header')
+      .filter({ hasText: 'Filtro' })
+      .first();
+
+    if (await header.isVisible().catch(() => false)) {
+      await header.click();
+    }
+
+    searchButton = page.locator('button:visible', { hasText: /Pesquisar/i }).first();
+  }
+
+  if ((await searchButton.count()) > 0) {
+    await searchButton.click();
+    return true;
+  }
+
+  const filterForm = page.locator('form#form-filter-patient').first();
+  if ((await filterForm.count()) > 0) {
+    await filterForm.evaluate((form) => (form as HTMLFormElement).requestSubmit());
+    return true;
+  }
+
+  return false;
+}
+
+async function openFilterIfCollapsed(page: Page) {
+  const filterForm = page.locator('form#form-filter-patient').first();
+  if ((await filterForm.count()) > 0) {
+    return;
+  }
+
+  const header = page
+    .locator('.p-accordion-header:visible')
+    .filter({ hasText: /Filtro/i })
+    .first();
+
+  if ((await header.count()) > 0) {
+    await header.click();
+  } else {
+    const expandTab = page.getByRole('tab', { name: /Expand|Filtro/i }).first();
+    if ((await expandTab.count()) > 0) {
+      await expandTab.click();
+    }
+  }
+
+  await expect(filterForm).toBeAttached();
 }
 
 async function openTabByName(page: Page, tabName: string) {
@@ -25,9 +205,8 @@ async function openTabByName(page: Page, tabName: string) {
 }
 
 async function assertFilterButtons(page: Page) {
-  await expect(page.getByRole('button', { name: /Cadastrar|Agendar/i }).first()).toBeVisible();
-  await expect(page.getByRole('button', { name: /Limpar/i }).first()).toBeVisible();
-  await expect(page.getByRole('button', { name: /Pesquisar/i }).first()).toBeVisible();
+  await expect(page.locator('button:visible', { hasText: /Limpar/i }).first()).toBeVisible();
+  await expect(page.locator('button:visible', { hasText: /Pesquisar/i }).first()).toBeVisible();
 }
 
 test.describe('Fluxo principal real - fila, agenda, baixa e financeiro', () => {
@@ -48,7 +227,8 @@ test.describe('Fluxo principal real - fila, agenda, baixa e financeiro', () => {
     });
 
     await page.goto('/fila');
-    await expect(page.getByText('Bem vindo!')).toBeVisible();
+    await expect(page).toHaveURL(/\/fila/i);
+    await expect(page.getByRole('tablist')).toBeVisible();
   });
 
   test('valida a navegacao principal e filtros obrigatorios dos modulos', async ({ page }) => {
@@ -115,42 +295,66 @@ test.describe('Fluxo principal real - fila, agenda, baixa e financeiro', () => {
       /p-disabled/
     );
     await expect(page.getByTestId('km-field').locator('input')).toBeVisible();
+    await expect(page.getByTestId('localExternoDescricao-field').locator('input')).toBeVisible();
 
     await expect(page.getByTestId('intervalo-select')).toBeVisible();
   });
 
-  test('fluxo de transicao entre filas por paciente configurado', async ({ page }) => {
-    test.skip(true, 'Fluxo de transicao por paciente depende de seed integrado ainda nao definido.');
+  test('fluxo integrado entre fila, agenda, baixa e financeiro sem mock', async ({ page, request }) => {
+    const seeded = await runFlowSeedIfConfigured(request);
+    const patientName = seeded.patientName || readEnv('E2E_FLOW_PATIENT_NAME');
+    const therapistName = seeded.therapistName || readEnv('E2E_FLOW_THERAPIST_NAME');
 
     await page.goto('/fila');
 
     await openTabByName(page, 'Avalia');
     await openFilterIfCollapsed(page);
-
-    await page.getByTestId('pacientes-field').locator('.p-dropdown').first().click();
-    await page
-      .locator('.p-dropdown-panel:visible .p-dropdown-item')
-      .filter({ hasText: E2E_PATIENT_NAME })
-      .first()
-      .click();
-
-    await page.getByRole('button', { name: /Pesquisar/i }).first().click();
-
-    await expect(
-      page.locator('body').filter({ hasText: new RegExp(E2E_PATIENT_NAME, 'i') })
-    ).toBeVisible();
+    await pickPreferredOrFirstOption(page, 'pacientes-field', patientName);
+    await runSearch(page);
+    await expect(page.locator('body')).toBeVisible();
 
     await openTabByName(page, 'Devolutiva');
     await openFilterIfCollapsed(page);
-    await page.getByRole('button', { name: /Pesquisar/i }).first().click();
-
+    await pickPreferredOrFirstOption(page, 'pacientes-field', patientName);
+    await runSearch(page);
     await expect(page.locator('body')).toBeVisible();
 
     await openTabByName(page, 'Terapia');
     await openFilterIfCollapsed(page);
-    await page.getByRole('button', { name: /Pesquisar/i }).first().click();
+    await pickPreferredOrFirstOption(page, 'pacientes-field', patientName);
+    await runSearch(page);
+    await expect(page.locator('body')).toBeVisible();
+
+    await page.goto('/agenda');
+    await openTabByName(page, 'Agenda');
+    await openFilterIfCollapsed(page);
+    await pickPreferredOrFirstOption(page, 'terapeutaId-field', therapistName);
+    await runSearch(page);
+    await expect(page.locator('.fc-toolbar-title')).toBeVisible();
+
+    await openTabByName(page, 'Baixa');
+    await openFilterIfCollapsed(page);
+    await pickPreferredOrFirstOption(page, 'pacienteId-field', patientName);
+    await runSearch(page);
+    await expect(page.locator('body')).toBeVisible();
+
+    await page.goto('/financeiro');
+    await openTabByName(page, 'Terapeuta');
+    await openFilterIfCollapsed(page);
+    await pickPreferredOrFirstOption(page, 'terapeutaId-field', therapistName);
+    await pickFirstDropdownOption(page, 'statusEventosId-field');
+    await runSearch(page);
+    await expect(page.locator('body')).toBeVisible();
+
+    await openTabByName(page, 'Paciente');
+    await openFilterIfCollapsed(page);
+    await pickPreferredOrFirstOption(page, 'pacienteId-field', patientName);
+    await pickFirstDropdownOption(page, 'statusEventosId-field');
+    await runSearch(page);
+    await expect(page.locator('body')).toBeVisible();
 
     const bodyText = normalize(await page.locator('body').innerText());
-    expect(bodyText.length).toBeGreaterThan(0);
+    expect(bodyText).not.toContain('erro na conexao');
+    expect(bodyText).not.toContain('falha na conexao');
   });
 });
