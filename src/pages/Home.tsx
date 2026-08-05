@@ -26,13 +26,14 @@ export default function Home() {
   const handleResetSenha = async (senha: any) => {
     setDisabled(true);
     try {
-      senha.id = user.login;
-      const { data }: any = await update(`/usuarios/reset-senha`, senha);
+      // PUT /usuarios/reset-senha troca sempre a senha do usuário do token
+      // (não recebe id/login no corpo) e responde 200 com corpo vazio.
+      await update(`/usuarios/reset-senha`, senha);
       reset();
       renderToast({
         type: 'success',
         title: '',
-        message: data.message,
+        message: 'Senha alterada com sucesso!',
         open: true,
       });
     } catch (error) {

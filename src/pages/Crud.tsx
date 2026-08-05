@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { TabView, TabPanel } from 'primereact/tabview';
 
 import CrudSimples from '../templates/crudSimples';
 import { getList } from '../server';
 import { useToast } from '../contexts/toast';
+import { TemporaryPasswordModal } from '../components';
 import Patient from './Patient';
 import { permissionAuth } from '../contexts/permission';
 import { buildErrorToast } from '../util/error';
@@ -13,13 +15,24 @@ export const Crud = () => {
   const canAccess = (permission: string) => Boolean(hasPermition(permission));
   const noop = () => undefined;
 
+  const [resetSenhaResult, setResetSenhaResult] = useState<{
+    senha: string;
+    subject?: string;
+  } | null>(null);
+
   const handleResetSenha = async (userId: number) => {
     try {
-      const { message }: any = await getList(`/usuarios/reset-senha/${userId}`);
+      // GET /usuarios/reset-senha/:id devolve senhaTemporaria em texto
+      // plano só nesta resposta — não tem mais mensagem pronta pra toast.
+      const result: any = await getList(`/usuarios/reset-senha/${userId}`);
+      setResetSenhaResult({
+        senha: result?.senhaTemporaria,
+        subject: result?.nome || result?.login,
+      });
       renderToast({
         type: 'success',
         title: '',
-        message,
+        message: 'Senha redefinida com sucesso!',
         open: true,
       });
     } catch (error) {
@@ -118,6 +131,13 @@ export const Crud = () => {
           <></>
         )} */}
       </TabView>
+
+      <TemporaryPasswordModal
+        open={!!resetSenhaResult}
+        senha={resetSenhaResult?.senha ?? null}
+        subject={resetSenhaResult?.subject}
+        onClose={() => setResetSenhaResult(null)}
+      />
     </div>
   );
 };
