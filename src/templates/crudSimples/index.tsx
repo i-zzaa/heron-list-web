@@ -9,15 +9,21 @@ import {
   Confirm,
   ButtonHeron,
   Input,
+  TemporaryPasswordModal,
 } from '../../components/index';
 import { create, getList, search, update } from '../../server';
+import { buildErrorToast } from '../../util/error';
 
 import { Fields } from '../../constants/formFields';
 import { useDropdown } from '../../contexts/dropDown';
 import { moneyFormat } from '../../util/util';
 import Pagination from '../../components/Pagination';
 import { PERFIL } from '../../constants/user';
-import { buildPaginationState, resolveResponseData, resolveResponsePagination } from '../../util/pagination';
+import {
+  buildPaginationState,
+  resolveResponseData,
+  resolveResponsePagination,
+} from '../../util/pagination';
 
 interface Props {
   namelist: string;
@@ -34,9 +40,10 @@ export default function CrudSimples({
   textButtonFooter,
   screen,
 }: Props) {
-
   const [list, setList] = useState<any>([]);
-  const [pagination, setPagination] = useState<any>(buildPaginationState(1, 10, 0));
+  const [pagination, setPagination] = useState<any>(
+    buildPaginationState(1, 10, 0)
+  );
   const [item, setItem] = useState<any>({});
   const [value, setValues] = useState<any>([]);
   const [open, setOpen] = useState<boolean>(false);
@@ -44,6 +51,9 @@ export default function CrudSimples({
   const [hidden, setHidden] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
   const [openConfirm, setOpenConfirm] = useState<boolean>(false);
+  const [temporaryPassword, setTemporaryPassword] = useState<string | null>(
+    null
+  );
 
   const isTerapeuta = [
     'especialidadeId',
@@ -71,39 +81,78 @@ export default function CrudSimples({
     reset,
   } = useForm<any>();
 
-  const renderList = useCallback(async (page: number = 1, pageSize: number= 10) => {
-    setLoading(true);
+  const buildFormPayload = (userState: any) => {
+    const formatValues = { ...userState };
 
-    try {
-      const response = await getList(`${namelist}?page=${page}&pageSize=${pageSize}`);
-      setList(resolveResponseData(response));
-      setPagination(resolveResponsePagination(response, buildPaginationState(page, pageSize, 0)))
-      setLoading(false);
-    } catch (error) {
-      setLoading(false);
-    }
-    if (open) {
-      setOpen(false);
-    }
-  }, []);
+    Object.keys(userState).forEach((index) => {
+      if (!index.includes('Id')) {
+        return;
+      }
+
+      if (!userState[index] || typeof userState[index][0] === 'number') {
+        delete formatValues[index];
+        return;
+      }
+
+      if (Array.isArray(userState[index]) && userState[index].length) {
+        formatValues[index] = formatValues[index].map((item_: any) => item_.id);
+        return;
+      }
+
+      formatValues[index] = userState[index].id;
+    });
+
+    delete formatValues.search;
+    return formatValues;
+  };
+
+  const resolveFieldsKey = () => {
+    if (namelist === 'status-eventos') return 'statusEventosFields';
+    if (namelist === 'grupo-permissoes') return 'grupoPermissoesFields';
+    return `${namelist}Fields`;
+  };
+
+  const renderList = useCallback(
+    async (page: number = 1, pageSize: number = 10) => {
+      setLoading(true);
+
+      try {
+        const response = await getList(
+          `${namelist}?page=${page}&pageSize=${pageSize}`
+        );
+        setList(resolveResponseData(response));
+        setPagination(
+          resolveResponsePagination(
+            response,
+            buildPaginationState(page, pageSize, 0)
+          )
+        );
+      } catch (error) {
+        renderToast(buildErrorToast(error, 'Não foi possível carregar a lista.'));
+      } finally {
+        setLoading(false);
+        setOpen(false);
+      }
+    },
+    [namelist]
+  );
 
   const handleClick = async (word: any) => {
     try {
-      if (word.search === undefined || word.search === ""){
+      if (word.search === undefined || word.search === '') {
         renderList();
         return;
       }
       setLoading(true);
       const response = await search(namelist, word.search);
-      setValue('search', '')
+      setValue('search', '');
       const lista = response.status === 200 ? response.data : [];
       setList(lista);
-      setPagination(buildPaginationState(1, 0, 0))
-
-      setLoading(false);
+      setPagination(buildPaginationState(1, 0, 0));
     } catch (error) {
+      renderToast(buildErrorToast(error, 'Não foi possível realizar a busca.'));
+    } finally {
       setLoading(false);
-      msgError(error);
     }
   };
 
@@ -112,28 +161,7 @@ export default function CrudSimples({
 
     try {
       let data;
-      const formatValues = {
-        ...userState,
-      };
-
-      Object.keys(userState).forEach((index) => {
-        if (index.indexOf('Id') !== -1) {
-          if (!userState[index] || typeof userState[index][0] === 'number') {
-            delete formatValues[index];
-            return;
-          }
-
-          if (Array.isArray(userState[index]) && userState[index].length) {
-            formatValues[index] = formatValues[index].map(
-              (item_: any) => item_.id
-            );
-          } else {
-            formatValues[index] = userState[index].id;
-          }
-        }
-      });
-
-      delete formatValues.search;
+      const formatValues = buildFormPayload(userState);
 
       if (isEdit) {
         formatValues.id = item.id;
@@ -142,8 +170,15 @@ export default function CrudSimples({
         data = await create(namelist, formatValues);
       }
 
+      // POST /usuarios devolve senhaTemporaria (texto plano, só nesta
+      // resposta) quando um usuário novo é criado — não se aplica a edição
+      // nem às demais entidades deste CRUD genérico.
+      if (!isEdit && namelist === 'usuarios' && data?.data?.senhaTemporaria) {
+        setTemporaryPassword(data.data.senhaTemporaria);
+      }
+
       reset();
-      setPagination(buildPaginationState(1, 10, 0))
+      setPagination(buildPaginationState(1, 10, 0));
       renderList();
       setIsEdit(false);
       setOpen(false);
@@ -153,13 +188,8 @@ export default function CrudSimples({
         message: 'Sucesso!',
         open: true,
       });
-    } catch ({ message }: any) {
-      renderToast({
-        type: 'failure',
-        title: '401',
-        message: `${message}`,
-        open: true,
-      });
+    } catch (error) {
+      renderToast(buildErrorToast(error, 'Não foi possível salvar.'));
     } finally {
       setLoading(false);
     }
@@ -177,24 +207,15 @@ export default function CrudSimples({
         message: 'Atualizado com sucesso!',
         open: true,
       });
-    } catch (message) {
-      msgError(message);
+    } catch (error) {
+      renderToast(buildErrorToast(error, 'Não foi possível realizar!'));
     }
-  };
-
-  const msgError = ({ data }: any) => {
-    renderToast({
-      type: 'failure',
-      title: '401',
-      message: data?.message || 'Não foi possível realizar!',
-      open: true,
-    });
   };
 
   const actionFieldId = async (valueForm: any, fieldId: string) => {
     switch (fieldId) {
       case 'perfilId':
-        const valid = valueForm.nome !== PERFIL.terapeuta
+        const valid = valueForm.nome !== PERFIL.terapeuta;
         setHidden(valid);
         if (!valid) {
           unregister(isTerapeuta, { keepDirtyValues: true });
@@ -212,22 +233,27 @@ export default function CrudSimples({
         setValue('cargaHoraria', valueForm);
         break;
       case 'funcoesId':
-        const current: any = await Promise.all(valueForm.map((itemValue: any) => {
-          const currentComissao = comissao.filter((item: any) => item.funcao === itemValue.nome)
-          if (currentComissao.length) {
-            return currentComissao[0]
-          }else {
-              return {
-                funcao: itemValue.nome,
-                funcaoId: itemValue.id,
-                valor: moneyFormat.format(80),
-                tipo: 'Fixo',
+        const current: any = await Promise.all(
+          valueForm.map((itemValue: any) => {
+            const currentComissao = comissao.filter(
+              (item: any) => item.funcao === itemValue.nome
+            );
+            if (currentComissao.length) {
+              return currentComissao[0];
+            }
+
+            return {
+              funcao: itemValue.nome,
+              funcaoId: itemValue.id,
+              valor: moneyFormat.format(80),
+              tipo: 'Fixo',
             };
-          }
-        }))
+          })
+        );
 
         setValue('comissao', current);
         setComissao(current);
+        break;
       default:
         break;
     }
@@ -244,10 +270,39 @@ export default function CrudSimples({
     }
   };
 
+  const findOptionById = (options: any[] = [], value: any) => {
+    if (!value?.id) {
+      return value;
+    }
+
+    return options.find((option) => option.id === value.id) || value;
+  };
+
+  const mapOptionsById = (options: any[] = [], values: any[] = []) => {
+    if (!Array.isArray(values)) {
+      return [];
+    }
+
+    return values.map((item) => findOptionById(options, item));
+  };
+
+  const buildComissaoFromFuncoes = (funcoes: any[] = []) => {
+    if (!Array.isArray(funcoes)) {
+      return [];
+    }
+
+    return funcoes.map((itemFuncao: any) => ({
+      funcaoId: itemFuncao.funcao?.id || itemFuncao.funcaoId,
+      valor: itemFuncao.comissao || moneyFormat.format(80),
+      tipo: itemFuncao.tipo || 'Fixo',
+      funcao: itemFuncao.funcao?.nome || itemFuncao.funcao,
+    }));
+  };
+
   const renderAgendar = useCallback(async () => {
     const list = await renderDropdownCrud();
     setDropDownList(list);
-  }, []);
+  }, [renderDropdownCrud]);
 
   const setOptions = (field: any) => {
     switch (field.type) {
@@ -256,11 +311,11 @@ export default function CrudSimples({
       case 'picker':
         return dropDownList[field.name];
       default:
-        break;
+        return undefined;
     }
   };
 
-  const seValue = (field: any) => {
+  const getFieldValue = (field: any) => {
     switch (field.type) {
       case 'picker':
         return value;
@@ -269,7 +324,7 @@ export default function CrudSimples({
       case 'dataTable':
         return cargaHoraria;
       default:
-        break;
+        return undefined;
     }
   };
 
@@ -278,16 +333,11 @@ export default function CrudSimples({
   }, [renderAgendar]);
 
   useEffect(() => {
-    let namelistField = `${namelist}Fields`
-
-    if (namelist === 'status-eventos') namelistField = 'statusEventosFields'
-    if (namelist === 'grupo-permissoes') namelistField = 'grupoPermissoesFields'
-
-    const _fields = Fields[namelistField];
+    const _fields = Fields[resolveFieldsKey()];
     const fieldsState: any = {};
     _fields.forEach((field: any) => (fieldsState[field.id] = ''));
     setFields(_fields);
-  }, []);
+  }, [namelist]);
 
   useEffect(() => {
     renderList();
@@ -295,7 +345,7 @@ export default function CrudSimples({
 
   useEffect(() => {
     unregister(isTerapeuta, { keepDirtyValues: true });
-  }, []);
+  }, [unregister]);
 
   return (
     <>
@@ -311,6 +361,7 @@ export default function CrudSimples({
         control={control}
         loading={loading}
         screen={screen}
+        addButtonTestId={`cadastro-add-${namelist}`}
       />
 
       <Card>
@@ -323,29 +374,107 @@ export default function CrudSimples({
             setItem(item_);
             setOpenConfirm(true);
           }}
-          onClickEdit={(item_: any) => {
+          onClickEdit={async (item_: any) => {
             const elemento = { ...item_ };
+            const shouldReloadCrudDropdown =
+              !dropDownList?.perfies ||
+              !dropDownList?.grupoPermissoes ||
+              !dropDownList?.especialidades;
+
+            const currentDropDownList = shouldReloadCrudDropdown
+              ? await renderDropdownCrud()
+              : dropDownList;
+
+            if (shouldReloadCrudDropdown) {
+              setDropDownList(currentDropDownList);
+            }
+
+            const especialidadeFromItem =
+              elemento.especialidadeId || elemento.terapeuta?.especialidade;
+
+            let funcoesOptions = currentDropDownList.funcoes || [];
+
+            if (especialidadeFromItem?.nome) {
+              funcoesOptions = await renderEspecialidadeFuncao(
+                especialidadeFromItem.nome
+              );
+              setDropDownList((prev: any) => ({
+                ...prev,
+                funcoes: funcoesOptions,
+              }));
+            }
+
+            if (elemento.perfil || elemento.perfilId) {
+              elemento.perfilId = findOptionById(
+                currentDropDownList.perfies,
+                elemento.perfilId || elemento.perfil
+              );
+            }
+
+            if (elemento.grupoPermissao || elemento.grupoPermissaoId) {
+              elemento.grupoPermissaoId = findOptionById(
+                currentDropDownList.grupoPermissoes,
+                elemento.grupoPermissaoId || elemento.grupoPermissao
+              );
+            }
+
+            if (especialidadeFromItem) {
+              elemento.especialidadeId = findOptionById(
+                currentDropDownList.especialidades,
+                especialidadeFromItem
+              );
+            }
+
+            if (
+              !elemento.funcoesId &&
+              Array.isArray(elemento.terapeuta?.funcoes)
+            ) {
+              elemento.funcoesId = elemento.terapeuta.funcoes.map(
+                (itemFuncao: any) => ({
+                  id: itemFuncao.funcao?.id || itemFuncao.funcaoId,
+                  nome: itemFuncao.funcao?.nome,
+                })
+              );
+            }
+
+            if (Array.isArray(elemento.funcoesId)) {
+              elemento.funcoesId = mapOptionsById(
+                funcoesOptions,
+                elemento.funcoesId
+              );
+            }
+
+            if (!Array.isArray(elemento.comissao)) {
+              elemento.comissao = buildComissaoFromFuncoes(
+                elemento.terapeuta?.funcoes
+              );
+            }
 
             setCargaHoraria({});
             setComissao([]);
             Object.keys(elemento).forEach((index: any) => {
-              if (
-                typeof elemento[index] === 'object' &&
-                // !Array.isArray(elemento[index]) &&
-                index !==  PERFIL.terapeuta.toLowerCase() &&
-                index !== 'cargaHoraria' &&
-                index.indexOf('Id') === -1
-              ) {
-                elemento[`${index}Id`] = elemento[index];
-                index = `${index}Id`;
-              }
-
               if (index === 'cargaHoraria') {
                 setCargaHoraria(elemento.cargaHoraria);
               }
 
               if (index === 'comissao') {
                 setComissao(elemento.comissao);
+                setValue(index, elemento[index]);
+                return;
+              }
+
+              if (
+                typeof elemento[index] === 'object' &&
+                // !Array.isArray(elemento[index]) &&
+                index !== PERFIL.terapeuta.toLowerCase() &&
+                index !== 'comissao' &&
+                index !== 'cargaHoraria' &&
+                index.indexOf('Id') === -1
+              ) {
+                if (!elemento[`${index}Id`]) {
+                  elemento[`${index}Id`] = elemento[index];
+                }
+                index = `${index}Id`;
               }
 
               setValue(index, elemento[index]);
@@ -381,8 +510,13 @@ export default function CrudSimples({
           }}
         />
 
-       {pagination.totalPages > 1 && <Pagination totalPages={pagination.totalPages}  currentPage={pagination.currentPage} onChange={renderList}/>}
-
+        {pagination.totalPages > 1 && (
+          <Pagination
+            totalPages={pagination.totalPages}
+            currentPage={pagination.currentPage}
+            onChange={renderList}
+          />
+        )}
       </Card>
 
       <Modal
@@ -399,6 +533,7 @@ export default function CrudSimples({
             onSubmit={handleSubmit(onSubmit)}
             action="#"
             className="grid gap-6"
+            data-testid={`crud-form-${namelist}`}
           >
             <div className="grid grid-cols-6 items-center gap-2">
               {fields.map((field: any) => (
@@ -417,7 +552,7 @@ export default function CrudSimples({
                   control={control}
                   onChange={(values: any) => handleChange(values, field.id)}
                   hidden={namelist === 'usuarios' && field.hidden && hidden}
-                  value={seValue(field)}
+                  value={getFieldValue(field)}
                   customCol={field.customCol}
                 />
               ))}
@@ -428,6 +563,7 @@ export default function CrudSimples({
               type={isEdit ? 'second' : 'primary'}
               size="full"
               loading={loading}
+              testId={`crud-save-${namelist}`}
             />
           </form>
         }
@@ -441,6 +577,12 @@ export default function CrudSimples({
         message="Deseja realmente desativar?"
         icon="pi pi-exclamation-triangle"
         open={openConfirm}
+      />
+
+      <TemporaryPasswordModal
+        open={!!temporaryPassword}
+        senha={temporaryPassword}
+        onClose={() => setTemporaryPassword(null)}
       />
     </>
   );

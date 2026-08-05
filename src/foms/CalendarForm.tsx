@@ -9,6 +9,7 @@ import { useDropdown } from '../contexts/dropDown';
 import { permissionAuth } from '../contexts/permission';
 import { useToast } from '../contexts/toast';
 import { create, dropDown, getList, update } from '../server';
+import { buildErrorToast } from '../util/error';
 
 export const CalendarForm = ({
   value,
@@ -52,6 +53,7 @@ export const CalendarForm = ({
     terapeuta: '',
     funcao: '',
     localidade: '',
+    localExternoDescricao: '',
     frequencia: '',
     statusEventos: '',
     diasFrequencia: [],
@@ -69,11 +71,42 @@ export const CalendarForm = ({
     trigger,
   } = useForm({ defaultValues });
 
+  const lockScheduleFields = isEdit;
+
+  const immutableEventFields = [
+    'modalidade',
+    'dataInicio',
+    'dataFim',
+    'start',
+    'end',
+    'frequencia',
+    'intervalo',
+    'diasFrequencia',
+  ];
+
+  const normalizeEditPayload = (payload: any) => {
+    if (!isEdit || !value) {
+      return payload;
+    }
+
+    const normalizedPayload = { ...payload };
+
+    immutableEventFields.forEach((fieldName) => {
+      if (value[fieldName] !== undefined) {
+        normalizedPayload[fieldName] = value[fieldName];
+      }
+    });
+
+    return normalizedPayload;
+  };
+
   const onSubmit = async (formValueState: any, changeAll: boolean | null) => {
     setOpenConfirm(false);
     setLoading(true);
 
     try {
+      const payload = normalizeEditPayload(formValueState);
+
       if (JSON.stringify(value) === JSON.stringify(formValueState)) {
         renderToast({
           type: 'warning',
@@ -86,27 +119,22 @@ export const CalendarForm = ({
 
       let data;
       if (isEdit) {
-        formValueState.id = value.id;
-        formValueState.changeAll = changeAll;
-        data = await update('evento', formValueState);
+        payload.id = value.id;
+        payload.changeAll = changeAll;
+        data = await update('evento', payload);
       } else {
-        data = await create('evento', formValueState);
+        data = await create('evento', payload);
       }
 
-      onClose(formValueState);
+      onClose(payload);
       renderToast({
         type: 'success',
         title: '',
         message: isEdit ? 'Atualizado com sucesso!' : 'Agendado com sucesso!',
         open: true,
       });
-    } catch ({ message }: any) {
-      renderToast({
-        type: 'failure',
-        title: '401',
-        message: `${message}`,
-        open: true,
-      });
+    } catch (error) {
+      renderToast(buildErrorToast(error, 'Não foi possível salvar o evento.'));
     } finally {
       setLoading(false);
     }
@@ -165,6 +193,9 @@ export const CalendarForm = ({
         <Input
           labelText="Especialidade"
           id={`especialidade${index}`}
+          testId={
+            index ? `especialidade-select-${index}` : 'especialidade-field'
+          }
           type="select"
           customCol="col-span-6 sm:col-span-2"
           errors={errors}
@@ -182,6 +213,7 @@ export const CalendarForm = ({
         <Input
           labelText="Terapeuta"
           id={`terapeuta${index}`}
+          testId={index ? `terapeuta-select-${index}` : 'terapeuta-select'}
           type="select"
           customCol="col-span-6 sm:col-span-2"
           errors={errors}
@@ -198,6 +230,7 @@ export const CalendarForm = ({
         <Input
           labelText="Função"
           id={`funcao${index}`}
+          testId={index ? `funcao-select-${index}` : 'funcao-select'}
           type="select"
           customCol="col-span-6 sm:col-span-2"
           errors={errors}
@@ -322,11 +355,13 @@ export const CalendarForm = ({
         action="#"
         onSubmit={handleSubmit(handleConfirm)}
         id="form-cadastro-agendamento"
+        data-testid="agenda-form"
       >
         <div className="grid grid-cols-6 gap-4 mb-8 overflow-y-auto">
           <Input
             labelText="Modalidade"
             id="modalidade"
+            testId="modalidade-select"
             type="select"
             customCol={`col-span-6 ${
               isAvaliacao || isEdit ? 'sm:col-span-2' : 'sm:col-span-3'
@@ -349,11 +384,15 @@ export const CalendarForm = ({
             validate={{
               required: true,
             }}
-            disabled={!hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_MODALIDADE')}
+            disabled={
+              !hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_MODALIDADE') ||
+              lockScheduleFields
+            }
           />
           <Input
             labelText="Data"
             id="dataInicio"
+            testId="data-inicial-input"
             type="date"
             customCol={`col-span-6 font-inter font-light ${
               isAvaliacao || isEdit ? 'sm:col-span-2' : 'sm:col-span-3'
@@ -375,7 +414,10 @@ export const CalendarForm = ({
               required: true,
               min: moment(new Date()).format('YYYY-MM-DD'),
             }}
-            disabled={!hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_DATA_INICIO')}
+            disabled={
+              !hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_DATA_INICIO') ||
+              lockScheduleFields
+            }
           />
 
           {isAvaliacao && (
@@ -389,13 +431,17 @@ export const CalendarForm = ({
               validate={{
                 min: minFinal.format('YYYY-MM-DD'),
               }}
-              disabled={!hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_DATA_FIM')}
+              disabled={
+                !hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_DATA_FIM') ||
+                lockScheduleFields
+              }
             />
           )}
 
           <Input
             labelText="Horario Inicial"
             id="start"
+            testId="hora-inicio-input"
             type="time"
             customCol={`col-span-6 ${
               hasFrequencia ? 'sm:col-span-3' : 'sm:col-span-2'
@@ -426,11 +472,15 @@ export const CalendarForm = ({
             validate={{
               required: true,
             }}
-            disabled={!hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_HORA_INICIO')}
+            disabled={
+              !hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_HORA_INICIO') ||
+              lockScheduleFields
+            }
           />
           <Input
             labelText="Horario Final"
             id="end"
+            testId="hora-fim-input"
             type="time"
             customCol={`col-span-6 ${
               hasFrequencia ? 'sm:col-span-3' : 'sm:col-span-2'
@@ -440,13 +490,17 @@ export const CalendarForm = ({
             validate={{
               required: true,
             }}
-            disabled={!hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_HORA_FIM')}
+            disabled={
+              !hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_HORA_FIM') ||
+              lockScheduleFields
+            }
           />
 
           {!isDevolutiva && (!value || value.id === value.groupId) && (
             <Input
               labelText="Frequência"
               id="frequencia"
+              testId="frequencia-select"
               type="select"
               customCol={`col-span-6 ${
                 hasFrequencia ? 'sm:col-span-2' : 'sm:col-span-2'
@@ -468,7 +522,8 @@ export const CalendarForm = ({
                 required: true,
               }}
               disabled={
-                !hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_FREQUENCIA') || isEdit
+                !hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_FREQUENCIA') ||
+                lockScheduleFields
               }
             />
           )}
@@ -477,6 +532,7 @@ export const CalendarForm = ({
             <Input
               labelText="Intervalo"
               id="intervalo"
+              testId="intervalo-select"
               type="select"
               customCol="col-span-6 sm:col-span-2"
               errors={errors}
@@ -487,7 +543,8 @@ export const CalendarForm = ({
                 required: true,
               }}
               disabled={
-                !hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_INTERVALO') || isEdit
+                !hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_INTERVALO') ||
+                lockScheduleFields
               }
             />
           )}
@@ -504,7 +561,7 @@ export const CalendarForm = ({
                 }}
                 disabled={
                   !hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_DIAS_FREQUENCIA') ||
-                  isEdit
+                  lockScheduleFields
                 }
               />
             </div>
@@ -554,6 +611,10 @@ export const CalendarForm = ({
             disabled={!hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_LOCALIDADE')}
             onChange={(e: any) => {
               setIsExterno(e);
+              if (!e) {
+                setValue('km', '');
+                setValue('localExternoDescricao', '');
+              }
             }}
           />
 
@@ -569,9 +630,25 @@ export const CalendarForm = ({
             />
           )}
 
+          {isExterno && (
+            <Input
+              labelText="Descrição/Endereço Local Externo"
+              id="localExternoDescricao"
+              type="text"
+              customCol="col-span-6 sm:col-span-2"
+              errors={errors}
+              control={control}
+              validate={{
+                required: true,
+              }}
+              disabled={!hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_LOCALIDADE')}
+            />
+          )}
+
           <Input
             labelText="Local"
             id="localidade"
+            testId="localidade-select"
             type="select"
             customCol={`col-span-6 sm:col-span-${isExterno ? '2' : '3'}`}
             errors={errors}
@@ -580,11 +657,15 @@ export const CalendarForm = ({
             validate={{
               required: true,
             }}
-            disabled={!hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_LOCALIDADE')}
+            disabled={
+              !hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_LOCALIDADE') ||
+              isExterno
+            }
           />
           <Input
             labelText="Status Eventos"
             id="statusEventos"
+            testId="status-evento-select"
             type="select"
             customCol="col-span-6 sm:col-span-2"
             errors={errors}
@@ -615,6 +696,7 @@ export const CalendarForm = ({
             type={isEdit ? 'second' : 'primary'}
             size="full"
             loading={loading}
+            testId="salvar-agendamento-button"
           />
         ) : null}
       </form>
@@ -629,6 +711,8 @@ export const CalendarForm = ({
         open={openConfirm}
         acceptLabel="Atual e eventos futuros"
         rejectLabel="Atual"
+        acceptClassName="botao-aplicar-atual-futuros"
+        rejectClassName="botao-aplicar-atual"
       />
     </>
   );

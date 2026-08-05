@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { deleteItem, filter, update } from '../server';
 
 import { useToast } from '../contexts/toast';
+import { buildErrorToast } from '../util/error';
 import { permissionAuth } from '../contexts/permission';
 import { useAuth } from '../contexts/auth';
 import { Card, Filter,ButtonHeron } from '../components/index';
@@ -60,6 +61,8 @@ export default function Baixa() {
       const { data }: any = await filter('baixa', format, `page=${pagination.currentPage}&pageSize=${pagination.pageSize}`);
       setBaixas(data.data || data.data.data);
       setPagination(data.pagination || data.data.pagination)
+    } catch (error) {
+      renderToast(buildErrorToast(error, 'Erro na conexão!'));
     } finally {
       setLoading(false);
     }
@@ -69,13 +72,8 @@ export default function Baixa() {
     try {
       await update('baixa', {id: rowData.id, usuarioId: user.id});
       handleSubmitFilter();
-    } catch (response: any) {
-      renderToast({
-        type: 'failure',
-        title: '401',
-        message: response.data.message,
-        open: true,
-      });
+    } catch (error) {
+      renderToast(buildErrorToast(error, 'Não foi possível dar baixa.'));
     }
   };
 
@@ -83,13 +81,8 @@ export default function Baixa() {
     try {
       await deleteItem(`baixa/${rowData.id}`);
       handleSubmitFilter();
-    } catch (response: any) {
-      renderToast({
-        type: 'failure',
-        title: '401',
-        message: response.data.message,
-        open: true,
-      });
+    } catch (error) {
+      renderToast(buildErrorToast(error, 'Não foi possível excluir.'));
     }
   };
 

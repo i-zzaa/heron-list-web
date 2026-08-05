@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { ButtonHeron, Card, Input, TextSubtext } from '../components/index';
 import { useToast } from '../contexts/toast';
 import { update } from '../server';
+import { buildErrorToast } from '../util/error';
 
 export default function Home() {
   const [user, setUser] = useState() as any;
@@ -25,22 +26,18 @@ export default function Home() {
   const handleResetSenha = async (senha: any) => {
     setDisabled(true);
     try {
-      senha.id = user.login;
-      const { data }: any = await update(`/usuarios/reset-senha`, senha);
+      // PUT /usuarios/reset-senha troca sempre a senha do usuário do token
+      // (não recebe id/login no corpo) e responde 200 com corpo vazio.
+      await update(`/usuarios/reset-senha`, senha);
       reset();
       renderToast({
         type: 'success',
         title: '',
-        message: data.message,
+        message: 'Senha alterada com sucesso!',
         open: true,
       });
-    } catch ({ message }: any) {
-      renderToast({
-        type: 'failure',
-        title: '401',
-        message: `${message}`,
-        open: true,
-      });
+    } catch (error) {
+      renderToast(buildErrorToast(error, 'Não foi possível alterar a senha.'));
       reset();
     } finally {
       setDisabled(false);

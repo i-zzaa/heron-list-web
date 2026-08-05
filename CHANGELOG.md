@@ -1,3 +1,7 @@
+[0.11.1-beta.0]
+Implementa cenários de testes
+
+
 [0.11.0-beta.1]
 Refatoracao do projeto
 Ajuste de seguranca hardening
