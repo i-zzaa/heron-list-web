@@ -9,6 +9,7 @@ import {
   Confirm,
   ButtonHeron,
   Input,
+  TemporaryPasswordModal,
 } from '../../components/index';
 import { create, getList, search, update } from '../../server';
 import { buildErrorToast } from '../../util/error';
@@ -50,6 +51,9 @@ export default function CrudSimples({
   const [hidden, setHidden] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
   const [openConfirm, setOpenConfirm] = useState<boolean>(false);
+  const [temporaryPassword, setTemporaryPassword] = useState<string | null>(
+    null
+  );
 
   const isTerapeuta = [
     'especialidadeId',
@@ -164,6 +168,13 @@ export default function CrudSimples({
         data = await update(namelist, formatValues);
       } else {
         data = await create(namelist, formatValues);
+      }
+
+      // POST /usuarios devolve senhaTemporaria (texto plano, só nesta
+      // resposta) quando um usuário novo é criado — não se aplica a edição
+      // nem às demais entidades deste CRUD genérico.
+      if (!isEdit && namelist === 'usuarios' && data?.data?.senhaTemporaria) {
+        setTemporaryPassword(data.data.senhaTemporaria);
       }
 
       reset();
@@ -566,6 +577,12 @@ export default function CrudSimples({
         message="Deseja realmente desativar?"
         icon="pi pi-exclamation-triangle"
         open={openConfirm}
+      />
+
+      <TemporaryPasswordModal
+        open={!!temporaryPassword}
+        senha={temporaryPassword}
+        onClose={() => setTemporaryPassword(null)}
       />
     </>
   );
