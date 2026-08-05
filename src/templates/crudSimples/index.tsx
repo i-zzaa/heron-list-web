@@ -11,6 +11,7 @@ import {
   Input,
 } from '../../components/index';
 import { create, getList, search, update } from '../../server';
+import { buildErrorToast } from '../../util/error';
 
 import { Fields } from '../../constants/formFields';
 import { useDropdown } from '../../contexts/dropDown';
@@ -123,7 +124,7 @@ export default function CrudSimples({
           )
         );
       } catch (error) {
-        msgError(error);
+        renderToast(buildErrorToast(error, 'Não foi possível carregar a lista.'));
       } finally {
         setLoading(false);
         setOpen(false);
@@ -145,7 +146,7 @@ export default function CrudSimples({
       setList(lista);
       setPagination(buildPaginationState(1, 0, 0));
     } catch (error) {
-      msgError(error);
+      renderToast(buildErrorToast(error, 'Não foi possível realizar a busca.'));
     } finally {
       setLoading(false);
     }
@@ -176,13 +177,8 @@ export default function CrudSimples({
         message: 'Sucesso!',
         open: true,
       });
-    } catch ({ message }: any) {
-      renderToast({
-        type: 'failure',
-        title: '401',
-        message: `${message}`,
-        open: true,
-      });
+    } catch (error) {
+      renderToast(buildErrorToast(error, 'Não foi possível salvar.'));
     } finally {
       setLoading(false);
     }
@@ -200,18 +196,9 @@ export default function CrudSimples({
         message: 'Atualizado com sucesso!',
         open: true,
       });
-    } catch (message) {
-      msgError(message);
+    } catch (error) {
+      renderToast(buildErrorToast(error, 'Não foi possível realizar!'));
     }
-  };
-
-  const msgError = ({ data }: any) => {
-    renderToast({
-      type: 'failure',
-      title: '401',
-      message: data?.message || 'Não foi possível realizar!',
-      open: true,
-    });
   };
 
   const actionFieldId = async (valueForm: any, fieldId: string) => {

@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { ButtonHeron, Card, Input, TextSubtext } from '../components/index';
 import { useToast } from '../contexts/toast';
 import { update } from '../server';
+import { buildErrorToast } from '../util/error';
 
 export default function Home() {
   const [user, setUser] = useState() as any;
@@ -34,13 +35,8 @@ export default function Home() {
         message: data.message,
         open: true,
       });
-    } catch ({ message }: any) {
-      renderToast({
-        type: 'failure',
-        title: '401',
-        message: `${message}`,
-        open: true,
-      });
+    } catch (error) {
+      renderToast(buildErrorToast(error, 'Não foi possível alterar a senha.'));
       reset();
     } finally {
       setDisabled(false);

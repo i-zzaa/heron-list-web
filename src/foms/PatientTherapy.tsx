@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 
 import { useToast } from '../contexts/toast';
 import { create, update } from '../server';
+import { buildErrorToast } from '../util/error';
 import { ButtonHeron, Input } from '../components/index';
 import { setColorChips } from '../util/util';
 
@@ -92,12 +93,7 @@ export const PatientTherapy = ({
 
       return onClose();
     } catch (error) {
-      renderToast({
-        type: 'failure',
-        title: '401',
-        message: 'Não cadastrado!',
-        open: true,
-      });
+      renderToast(buildErrorToast(error, 'Não cadastrado!'));
     } finally {
       setLoading(false);
     }

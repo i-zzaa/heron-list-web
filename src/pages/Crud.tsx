@@ -5,6 +5,7 @@ import { getList } from '../server';
 import { useToast } from '../contexts/toast';
 import Patient from './Patient';
 import { permissionAuth } from '../contexts/permission';
+import { buildErrorToast } from '../util/error';
 
 export const Crud = () => {
   const { renderToast } = useToast();
@@ -21,13 +22,8 @@ export const Crud = () => {
         message,
         open: true,
       });
-    } catch ({ message }: any) {
-      renderToast({
-        type: 'failure',
-        title: '401',
-        message: `${message}`,
-        open: true,
-      });
+    } catch (error) {
+      renderToast(buildErrorToast(error, 'Não foi possível resetar a senha.'));
       return;
     }
   };

@@ -9,6 +9,7 @@ import { useDropdown } from '../contexts/dropDown';
 import { permissionAuth } from '../contexts/permission';
 import { useToast } from '../contexts/toast';
 import { create, dropDown, getList, update } from '../server';
+import { buildErrorToast } from '../util/error';
 
 export const CalendarForm = ({
   value,
@@ -132,13 +133,8 @@ export const CalendarForm = ({
         message: isEdit ? 'Atualizado com sucesso!' : 'Agendado com sucesso!',
         open: true,
       });
-    } catch ({ message }: any) {
-      renderToast({
-        type: 'failure',
-        title: '401',
-        message: `${message}`,
-        open: true,
-      });
+    } catch (error) {
+      renderToast(buildErrorToast(error, 'Não foi possível salvar o evento.'));
     } finally {
       setLoading(false);
     }

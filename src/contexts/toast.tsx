@@ -1,4 +1,4 @@
-import { createContext, useState, useContext } from 'react';
+import { createContext, useState, useContext, useCallback, useMemo } from 'react';
 
 const container =
   'absolute animate-bounce min-w-[24rem] top-2 right-0 block flex p-4 mb-4 text-sm rounded-lg items-center gap-2 z-[70] ';
@@ -72,7 +72,10 @@ export const ToastProvider = ({ children }: Props) => {
     }
   };
 
-  const renderToast = ({ type, message, title, open }: ToastState) => {
+  // Estável (deps []): evita que consumidores do contexto (ex: AuthProvider,
+  // que usa isso na cadeia do timer de inatividade) sejam forçados a
+  // re-renderizar toda vez que um toast é exibido em qualquer tela.
+  const renderToast = useCallback(({ type, message, title, open }: ToastState) => {
     renderType(type);
     renderColor(type);
 
@@ -88,10 +91,12 @@ export const ToastProvider = ({ children }: Props) => {
     setTimeout(() => {
       setIsShow('hidden');
     }, 3000);
-  };
+  }, []);
+
+  const value = useMemo(() => ({ renderToast }), [renderToast]);
 
   return (
-    <ToastContext.Provider value={{ renderToast }}>
+    <ToastContext.Provider value={value}>
       <>
         {children}
         <div className={`${container} ${isShow} ${color}`} role="alert">
