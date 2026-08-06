@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Controller } from 'react-hook-form';
 
 import { MultiSelect } from 'primereact/multiselect';
@@ -54,8 +55,49 @@ export function Input({
   hidden,
   testId,
 }: InputProps) {
+  const [showPassword, setShowPassword] = useState(false);
+
   const renderType = () => {
     switch (type) {
+      case 'password':
+        return (
+          <Controller
+            name={id}
+            control={control}
+            rules={validate}
+            render={({ field }: any) => (
+              <div className="relative">
+                <input
+                  disabled={disabled}
+                  id={field.id}
+                  {...field}
+                  value={getInputValue(value, field.value)}
+                  key={field.id}
+                  type={showPassword ? 'text' : 'password'}
+                  className={getInputClassName(
+                    type,
+                    `pr-11${customClass ? ` ${customClass}` : ''}`
+                  )}
+                  autoComplete="off"
+                  onInput={(e: any) => {
+                    field.onChange(e);
+                    onChange && onChange(e);
+                  }}
+                />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  disabled={disabled}
+                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-0 inset-y-0 flex items-center pr-3 text-gray-400 hover:text-violet-800 disabled:pointer-events-none"
+                >
+                  <i className={showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'} />
+                </button>
+              </div>
+            )}
+          />
+        );
       case 'select':
         return (
           <Controller
