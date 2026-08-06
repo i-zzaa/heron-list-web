@@ -4,7 +4,6 @@ import { Layout } from '../foms/Layout';
 import { Nav } from '../components/Nav';
 import { MustChangePasswordModal } from '../components/mustChangePasswordModal';
 import { Crud } from '../pages/Crud';
-import Dashboard from '../pages/Dashboard';
 import Home from '../pages/Home';
 import Queue from '../pages/Queue';
 import Schedule from '../pages/Schedule';
@@ -33,7 +32,8 @@ export interface RoutesProps {
 export const ROUTES = [
   { path: '*', componentRoute: Home, icon: '', permission: '*' },
   { path: CONSTANTES_ROUTERS.HOME, componentRoute: Home, icon: 'pi pi-home', permission: CONSTANTES_ROUTERS.HOME },
-  // { path: CONSTANTES_ROUTERS.DASHBOARD, componentRoute: Dashboard, icon: 'pi pi-chart-pie' },
+  // Dashboard não é uma rota própria — fica embutido em Home.tsx, visível
+  // só para quem tem a tag DASHBOARD (ver Home.tsx).
   { path: CONSTANTES_ROUTERS.CRUD, componentRoute: Crud, icon: 'pi pi-credit-card', permission: CONSTANTES_ROUTERS.CRUD },
   { path: CONSTANTES_ROUTERS.QUEUE, componentRoute: Queue , icon: 'pi pi-sort-amount-down', permission: CONSTANTES_ROUTERS.QUEUE},
   { path: CONSTANTES_ROUTERS.CALENDAR, componentRoute: Schedule, icon: 'pi pi-calendar', permission: CONSTANTES_ROUTERS.CALENDAR },

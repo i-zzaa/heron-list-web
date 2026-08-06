@@ -121,12 +121,12 @@ export default function LoginPage() {
           <img
             src={logoMark}
             alt=""
-            className="w-24 h-24 mb-4"
+            className="w-[12rem] h-[12rem] -mb-8"
             style={{ filter: 'brightness(0) invert(1)', opacity: 0.95 }}
           />
 
           <p
-            className="text-white text-5xl leading-none mb-1"
+            className="text-white text-[2rem] leading-none mb-1"
             style={{ fontFamily: "'Dancing Script', cursive" }}
           >
             Multi Alcance
@@ -149,38 +149,40 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Form panel */}
-      <div className="flex-1 flex flex-col overflow-y-auto bg-background">
-        <div className="flex-1 flex items-center justify-center px-6 py-12">
-          <div className="w-full max-w-sm bg-white rounded-2xl shadow-lg border border-gray-200 px-8 py-10">
+      {/* Form panel — padding/margens enxutos de propósito: em telas mais
+          baixas (laptop com barra de endereço, zoom, etc.) o card inteiro
+          precisa caber em h-screen sem precisar de scroll interno. */}
+      <div className="flex-1 flex flex-col min-h-0 overflow-y-auto bg-background">
+        <div className="flex-1 flex items-center justify-center px-6 py-4 min-h-0">
+          <div className="w-full max-w-sm bg-white rounded-2xl shadow-lg border border-gray-200 px-8 py-6 max-h-full overflow-y-auto">
             {/* Compact brand lockup — only shown when the panel above is hidden */}
-            <div className="lg:hidden flex justify-center mb-8">
+            <div className="lg:hidden flex justify-center mb-5">
               <img src={logoLg} alt="Multi Alcance" className="h-14" />
             </div>
 
-            <div className="flex justify-center mb-5">
-              <div className="w-16 h-16 rounded-full bg-[#662977]/10 flex items-center justify-center">
-                <i className="pi pi-calendar text-violet-800" style={{ fontSize: 26 }} />
+            <div className="flex justify-center mb-3">
+              <div className="w-14 h-14 rounded-full bg-[#662977]/10 flex items-center justify-center">
+                <i className="pi pi-calendar text-violet-800" style={{ fontSize: 22 }} />
               </div>
             </div>
 
             <h1 className="text-lg font-bold text-center text-gray-800">
               Acesse sua agenda
             </h1>
-            <p className="text-gray-400 text-sm text-center mt-1 mb-8">
+            <p className="text-gray-400 text-sm text-center mt-1 mb-4">
               Entre com seu login e senha para continuar.
             </p>
 
             <Login />
 
-            <div className="flex items-center justify-center gap-2 mt-6 text-gray-400">
+            <div className="flex items-center justify-center gap-2 mt-4 text-gray-400">
               <i className="pi pi-shield" style={{ fontSize: 12 }} />
               <span className="text-xs">Ambiente seguro e confidencial</span>
             </div>
           </div>
         </div>
 
-        <div className="text-xs text-gray-300 text-center pb-4">
+        <div className="text-xs text-gray-300 text-center pb-2 shrink-0">
           {version}
         </div>
       </div>
