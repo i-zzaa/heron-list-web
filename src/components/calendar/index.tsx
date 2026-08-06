@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import type { CalendarApi } from '@fullcalendar/core';
 import '@fullcalendar/react/dist/vdom';
 
@@ -54,7 +54,131 @@ const calendarConfig = {
   },
 };
 
-export const CalendarComponent = ({
+// Hoisteados para fora do componente: @fullcalendar/react reinicializa
+// plugins/eventos internamente sempre que recebe uma nova referência de
+// array/objeto nessas props, mesmo que o conteúdo seja idêntico. Definidos
+// como literais dentro do componente, eles mudavam de referência a cada
+// render e faziam o calendário reprocessar tudo — inclusive em renders sem
+// nenhuma mudança real nos eventos — o que é a causa mais provável da
+// demora percebida ao trocar de data.
+const CALENDAR_PLUGINS = [
+  interactionPlugin,
+  rrulePlugin,
+  dayGridPlugin,
+  listPlugin,
+  timeGridPlugin,
+];
+
+// Não depende de props/estado do componente — pura em relação aos
+// argumentos recebidos, então não precisa (e não deve) ser recriada a
+// cada render.
+const getNavigationInfo = (calendar: any, eventType: 'prev' | 'next') => {
+  const prev = eventType === 'prev';
+  const currentViewType = calendar.getCurrentData().currentViewType;
+  const activeDate = calendar.getCurrentData().dateProfile.activeRange.end;
+
+  switch (currentViewType) {
+    case 'dayGridMonth': {
+      const month = prev
+        ? activeDate.getMonth() - 1
+        : activeDate.getMonth() + 1;
+      const year = activeDate.getFullYear();
+      return {
+        type: 'dayGridMonth',
+        start: getPrimeiroDoMes(year, month),
+        end: getUltimoDoMes(year, month),
+      };
+    }
+
+    case 'timeGridWeek':
+    case 'listWeek': {
+      const momentStart = moment(
+        calendar.getCurrentData().dateProfile.activeRange.start
+      );
+      const momentEnd = moment(
+        calendar.getCurrentData().dateProfile.activeRange.end
+      );
+      const start = prev
+        ? momentStart.subtract(7, 'days')
+        : momentStart.add(7, 'days');
+      const end = prev
+        ? momentEnd.subtract(7, 'days')
+        : momentEnd.add(7, 'days');
+
+      return {
+        type: 'timeGridWeek',
+        start: start.format('YYYY-MM-DD'),
+        end: end.format('YYYY-MM-DD'),
+      };
+    }
+
+    case 'timeGridDay': {
+      const startDate = prev
+        ? moment(activeDate).subtract(1, 'days')
+        : moment(activeDate).add(1, 'days');
+      const endDate = prev
+        ? moment(activeDate)
+        : moment(activeDate).add(2, 'days');
+      return {
+        type: 'timeGridDay',
+        start: startDate.format('YYYY-MM-DD'),
+        end: endDate.format('YYYY-MM-DD'),
+      };
+    }
+
+    default:
+      return undefined;
+  }
+};
+
+const renderEventContent = (arg: any) => {
+  const statusValue =
+    arg?.event?.extendedProps?.statusEventos?.nome ||
+    arg?.event?.extendedProps?.statusEventos ||
+    arg?.event?.extendedProps?.status ||
+    '';
+  const normalizedStatus = String(statusValue).trim().toLowerCase();
+  const isAttended = normalizedStatus === 'atendido';
+  const isCanceled = normalizedStatus.includes('cancelado');
+
+  return (
+    <div
+      className="fc-event-title-container flex items-center gap-1 overflow-hidden"
+      data-testid="calendar-event-slot"
+    >
+      <span
+        className={`truncate ${isCanceled ? 'line-through' : ''}`}
+        data-testid="calendar-event-title"
+      >
+        {arg.event.title}
+      </span>
+      {isAttended ? (
+        <i className="pi pi-check flex-shrink-0" title="Atendido" />
+      ) : null}
+    </div>
+  );
+};
+
+const handleEventDidMount = (info: any) => {
+  const statusName = String(
+    info?.event?.extendedProps?.statusEventos?.nome ||
+      info?.event?.extendedProps?.statusEventos ||
+      ''
+  )
+    .trim()
+    .toLowerCase();
+  const isCanceled = statusName.includes('cancelado');
+
+  info.el.setAttribute('data-testid', 'calendar-event-slot');
+  info.el.setAttribute('data-event-id', String(info.event.id || ''));
+  info.el.setAttribute('data-event-start', info.event.startStr || '');
+
+  if (isCanceled) {
+    info.el.classList.add('calendar-event-canceled');
+  }
+};
+
+const CalendarComponentBase = ({
   events,
   openModalEdit,
   eventMouseEnter,
@@ -186,65 +310,6 @@ export const CalendarComponent = ({
     }, []);
   }, [events]);
 
-  const getInfo = (calendar: any, eventType: string) => {
-    const prev = eventType === 'prev';
-    const currentViewType = calendar.getCurrentData().currentViewType;
-    const activeDate = calendar.getCurrentData().dateProfile.activeRange.end;
-
-    switch (currentViewType) {
-      case 'dayGridMonth': {
-        const month = prev
-          ? activeDate.getMonth() - 1
-          : activeDate.getMonth() + 1;
-        const year = activeDate.getFullYear();
-        return {
-          type: 'dayGridMonth',
-          start: getPrimeiroDoMes(year, month),
-          end: getUltimoDoMes(year, month),
-        };
-      }
-
-      case 'timeGridWeek':
-      case 'listWeek': {
-        const momentStart = moment(
-          calendar.getCurrentData().dateProfile.activeRange.start
-        );
-        const momentEnd = moment(
-          calendar.getCurrentData().dateProfile.activeRange.end
-        );
-        const start = prev
-          ? momentStart.subtract(7, 'days')
-          : momentStart.add(7, 'days');
-        const end = prev
-          ? momentEnd.subtract(7, 'days')
-          : momentEnd.add(7, 'days');
-
-        return {
-          type: 'timeGridWeek',
-          start: start.format('YYYY-MM-DD'),
-          end: end.format('YYYY-MM-DD'),
-        };
-      }
-
-      case 'timeGridDay': {
-        const startDate = prev
-          ? moment(activeDate).subtract(1, 'days')
-          : moment(activeDate).add(1, 'days');
-        const endDate = prev
-          ? moment(activeDate)
-          : moment(activeDate).add(2, 'days');
-        return {
-          type: 'timeGridDay',
-          start: startDate.format('YYYY-MM-DD'),
-          end: endDate.format('YYYY-MM-DD'),
-        };
-      }
-
-      default:
-        return undefined;
-    }
-  };
-
   useEffect(() => {
     const calendar = document.querySelector(
       'fieldset > div > div > div > div > div'
@@ -256,103 +321,77 @@ export const CalendarComponent = ({
     }
   }, []);
 
-  const renderEventContent = (arg: any) => {
-    const statusValue =
-      arg?.event?.extendedProps?.statusEventos?.nome ||
-      arg?.event?.extendedProps?.statusEventos ||
-      arg?.event?.extendedProps?.status ||
-      '';
-    const normalizedStatus = String(statusValue).trim().toLowerCase();
-    const isAttended = normalizedStatus === 'atendido';
-    const isCanceled = normalizedStatus.includes('cancelado');
+  const handleCustomButton = useCallback(
+    (eventType: 'prev' | 'next') => {
+      const calendar =
+        (
+          calendarRef.current as { getApi?: () => CalendarApi } | null
+        )?.getApi?.() ?? null;
+      const navigation = calendar
+        ? getNavigationInfo(calendar, eventType)
+        : undefined;
 
-    return (
-      <div
-        className="fc-event-title-container flex items-center gap-1 overflow-hidden"
-        data-testid="calendar-event-slot"
-      >
-        <span
-          className={`truncate ${isCanceled ? 'line-through' : ''}`}
-          data-testid="calendar-event-title"
-        >
-          {arg.event.title}
-        </span>
-        {isAttended ? (
-          <i className="pi pi-check flex-shrink-0" title="Atendido" />
-        ) : null}
-      </div>
-    );
-  };
+      if (!calendar || !navigation) {
+        return;
+      }
 
-  const handleCustomButton = (eventType: 'prev' | 'next') => {
-    const calendar =
-      (
-        calendarRef.current as { getApi?: () => CalendarApi } | null
-      )?.getApi?.() ?? null;
-    const navigation = calendar ? getInfo(calendar, eventType) : undefined;
+      if (eventType === 'prev') {
+        onPrev(navigation);
+        calendar.prev();
+        return;
+      }
 
-    if (!calendar || !navigation) {
-      return;
-    }
+      onNext(navigation);
+      calendar.next();
+    },
+    [onNext, onPrev]
+  );
 
-    if (eventType === 'prev') {
-      onPrev(navigation);
-      calendar.prev();
-      return;
-    }
+  // Referência estável: recriar este objeto a cada render faz o
+  // FullCalendar re-registrar os botões customizados sempre, mesmo quando
+  // nada relacionado a eles mudou.
+  const customButtons = useMemo(
+    () => ({
+      prev: {
+        text: 'prev',
+        click: () => handleCustomButton('prev'),
+      },
+      next: {
+        text: 'next',
+        click: () => handleCustomButton('next'),
+      },
+    }),
+    [handleCustomButton]
+  );
 
-    onNext(navigation);
-    calendar.next();
-  };
+  const handleDateClick = useCallback(
+    ({ date }: any) => dateClick(formatdateEuaAddDay(date)),
+    [dateClick]
+  );
 
   return (
     <div>
       <div className="card text-sm font-inter">
         <FullCalendar
-          plugins={[
-            interactionPlugin,
-            rrulePlugin,
-            dayGridPlugin,
-            listPlugin,
-            timeGridPlugin,
-          ]}
+          plugins={CALENDAR_PLUGINS}
           {...calendarConfig}
           events={normalizedEvents}
           ref={calendarRef}
           eventClick={openModalEdit}
-          dateClick={({ date }) => dateClick(formatdateEuaAddDay(date))}
+          dateClick={handleDateClick}
           eventMouseEnter={eventMouseEnter}
           eventContent={renderEventContent}
-          eventDidMount={(info) => {
-            const statusName = String(
-              info?.event?.extendedProps?.statusEventos?.nome ||
-                info?.event?.extendedProps?.statusEventos ||
-                ''
-            )
-              .trim()
-              .toLowerCase();
-            const isCanceled = statusName.includes('cancelado');
-
-            info.el.setAttribute('data-testid', 'calendar-event-slot');
-            info.el.setAttribute('data-event-id', String(info.event.id || ''));
-            info.el.setAttribute('data-event-start', info.event.startStr || '');
-
-            if (isCanceled) {
-              info.el.classList.add('calendar-event-canceled');
-            }
-          }}
-          customButtons={{
-            prev: {
-              text: 'prev',
-              click: () => handleCustomButton('prev'),
-            },
-            next: {
-              text: 'next',
-              click: () => handleCustomButton('next'),
-            },
-          }}
+          eventDidMount={handleEventDidMount}
+          customButtons={customButtons}
         />
       </div>
     </div>
   );
 };
+
+// A tela de agenda re-renderiza por diversos motivos que não mudam os
+// eventos nem os handlers (abrir/fechar modais, digitar no filtro etc.).
+// Sem memo, cada um desses renders forçava o FullCalendar a reprocessar
+// plugins/eventos do zero. Só é efetivo porque ScheduleCalendar agora passa
+// callbacks estáveis (useCallback) em vez de arrow functions inline.
+export const CalendarComponent = memo(CalendarComponentBase);
