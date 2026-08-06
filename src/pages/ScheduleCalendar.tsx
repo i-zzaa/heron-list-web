@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { deleteItem, getList, update } from '../server';
 import { Card, Confirm, Filter, Modal } from '../components';
 import { CalendarComponent } from '../components/calendar';
+import { LoadingHeron } from '../components/loading';
 import { ViewEvento } from '../components/view-evento';
 import { CalendarForm } from '../foms/CalendarForm';
 import { useDropdown } from '../contexts/dropDown';
@@ -23,6 +24,22 @@ import { resolveResponseData } from '../util/pagination';
 import { buildErrorToast } from '../util/error';
 
 const fieldsConst = filterCalendarFields;
+
+// Só normaliza o formato do payload (backend às vezes manda um objeto
+// indexado por id em vez de array) — NÃO faz mais o trabalho de decidir
+// recorrência, montar id de fallback ou remontar start/end: isso já é
+// refeito do zero, campo a campo, pelo useMemo de CalendarComponent (que
+// precisa rodar de qualquer forma pra produzir o formato específico do
+// FullCalendar). Fazer as duas coisas era processar cada evento duas vezes
+// inteiras a cada troca de data — a causa mais provável do pico de
+// lentidão ao navegar no calendário.
+const normalizeCalendarEvents = (events: any[] = []) => {
+  if (Array.isArray(events)) {
+    return events;
+  }
+
+  return events && typeof events === 'object' ? Object.values(events) : [];
+};
 
 export default function ScheduleCalendar() {
   const current = new Date();
@@ -50,134 +67,69 @@ export default function ScheduleCalendar() {
     end: getUltimoDoMes(current.getFullYear(), current.getMonth() + 1),
   });
 
-  const normalizeCalendarEvents = (events: any[] = []) => {
-    const eventList = Array.isArray(events)
-      ? events
-      : events && typeof events === 'object'
-      ? Object.values(events)
-      : [];
+  // Estável entre renders (só muda se renderToast mudar, o que nunca
+  // acontece de fato — ver toast.tsx). Antes era recriada a cada render de
+  // ScheduleCalendar, o que por si só não afeta o calendário (não é passada
+  // como prop pra ele), mas é pré-requisito pra renderEvents abaixo também
+  // poder ser estável.
+  const fetchEventsWithFilter = useCallback(
+    async (dateRange: any, activeFilter: Record<string, any> = {}) => {
+      setLoading(true);
 
-    return eventList.map((eventItem: any, index: number) => {
-      const date = eventItem.date || eventItem.dataInicio;
-      const startTime = eventItem.startTime || eventItem.start;
-      const endTime = eventItem.endTime || eventItem.end;
-      const isRecurringEvent =
-        eventItem?.frequencia?.id === 2 ||
-        String(eventItem?.frequencia?.nome || '').toLowerCase() ===
-          'recorrente';
-
-      const normalizedId =
-        eventItem.id && eventItem.id !== 0
-          ? String(eventItem.id)
-          : `${eventItem.groupId || 'evento'}-${date || 'sem-data'}-${
-              startTime || 'sem-inicio'
-            }-${endTime || 'sem-fim'}-${index}`;
-
-      const normalizedEvent = {
-        ...eventItem,
-        id: normalizedId,
-      };
-
-      if (date && startTime && endTime && !isRecurringEvent) {
-        const sanitizedEvent = {
-          ...normalizedEvent,
-          start: `${date}T${startTime}`,
-          end: `${date}T${endTime}`,
-        } as Record<string, any>;
-
-        delete sanitizedEvent.rrule;
-        delete sanitizedEvent.daysOfWeek;
-        delete sanitizedEvent.startTime;
-        delete sanitizedEvent.endTime;
-        delete sanitizedEvent.startRecur;
-        delete sanitizedEvent.endRecur;
-
-        return sanitizedEvent;
+      try {
+        const filterUrl = buildEventFilterUrl(
+          dateRange.start,
+          dateRange.end,
+          activeFilter
+        );
+        const separator = filterUrl.includes('?') ? '&' : '?';
+        const response: any = await getList(
+          `${filterUrl}${separator}_ts=${Date.now()}`
+        );
+        setEventsList(normalizeCalendarEvents(resolveResponseData(response)));
+      } catch (error) {
+        renderToast(buildErrorToast(error, 'Não foi possível carregar os eventos da agenda!'));
+      } finally {
+        setLoading(false);
       }
+    },
+    [renderToast]
+  );
 
-      if (isRecurringEvent) {
-        return {
-          ...normalizedEvent,
-          daysOfWeek:
-            Array.isArray(eventItem?.diasFrequencia) &&
-            eventItem.diasFrequencia.length
-              ? eventItem.diasFrequencia.map((day: string | number) =>
-                  Number(day)
-                )
-              : normalizedEvent.daysOfWeek,
+  // useCallback (não function declaration como antes): precisa de
+  // identidade estável entre renders que não mudam currentDate/filter/
+  // perfil, porque é passada direto como onNext/onPrev pro CalendarComponent
+  // memoizado — senão o memo nunca "pega" e o calendário volta a
+  // reprocessar plugins/eventos a cada render da tela.
+  const renderEvents = useCallback(
+    async (moment: any = currentDate, overrideFilter?: Record<string, any>) => {
+      const nextDate = {
+        start: moment.start,
+        end: moment.end,
+      };
+      const baseFilter = overrideFilter ?? filter;
+
+      setCurrentDate(nextDate);
+
+      if (isProfile(perfil, PERFIL.terapeuta)) {
+        const auth: any = await sessionStorage.getItem('auth');
+        const user = JSON.parse(auth);
+        const nextFilter = {
+          ...baseFilter,
+          terapeutaId: {
+            id: user.id,
+          },
         };
+
+        setFilter(nextFilter);
+        await fetchEventsWithFilter(nextDate, nextFilter);
+        return;
       }
 
-      const fallbackEvent = {
-        ...normalizedEvent,
-        rrule: undefined,
-        daysOfWeek: undefined,
-        startTime: undefined,
-        endTime: undefined,
-        startRecur: undefined,
-        endRecur: undefined,
-      };
-
-      return {
-        ...fallbackEvent,
-        id: normalizedId,
-      };
-    });
-  };
-
-  const fetchEventsWithFilter = async (
-    dateRange: any,
-    activeFilter: Record<string, any> = {}
-  ) => {
-    setLoading(true);
-
-    try {
-      const filterUrl = buildEventFilterUrl(
-        dateRange.start,
-        dateRange.end,
-        activeFilter
-      );
-      const separator = filterUrl.includes('?') ? '&' : '?';
-      const response: any = await getList(
-        `${filterUrl}${separator}_ts=${Date.now()}`
-      );
-      setEventsList(normalizeCalendarEvents(resolveResponseData(response)));
-    } catch (error) {
-      renderToast(buildErrorToast(error, 'Não foi possível carregar os eventos da agenda!'));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  async function renderEvents(
-    moment: any = currentDate,
-    overrideFilter?: Record<string, any>
-  ) {
-    const nextDate = {
-      start: moment.start,
-      end: moment.end,
-    };
-    const baseFilter = overrideFilter ?? filter;
-
-    setCurrentDate(nextDate);
-
-    if (isProfile(perfil, PERFIL.terapeuta)) {
-      const auth: any = await sessionStorage.getItem('auth');
-      const user = JSON.parse(auth);
-      const nextFilter = {
-        ...baseFilter,
-        terapeutaId: {
-          id: user.id,
-        },
-      };
-
-      setFilter(nextFilter);
-      await fetchEventsWithFilter(nextDate, nextFilter);
-      return;
-    }
-
-    await fetchEventsWithFilter(nextDate, baseFilter);
-  }
+      await fetchEventsWithFilter(nextDate, baseFilter);
+    },
+    [currentDate, filter, perfil, fetchEventsWithFilter]
+  );
 
   async function deleteEvent() {
     try {
@@ -259,7 +211,9 @@ export default function ScheduleCalendar() {
     );
   };
 
-  const renderModalView = ({ event }: any) => {
+  // useCallback: passada como openModalEdit pro CalendarComponent
+  // memoizado (só usa setters estáveis, então identidade fixa pra sempre).
+  const renderModalView = useCallback(({ event }: any) => {
     const evento = {
       id: Number(event.id),
       ...event._def.extendedProps,
@@ -271,13 +225,21 @@ export default function ScheduleCalendar() {
     };
     setEvent(evento);
     setOpenView(true);
-  };
+  }, []);
 
   const renderModalEdit = () => {
     setOpenView(false);
     setOpen(true);
     setIsEdit(true);
   };
+
+  // useCallback: passada como dateClick pro CalendarComponent memoizado
+  // (idem renderModalView, só setters estáveis).
+  const handleCalendarDateClick = useCallback((moment: any) => {
+    setEvent({ dataInicio: moment });
+    setOpen(true);
+    setIsEdit(false);
+  }, []);
 
   useEffect(() => {
     const loadFilters = async () => {
@@ -315,18 +277,26 @@ export default function ScheduleCalendar() {
       ) : null}
 
       <Card>
-        <div className="flex-1">
+        <div className="flex-1 relative">
           <CalendarComponent
             openModalEdit={renderModalView}
             events={evenetsList}
-            onNext={(moment: any) => renderEvents(moment)}
-            onPrev={(moment: any) => renderEvents(moment)}
-            dateClick={(moment: any) => {
-              setEvent({ dataInicio: moment });
-              setOpen(true);
-              setIsEdit(false);
-            }}
+            onNext={renderEvents}
+            onPrev={renderEvents}
+            dateClick={handleCalendarDateClick}
           />
+          {/* A busca de eventos ao trocar de data pode levar alguns
+              segundos (depende da resposta do backend, não do render do
+              calendário). Sem esse indicador, a tela fica parada e a espera
+              parece um travamento em vez de um carregamento. */}
+          {loading && (
+            <div
+              className="absolute inset-0 z-10 flex items-center justify-center bg-white/60 pointer-events-none"
+              data-testid="calendar-loading-overlay"
+            >
+              <LoadingHeron />
+            </div>
+          )}
         </div>
       </Card>
 
