@@ -71,3 +71,15 @@ tr {
   padding: 2px 4px;
   font-size: 16px;
 }
+
+/* O Chrome/Safari pintam um fundo (geralmente amarelo) por trás de campos
+   autopreenchidos, ignorando background-color normal — só dá pra sobrepor
+   via box-shadow inset. O delay gigante na transition evita o fundo do
+   navegador "piscar" antes do estilo aplicar. */
+.auth-input:-webkit-autofill,
+.auth-input:-webkit-autofill:hover,
+.auth-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset;
+  -webkit-text-fill-color: var(--gray-800);
+  transition: background-color 9999s ease-in-out 0s;
+}
