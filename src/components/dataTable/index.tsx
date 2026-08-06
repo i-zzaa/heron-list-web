@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Accordion, AccordionTab } from 'primereact/accordion';
 import { Input } from '../input';
-import { InputSwitch } from 'primereact';
+import { InputSwitch } from 'primereact/inputswitch';
 
 interface DataTableHeronProps {
   value: any;

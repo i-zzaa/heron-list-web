@@ -9,7 +9,7 @@ export interface ButtonProps {
   testId?: string;
 }
 import { clsx } from 'clsx';
-import { Button } from 'primereact';
+import { Button } from 'primereact/button';
 
 export function ButtonHeron({
   icon,
