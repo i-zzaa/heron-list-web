@@ -5,6 +5,7 @@ import { Nav } from '../components/Nav';
 import { MustChangePasswordModal } from '../components/mustChangePasswordModal';
 import { Crud } from '../pages/Crud';
 import Home from '../pages/Home';
+import Profile from '../pages/Profile';
 import Queue from '../pages/Queue';
 import Schedule from '../pages/Schedule';
 import Financial from '../pages/Financial';
@@ -16,6 +17,7 @@ import { useAuth } from '../contexts/auth';
 export enum CONSTANTES_ROUTERS {
   HOME = 'home',
   DASHBOARD = 'dashboard',
+  PROFILE = 'perfil',
   QUEUE = 'fila',
   CRUD = 'cadastro',
   CALENDAR = 'agenda',
@@ -34,6 +36,9 @@ export const ROUTES = [
   { path: CONSTANTES_ROUTERS.HOME, componentRoute: Home, icon: 'pi pi-home', permission: CONSTANTES_ROUTERS.HOME },
   // Dashboard não é uma rota própria — fica embutido em Home.tsx, visível
   // só para quem tem a tag DASHBOARD (ver Home.tsx).
+  // Perfil é '*': todo usuário autenticado precisa poder trocar a própria
+  // senha, independente de qualquer tag de permissão.
+  { path: CONSTANTES_ROUTERS.PROFILE, componentRoute: Profile, icon: 'pi pi-user', permission: '*' },
   { path: CONSTANTES_ROUTERS.CRUD, componentRoute: Crud, icon: 'pi pi-credit-card', permission: CONSTANTES_ROUTERS.CRUD },
   { path: CONSTANTES_ROUTERS.QUEUE, componentRoute: Queue , icon: 'pi pi-sort-amount-down', permission: CONSTANTES_ROUTERS.QUEUE},
   { path: CONSTANTES_ROUTERS.CALENDAR, componentRoute: Schedule, icon: 'pi pi-calendar', permission: CONSTANTES_ROUTERS.CALENDAR },
