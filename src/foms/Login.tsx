@@ -84,7 +84,7 @@ export default function Login() {
   }, [setValue]);
 
   return (
-    <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
+    <form className="space-y-3" onSubmit={handleSubmit(onSubmit)}>
       <div>
         <label htmlFor="username" className="block text-sm text-violet-800 mb-1">
           {usernameField?.labelText || 'Login'}
@@ -99,7 +99,7 @@ export default function Login() {
             type="text"
             autoComplete="username"
             placeholder={usernameField?.placeholder}
-            className="auth-input w-full py-3 text-sm outline-none bg-transparent"
+            className="auth-input w-full py-2 text-sm outline-none bg-transparent"
             {...register('username', usernameField?.validate)}
           />
         </div>
@@ -122,7 +122,7 @@ export default function Login() {
             type={showPassword ? 'text' : 'password'}
             autoComplete="current-password"
             placeholder={passwordField?.placeholder}
-            className="auth-input w-full py-3 text-sm outline-none bg-transparent"
+            className="auth-input w-full py-2 text-sm outline-none bg-transparent"
             {...register('password', passwordField?.validate)}
           />
           <button

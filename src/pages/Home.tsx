@@ -4,8 +4,14 @@ import { ButtonHeron, Card, Input, TextSubtext } from '../components/index';
 import { useToast } from '../contexts/toast';
 import { update } from '../server';
 import { buildErrorToast } from '../util/error';
+import { permissionAuth } from '../contexts/permission';
+import Dashboard from './Dashboard';
 
 export default function Home() {
+  // Dashboard operacional embutido na home (não é rota própria) — só
+  // aparece pra quem tem a tag DASHBOARD (perfis Administrador e Developer,
+  // este último via bypass de hasPermition). Ver Dashboard.tsx.
+  const { hasPermition } = permissionAuth();
   const [user, setUser] = useState() as any;
   const [disabled, setDisabled] = useState(false);
   const { renderToast } = useToast();
@@ -83,6 +89,8 @@ export default function Home() {
           </div>
         </div>
       </Card>
+
+      {hasPermition('DASHBOARD') ? <Dashboard /> : null}
     </>
   );
 }
