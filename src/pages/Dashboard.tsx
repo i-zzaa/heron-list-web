@@ -707,14 +707,21 @@ export default function Dashboard() {
             <Card>
               <PanelTitle icon="pi pi-star" text="Top terapeutas do dia" />
               {topTerapeutas.length ? (
-                <div className="grid gap-3">
+                // Lado a lado quando cabe, descendo pra próxima linha
+                // quando não cabe — em vez de forçar uma coluna só.
+                <div className="grid gap-3 sm:grid-cols-2">
                   {topTerapeutas.map((item) => (
-                    <div key={item.nome} className="flex items-center gap-3 rounded-xl border border-gray-200 p-3">
+                    <div
+                      key={item.nome}
+                      className="flex items-center gap-3 rounded-xl border border-gray-200 p-3 min-w-0"
+                    >
                       <div className="w-10 h-10 rounded-full bg-violet-800 text-white flex items-center justify-center font-bold text-sm shrink-0">
                         {getInitials(item.nome)}
                       </div>
-                      <div>
-                        <div className="text-sm font-medium text-gray-800">{item.nome}</div>
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium text-gray-800 truncate" title={item.nome}>
+                          {item.nome}
+                        </div>
                         <div className="text-xs text-gray-400">
                           {item.sessoes} sessões
                           {item.presenca !== null ? ` · ${item.presenca}% presença` : ''}
