@@ -7,15 +7,87 @@ import logoLg from '../assets/logo-lg.jpg';
 
 import package_json from '../../package.json';
 
+// Cada lado de uma peça pode ser reto, ter um "nó" saindo pra fora (tab) ou
+// um encaixe entrando pra dentro (blank) — a mesma anatomia das peças em
+// src/assets/Puzzle Pieces Separated Outline.jpg, usada aqui como modelo.
+type PieceEdgeKind = 'flat' | 'tab' | 'blank';
+type PieceEdges = {
+  top: PieceEdgeKind;
+  right: PieceEdgeKind;
+  bottom: PieceEdgeKind;
+  left: PieceEdgeKind;
+};
+
+// Desenha um lado do quadrado. Pra "tab"/"blank" o traço sai da borda, afina
+// num pescoço estreito e abre num nó redondo (arco de círculo) antes de
+// afinar de novo e voltar — é esse afinamento que faz o nó "prender" e
+// parecer peça de quebra-cabeça de verdade, em vez de só uma onda lisa.
+const puzzleEdge = (
+  [x0, y0]: [number, number],
+  [x1, y1]: [number, number],
+  kind: PieceEdgeKind,
+) => {
+  if (kind === 'flat') return `L${x1},${y1}`;
+
+  const dx = x1 - x0;
+  const dy = y1 - y0;
+  const len = Math.hypot(dx, dy);
+  const ux = dx / len;
+  const uy = dy / len;
+  const nx = uy; // normal apontando pra fora da peça (caminho no sentido horário)
+  const ny = -ux;
+  const dir = kind === 'tab' ? 1 : -1;
+
+  const halfNeck = len * 0.13;
+  const knobR = len * 0.16;
+  const protrude = len * 0.24;
+
+  const point = (t: number, offset = 0): [number, number] => [
+    x0 + dx * t + nx * offset * dir,
+    y0 + dy * t + ny * offset * dir,
+  ];
+
+  const n1 = point(0.5 - halfNeck / len);
+  const n2 = point(0.5 - knobR / len, protrude * 0.42);
+  const n3 = point(0.5 - knobR / len, protrude);
+  const n4 = point(0.5 + knobR / len, protrude);
+  const n5 = point(0.5 + knobR / len, protrude * 0.42);
+  const n6 = point(0.5 + halfNeck / len);
+  const sweep = kind === 'tab' ? 1 : 0;
+
+  return `L${n1} C${n2} ${n2} ${n3} A${knobR},${knobR} 0 0 ${sweep} ${n4} C${n5} ${n5} ${n6} L${x1},${y1}`;
+};
+
+// Quadrado de cantos retos (não arredondados, como no modelo) com os 4 lados
+// definidos por `edges`.
+const buildPuzzlePiecePath = (edges: PieceEdges) => {
+  const corners: [number, number][] = [
+    [22, 22],
+    [78, 22],
+    [78, 78],
+    [22, 78],
+  ];
+  return [
+    `M${corners[0]}`,
+    puzzleEdge(corners[0], corners[1], edges.top),
+    puzzleEdge(corners[1], corners[2], edges.right),
+    puzzleEdge(corners[2], corners[3], edges.bottom),
+    puzzleEdge(corners[3], corners[0], edges.left),
+    'Z',
+  ].join(' ');
+};
+
 // Peça de quebra-cabeça reaproveitada tanto no cantinho de destaque quanto
-// espalhada de fundo pelo painel roxo — mesmo traço do ícone da marca (ver
-// logo-sm.png), só que como textura decorativa em baixa opacidade.
+// espalhada de fundo pelo painel roxo, como textura decorativa em baixa
+// opacidade.
 const PuzzlePiece = ({
   className,
   style,
+  edges = { top: 'tab', right: 'blank', bottom: 'tab', left: 'blank' },
 }: {
   className?: string;
   style?: CSSProperties;
+  edges?: PieceEdges;
 }) => (
   <svg
     viewBox="0 0 100 100"
@@ -26,39 +98,51 @@ const PuzzlePiece = ({
     strokeWidth="4"
     aria-hidden="true"
   >
-    <path
-      strokeLinejoin="round"
-      d="M28,18 L45,18
-         C45,10 55,10 55,18
-         L72,18
-         Q82,18 82,28
-         L82,45
-         C74,45 74,55 82,55
-         L82,72
-         Q82,82 72,82
-         L55,82
-         C55,90 45,90 45,82
-         L28,82
-         Q18,82 18,72
-         L18,55
-         C26,55 26,45 18,45
-         L18,28
-         Q18,18 28,18 Z"
-    />
+    <path strokeLinejoin="round" strokeLinecap="round" d={buildPuzzlePiecePath(edges)} />
   </svg>
 );
 
-// Posições/tamanhos/rotações fixos (não randômicos): randomizar a cada
+// Posições/tamanhos/rotações/lados fixos (não randômicos): randomizar a cada
 // render faria as peças "pularem" de lugar sempre que o componente
-// re-renderizasse.
-const SCATTERED_PUZZLE_PIECES = [
-  { top: '10%', left: '68%', size: 'w-8 h-8', rotate: 20, opacity: 'opacity-10' },
-  { top: '22%', left: '14%', size: 'w-6 h-6', rotate: -25, opacity: 'opacity-[0.08]' },
-  { top: '38%', left: '80%', size: 'w-10 h-10', rotate: 10, opacity: 'opacity-10' },
-  { top: '58%', left: '10%', size: 'w-7 h-7', rotate: 35, opacity: 'opacity-[0.07]' },
-  { top: '68%', left: '72%', size: 'w-6 h-6', rotate: -15, opacity: 'opacity-[0.09]' },
-  { top: '82%', left: '30%', size: 'w-9 h-9', rotate: 5, opacity: 'opacity-[0.08]' },
-  { top: '48%', left: '45%', size: 'w-5 h-5', rotate: -30, opacity: 'opacity-[0.06]' },
+// re-renderizasse. As combinações de lados variam peça a peça, ecoando as
+// diferentes peças do modelo (algumas com lado reto de borda, outras só com
+// nós/encaixes).
+const SCATTERED_PUZZLE_PIECES: {
+  top: string;
+  left: string;
+  size: string;
+  rotate: number;
+  opacity: string;
+  edges: PieceEdges;
+}[] = [
+  {
+    top: '10%', left: '68%', size: 'w-8 h-8', rotate: 20, opacity: 'opacity-10',
+    edges: { top: 'flat', right: 'tab', bottom: 'tab', left: 'tab' },
+  },
+  {
+    top: '22%', left: '14%', size: 'w-6 h-6', rotate: -25, opacity: 'opacity-[0.08]',
+    edges: { top: 'blank', right: 'tab', bottom: 'blank', left: 'tab' },
+  },
+  {
+    top: '38%', left: '80%', size: 'w-10 h-10', rotate: 10, opacity: 'opacity-10',
+    edges: { top: 'tab', right: 'blank', bottom: 'tab', left: 'blank' },
+  },
+  {
+    top: '58%', left: '10%', size: 'w-7 h-7', rotate: 35, opacity: 'opacity-[0.07]',
+    edges: { top: 'blank', right: 'blank', bottom: 'tab', left: 'tab' },
+  },
+  {
+    top: '68%', left: '72%', size: 'w-6 h-6', rotate: -15, opacity: 'opacity-[0.09]',
+    edges: { top: 'tab', right: 'tab', bottom: 'blank', left: 'blank' },
+  },
+  {
+    top: '82%', left: '30%', size: 'w-9 h-9', rotate: 5, opacity: 'opacity-[0.08]',
+    edges: { top: 'flat', right: 'blank', bottom: 'tab', left: 'blank' },
+  },
+  {
+    top: '48%', left: '45%', size: 'w-5 h-5', rotate: -30, opacity: 'opacity-[0.06]',
+    edges: { top: 'blank', right: 'tab', bottom: 'flat', left: 'tab' },
+  },
 ];
 
 export default function LoginPage() {
@@ -108,6 +192,7 @@ export default function LoginPage() {
         {SCATTERED_PUZZLE_PIECES.map((piece, index) => (
           <PuzzlePiece
             key={index}
+            edges={piece.edges}
             className={`absolute text-white ${piece.size} ${piece.opacity}`}
             style={{ top: piece.top, left: piece.left, transform: `rotate(${piece.rotate}deg)` }}
           />
@@ -141,7 +226,7 @@ export default function LoginPage() {
             <span className="h-px flex-1 bg-white opacity-30" />
           </div>
 
-          <p className="text-white font-bold mb-2">Cuidado que transforma.</p>
+          <p className="text-yellow-400 font-bold mb-2">Cuidado que transforma.</p>
           <p className="text-white text-sm opacity-80 leading-relaxed">
             Organizamos o atendimento multidisciplinar de forma integrada
             para apoiar o desenvolvimento de crianças e suas famílias.

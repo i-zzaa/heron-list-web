@@ -1,4 +1,4 @@
-import { TabPanel, TabView } from 'primereact';
+import { TabPanel, TabView } from 'primereact/tabview';
 import { permissionAuth } from '../contexts/permission';
 import Avaliation from './Avaliation';
 import Devolutiva from './Devolutiva';
