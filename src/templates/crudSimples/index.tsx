@@ -522,7 +522,11 @@ export default function CrudSimples({
       <Modal
         title="Cadastro"
         open={open}
-        width={namelist === 'usuarios' ? '75vw' : '50vw'}
+        width={
+          ['usuarios', 'grupo-permissoes'].includes(namelist)
+            ? '75vw'
+            : '50vw'
+        }
         onClose={() => {
           setOpen(false);
           reset();

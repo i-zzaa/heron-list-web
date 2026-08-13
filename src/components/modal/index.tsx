@@ -21,7 +21,7 @@ export function Modal({
       modal
       visible={open}
       onHide={onClose}
-      breakpoints={{ '960px': '75vw' }}
+      breakpoints={{ '960px': '75vw', '640px': '95vw' }}
       style={{ width }}
     >
       {children}
