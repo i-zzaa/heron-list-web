@@ -11,6 +11,37 @@ import { useToast } from '../contexts/toast';
 import { create, dropDown, getList, update } from '../server';
 import { buildErrorToast } from '../util/error';
 
+// Rótulos exibidos no toast de campo obrigatório — precisam bater com os
+// `labelText` usados nos <Input /> abaixo. Campos repetidos por
+// especialidade/terapeuta/função ganham um índice numérico no id
+// (ex.: "especialidade1"), por isso a busca em FIELD_LABELS ignora o sufixo
+// numérico.
+const FIELD_LABELS: Record<string, string> = {
+  modalidade: 'Modalidade',
+  dataInicio: 'Data',
+  dataFim: 'Data Final',
+  start: 'Horário Inicial',
+  end: 'Horário Final',
+  frequencia: 'Frequência',
+  intervalo: 'Intervalo',
+  diasFrequencia: 'Dias da semana',
+  paciente: 'Paciente',
+  especialidade: 'Especialidade',
+  terapeuta: 'Terapeuta',
+  funcao: 'Função',
+  isExterno: 'Local Externo?',
+  km: 'km',
+  localExternoDescricao: 'Descrição/Endereço Local Externo',
+  localidade: 'Local',
+  statusEventos: 'Status Eventos',
+  observacao: 'Observação',
+};
+
+const getFieldLabel = (fieldId: string) => {
+  const baseId = fieldId.replace(/\d+$/, '');
+  return FIELD_LABELS[baseId] || FIELD_LABELS[fieldId] || fieldId;
+};
+
 export const CalendarForm = ({
   value,
   onClose,
@@ -138,6 +169,17 @@ export const CalendarForm = ({
     } finally {
       setLoading(false);
     }
+  };
+
+  const onInvalidSubmit = (formErrors: any) => {
+    const missingLabels = Object.keys(formErrors).map(getFieldLabel);
+
+    renderToast({
+      type: 'warning',
+      title: 'Campo obrigatório',
+      message: `Preencha o(s) campo(s): ${missingLabels.join(', ')}`,
+      open: true,
+    });
   };
 
   const handleConfirm = (_event: any) => {
@@ -353,7 +395,7 @@ export const CalendarForm = ({
     <>
       <form
         action="#"
-        onSubmit={handleSubmit(handleConfirm)}
+        onSubmit={handleSubmit(handleConfirm, onInvalidSubmit)}
         id="form-cadastro-agendamento"
         data-testid="agenda-form"
       >
@@ -614,6 +656,8 @@ export const CalendarForm = ({
               if (!e) {
                 setValue('km', '');
                 setValue('localExternoDescricao', '');
+              } else {
+                setValue('localidade', '');
               }
             }}
           />
@@ -623,9 +667,14 @@ export const CalendarForm = ({
               labelText="km"
               id="km"
               type="number"
+              min={0}
               customCol="col-span-6 sm:col-span-1 font-inter font-light"
               errors={errors}
               control={control}
+              validate={{
+                required: true,
+                min: { value: 0, message: 'km não pode ser negativo' },
+              }}
               disabled={!hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_LOCALIDADE')}
             />
           )}
@@ -645,23 +694,22 @@ export const CalendarForm = ({
             />
           )}
 
-          <Input
-            labelText="Local"
-            id="localidade"
-            testId="localidade-select"
-            type="select"
-            customCol={`col-span-6 sm:col-span-${isExterno ? '2' : '3'}`}
-            errors={errors}
-            control={control}
-            options={dropDownList?.localidades}
-            validate={{
-              required: true,
-            }}
-            disabled={
-              !hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_LOCALIDADE') ||
-              isExterno
-            }
-          />
+          {!isExterno && (
+            <Input
+              labelText="Local"
+              id="localidade"
+              testId="localidade-select"
+              type="select"
+              customCol="col-span-6 sm:col-span-3"
+              errors={errors}
+              control={control}
+              options={dropDownList?.localidades}
+              validate={{
+                required: true,
+              }}
+              disabled={!hasPermition('AGENDA_CALENDARIO_EVENTO_EDITAR_LOCALIDADE')}
+            />
+          )}
           <Input
             labelText="Status Eventos"
             id="statusEventos"

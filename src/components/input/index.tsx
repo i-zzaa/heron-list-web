@@ -32,6 +32,8 @@ export interface InputProps {
   hidden?: any;
   control?: any;
   testId?: string;
+  min?: number;
+  max?: number;
 }
 
 export interface OptionsProps {
@@ -54,6 +56,8 @@ export function Input({
   disabled,
   hidden,
   testId,
+  min,
+  max,
 }: InputProps) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -401,6 +405,8 @@ export function Input({
                 value={getInputValue(value, field.value)}
                 key={field.id}
                 type={type}
+                min={min}
+                max={max}
                 className={getInputClassName(type, customClass)}
                 autoComplete="off"
                 onInput={(e: any) => {

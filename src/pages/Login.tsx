@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { CSSProperties } from 'react';
 import Login from '../foms/Login';
 import { getList } from '../server';
-import logoMark from '../assets/logo-sm.png';
+import logoMark from '../assets/logo_negativo_multialcance.png';
 import logoLg from '../assets/logo-lg.jpg';
 
 import package_json from '../../package.json';
@@ -206,19 +206,9 @@ export default function LoginPage() {
           <img
             src={logoMark}
             alt=""
-            className="w-[12rem] h-[12rem] -mb-8"
+            className=" -mb-8"
             style={{ filter: 'brightness(0) invert(1)', opacity: 0.95 }}
           />
-
-          <p
-            className="text-white text-[2rem] leading-none mb-1"
-            style={{ fontFamily: "'Dancing Script', cursive" }}
-          >
-            Multi Alcance
-          </p>
-          <p className="text-white text-xs uppercase tracking-[0.25em] opacity-70 mb-5">
-            Núcleo Terapêutico
-          </p>
 
           <div className="flex items-center gap-3 w-full max-w-[180px] mb-5">
             <span className="h-px flex-1 bg-white opacity-30" />
@@ -245,7 +235,7 @@ export default function LoginPage() {
               <img src={logoLg} alt="Multi Alcance" className="h-14" />
             </div>
 
-            <div className="flex justify-center mb-3">
+            <div className="hidden lg:flex justify-center mb-3">
               <div className="w-14 h-14 rounded-full bg-[#662977]/10 flex items-center justify-center">
                 <i className="pi pi-calendar text-violet-800" style={{ fontSize: 22 }} />
               </div>
