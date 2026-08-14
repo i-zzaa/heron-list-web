@@ -190,6 +190,7 @@ export function List({
       const tags = (item?.vaga?.especialidades || []).map((especialidade: any) => {
         return {
           type: especialidade?.especialidade?.nome || 'Sem especialidade',
+          color: especialidade?.especialidade?.cor,
           disabled: !!especialidade?.agendado,
         };
       });

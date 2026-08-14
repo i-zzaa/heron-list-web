@@ -11,15 +11,6 @@ export const colorsData: any = {
   PSICOPEDAG: '#000000',
 };
 
-export const bgData: any = {
-  TO: 'bg-to',
-  FONO: 'bg-fono',
-  PSICO: 'bg-psico',
-  MOTRICIDADE: 'bg-motricidade',
-  MUSICOTERAPIA: 'bg-musicoterapia',
-  PSICOPEDAG: 'bg-psico-pdeg',
-};
-
 export const colorsTextData: any = {
   TO: '#ffffff',
   FONO: '#ffffff',
@@ -27,6 +18,23 @@ export const colorsTextData: any = {
   MUSICOTERAPIA: '#ffffff',
   MOTRICIDADE: '#ffffff',
   PSICOPEDAG: '#ffffff',
+};
+
+// Monta um mapa NOME_EM_MAIÚSCULO -> cor a partir do catálogo de
+// especialidades (cada item com `nome`/`cor` vindo do backend, cadastrado
+// em Cadastro > Especialidade). Usar em telas que só têm o nome da
+// especialidade solto (sem o objeto completo aninhado), pra ainda assim
+// pintar com a cor real cadastrada em vez de uma cor fixa no front.
+export const buildEspecialidadeColorMap = (
+  especialidades: any[] = []
+): Record<string, string> => {
+  return (especialidades || []).reduce((map: Record<string, string>, item: any) => {
+    const nome = item?.nome;
+    if (nome && item?.cor) {
+      map[nome.toUpperCase()] = item.cor;
+    }
+    return map;
+  }, {});
 };
 
 export const corEspecialidade = (type: string): string => {

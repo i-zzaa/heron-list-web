@@ -396,10 +396,24 @@ const especialidadeFields = [
     autoComplete: 'nome',
     isRequired: true,
     placeholder: 'Nome',
-    customCol: 'col-span-6',
+    customCol: 'col-span-4',
     type: 'text',
     validate: {
       required: true,
+    },
+  },
+  {
+    labelText: 'Cor',
+    labelFor: 'cor',
+    id: 'cor',
+    name: 'cor',
+    autoComplete: 'cor',
+    isRequired: true,
+    placeholder: 'Cor',
+    customCol: 'col-span-2',
+    type: 'color',
+    validate: {
+      required: 'Campo obrigatório!',
     },
   },
 ];

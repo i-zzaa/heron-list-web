@@ -16,6 +16,7 @@ import { DataTableHeron } from '../dataTable';
 import { InputNumber } from 'primereact/inputnumber';
 import { DataTableSessaoHeron } from '../dataTableSessao';
 import { getInputClassName, getInputValue } from '../../util/input';
+import { ColorPicker } from '../colorPicker';
 
 export interface InputProps {
   id: string;
@@ -215,6 +216,27 @@ export function Input({
                 </div>
               );
             }}
+          />
+        );
+      case 'color':
+        return (
+          <Controller
+            name={id}
+            control={control}
+            rules={validate}
+            render={({ field }: any) => (
+              <div>
+                <span className="block text-violet-800">{labelText}</span>
+                <ColorPicker
+                  value={getInputValue(value, field.value)}
+                  disabled={disabled}
+                  onChange={(color: string) => {
+                    field.onChange(color);
+                    onChange && onChange(color);
+                  }}
+                />
+              </div>
+            )}
           />
         );
       case 'tel':
@@ -430,7 +452,9 @@ export function Input({
       )}
     >
       {renderType()}
-      {type !== 'switch' && type !== 'checkbox' && <label> {labelText} </label>}
+      {type !== 'switch' && type !== 'checkbox' && type !== 'color' && (
+        <label> {labelText} </label>
+      )}
       {errors && errors[id] && (
         <p className="text-xs text-red-400 text-end">{errors[id].message}</p>
       )}

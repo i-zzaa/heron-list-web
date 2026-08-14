@@ -23,7 +23,7 @@ import { STATUS_PACIENT_COD } from '../constants/patient';
 import { NotFound } from '../components/notFound';
 import { TabPanel, TabView } from 'primereact/tabview';
 import moment from 'moment';
-import { bgData, formaTime, moneyFormat } from '../util/util';
+import { buildEspecialidadeColorMap, formaTime, moneyFormat } from '../util/util';
 import { LoadingHeron } from '../components/loading';
 import { Accordion, AccordionTab } from 'primereact/accordion';
 import * as XLSX from 'xlsx';
@@ -394,9 +394,12 @@ export default function Financial() {
                         <>
                           <div className="flex gap-2 items-center">
                             <div
-                              className={`h-2 w-2 rounded-full ${
-                                bgData[item.toUpperCase()]
-                              }`}
+                              className="h-2 w-2 rounded-full"
+                              style={{
+                                backgroundColor:
+                                  especialidadeColorMap[item.toUpperCase()] ||
+                                  '#662977',
+                              }}
                             ></div>
                             <div className="grid">
                               <span> {item} </span>
@@ -520,6 +523,10 @@ export default function Financial() {
   useEffect(() => {
     renderDropdown();
   }, []);
+
+  const especialidadeColorMap = buildEspecialidadeColorMap(
+    dropDownList?.especialidades
+  );
 
   return (
     <div className="grid gap-8">

@@ -63,7 +63,7 @@ export const ViewEvento = ({
 
   const header = (
     <div className="flex justify-between items-center gap-8">
-   {  evento.paciente.nome !== STATUS_EVENTS.livre ? <Tag type={evento.especialidade.nome} disabled={false} /> : <div></div>}
+   {  evento.paciente.nome !== STATUS_EVENTS.livre ? <Tag type={evento.especialidade.nome} color={evento.especialidade.cor} disabled={false} /> : <div></div>}
       <span>{evento.paciente.nome}</span>
 
       <div className="flex mt-[-0.5rem]">

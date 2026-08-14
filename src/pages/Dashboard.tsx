@@ -221,10 +221,14 @@ const buildFilaEspecialidade = (raw: any): { label: string; value: number; color
   const items = resolveResponseData(raw) || [];
   return items.map((item: any) => {
     const label = pick(item, 'especialidade', 'nome', 'label') ?? '-';
+    // Cor cadastrada na especialidade, vinda do backend — mesmo campo já
+    // usado em sessoes-especialidade. A paleta fixa (getSpecialtyColor)
+    // fica só como fallback pra item sem cor cadastrada.
+    const color = pick(item, 'cor', 'color') ?? getSpecialtyColor(label);
     return {
       label,
       value: Number(pick(item, 'total', 'valor', 'quantidade') ?? 0),
-      color: getSpecialtyColor(label),
+      color,
     };
   });
 };
