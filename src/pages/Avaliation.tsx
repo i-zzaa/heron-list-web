@@ -85,11 +85,16 @@ export default function Avaliation() {
   };
 
   const handlePagination = async (pag: any) => {
-    setPagination(pag)
-    handleSubmitFilter()
+    const currentPage = {
+      ...pagination,
+      currentPage: pag,
+    };
+
+    setPagination(currentPage);
+    handleSubmitFilter(filterCurrent, currentPage);
   }
 
-  const handleSubmitFilter = async (formState: any = filterCurrent) => {
+  const handleSubmitFilter = async (formState: any = filterCurrent, pag = pagination) => {
     setLoading(true);
     setFilter(formState)
     try {
@@ -103,11 +108,11 @@ export default function Avaliation() {
         { exclude: ['naFila', 'disabled'] }
       );
 
-      const response: any = await filter('paciente',  format, `page=${pagination.currentPage}&pageSize=${pagination.pageSize}`);
+      const response: any = await filter('paciente',  format, `page=${pag.currentPage}&pageSize=${pag.pageSize}`);
       const data = resolveResponseData(response);
       if (data) {
         setPatients(data);
-        setPagination(resolveResponsePagination(response, pagination));
+        setPagination(resolveResponsePagination(response, pag));
       } else {
         setPatients([]);
       }

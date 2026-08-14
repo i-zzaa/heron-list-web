@@ -282,6 +282,7 @@ function itemListComplete({
                 : undefined
             }
             type={item.type}
+            color={item.color}
             disabled={
               screen === 'FILA_DEVOLUTIVA' || screen === 'CADASTRO_PACIENTES'
                 ? false

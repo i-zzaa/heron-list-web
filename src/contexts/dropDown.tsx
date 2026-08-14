@@ -1,5 +1,5 @@
 import { createContext, useContext, useCallback, useMemo } from 'react';
-import { dropDown } from '../server';
+import { dropDown, getList } from '../server';
 import {
   COORDENADOR,
   COORDENADOR_TERAPEUTA,
@@ -7,6 +7,7 @@ import {
   TERAPEUTA,
 } from './permission';
 import { isProfile } from '../util/permissions';
+import { resolveResponseData } from '../util/pagination';
 
 export interface DropdownContextData {
   renderPacientes: (statusPacienteCod: string) => void;
@@ -15,6 +16,8 @@ export interface DropdownContextData {
   renderFrequencia: () => void;
   renderLocalidade: () => void;
   renderFuncao: () => void;
+  renderEspecialidade: () => void;
+  renderEspecialidadeCatalogo: () => void;
   renderTerapeutas: () => void;
   renderEspecialidadeFuncao: (especialidade: string) => void;
   renderEspecialidadeTerapeuta: (especialidade: string) => void;
@@ -73,6 +76,20 @@ export const DropdownProvider = ({ children }: Props) => {
   const renderEspecialidade = useCallback(async () => {
     const response: any = await dropDown('especialidade');
     return response;
+  }, []);
+
+  // O endpoint de dropdown (`especialidade/dropdown`) é pensado pra
+  // popular <select>, e pode devolver só `id`/`nome`, sem `cor`. Quando
+  // precisamos da cor cadastrada (pra pintar tags/gráficos), buscamos no
+  // endpoint de listagem completa do cadastro em vez do dropdown.
+  const renderEspecialidadeCatalogo = useCallback(async () => {
+    try {
+      const response = await getList('especialidade?page=1&pageSize=1000');
+      return resolveResponseData(response) || [];
+    } catch (error) {
+      console.error('Falha ao carregar catálogo de especialidades:', error);
+      return [];
+    }
   }, []);
 
   const renderStatusEventos = useCallback(async () => {
@@ -264,6 +281,10 @@ export const DropdownProvider = ({ children }: Props) => {
       convenios: await renderConvenio(),
       terapeutas: await renderTerapeutas(),
       localidades: await renderLocalidade(),
+      // A listagem de baixas devolve `especialidade` como texto solto (não
+      // um objeto aninhado) — precisamos do catálogo completo aqui pra
+      // conseguir casar nome -> cor cadastrada no backend.
+      especialidades: await renderEspecialidadeCatalogo(),
     };
 
     return dropDownList;
@@ -298,6 +319,9 @@ export const DropdownProvider = ({ children }: Props) => {
       terapeutas: await renderTerapeutas(),
       pacientes: await renderPacientes(statusPacienteCod),
       statusEventos: await renderStatusEventos(),
+      // O resumo por especialidade vem como `{ nomeEspecialidade: total }`,
+      // sem cor — precisamos do catálogo pra casar nome -> cor cadastrada.
+      especialidades: await renderEspecialidadeCatalogo(),
     };
 
     return dropDownList;
@@ -324,6 +348,8 @@ export const DropdownProvider = ({ children }: Props) => {
         renderFrequencia,
         renderLocalidade,
         renderFuncao,
+        renderEspecialidade,
+        renderEspecialidadeCatalogo,
         renderTerapeutas,
         renderDropdownCalendario,
         renderDropdownCrud,

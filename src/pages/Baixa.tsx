@@ -15,6 +15,7 @@ import { Column } from 'primereact/column';
 import { STATUS_PACIENT_COD } from '../constants/patient';
 import { NotFound } from '../components/notFound';
 import { Tag } from '../components/tag';
+import { buildEspecialidadeColorMap } from '../util/util';
 
 const fieldsConst = filterBaixaFields;
 const fieldsState: any = {};
@@ -40,11 +41,16 @@ export default function Baixa() {
   const { renderToast } = useToast();
 
   const handlePagination = async (pag: any) => {
-    setPagination(pag)
-    handleSubmitFilter()
+    const currentPage = {
+      ...pagination,
+      currentPage: pag,
+    };
+
+    setPagination(currentPage);
+    handleSubmitFilter(filterCurrent, currentPage);
   }
 
-  const handleSubmitFilter = async (formState: any = filterCurrent) => {
+  const handleSubmitFilter = async (formState: any = filterCurrent, pag = pagination) => {
     setLoading(true);
     setFilter(formState)
 
@@ -58,7 +64,7 @@ export default function Baixa() {
         format[key] = formState[key]?.id || undefined;
       });
 
-      const { data }: any = await filter('baixa', format, `page=${pagination.currentPage}&pageSize=${pagination.pageSize}`);
+      const { data }: any = await filter('baixa', format, `page=${pag.currentPage}&pageSize=${pag.pageSize}`);
       setBaixas(data.data || data.data.data);
       setPagination(data.pagination || data.data.pagination)
     } catch (error) {
@@ -121,7 +127,18 @@ const deleteBodyTemplate = (rowData: any): any => {
   )
 };
 
-const especialidadeBodyTemplate = (rowData: any): any =>  <Tag type={rowData.especialidade} disabled={false} />
+  const especialidadeColorMap = buildEspecialidadeColorMap(dropDownList?.especialidades);
+
+  const especialidadeBodyTemplate = (rowData: any): any =>
+    rowData.especialidade ? (
+      <Tag
+        type={rowData.especialidade}
+        color={especialidadeColorMap[String(rowData.especialidade).toUpperCase()]}
+        disabled={false}
+      />
+    ) : (
+      <span>-</span>
+    );
 
   useEffect(() => {
     handleSubmitFilter()

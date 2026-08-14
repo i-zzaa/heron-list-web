@@ -1,5 +1,6 @@
 export { ButtonHeron } from './button';
 export { Input } from './input';
+export { ColorPicker } from './colorPicker';
 export { Title } from './title';
 export { TextSubtext } from './textSubtext';
 export { Card } from './card';
