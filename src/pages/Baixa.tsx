@@ -130,7 +130,7 @@ const deleteBodyTemplate = (rowData: any): any => {
   const especialidadeColorMap = buildEspecialidadeColorMap(dropDownList?.especialidades);
 
   const especialidadeBodyTemplate = (rowData: any): any =>
-    rowData.especialidade ? (
+    rowData.especialidade && rowData.especialidade !== '-' ? (
       <Tag
         type={rowData.especialidade}
         color={especialidadeColorMap[String(rowData.especialidade).toUpperCase()]}
