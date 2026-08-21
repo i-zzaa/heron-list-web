@@ -7,12 +7,7 @@ import { ViewEvento } from '../components/view-evento';
 import { CalendarForm } from '../foms/CalendarForm';
 import { useDropdown } from '../contexts/dropDown';
 import { filterCalendarFields } from '../constants/formFields';
-import {
-  formatdateeua,
-  getDateFormat,
-  getPrimeiroDoMes,
-  getUltimoDoMes,
-} from '../util/util';
+import { getPrimeiroDoMes, getUltimoDoMes } from '../util/util';
 import { STATUS_PACIENT_COD } from '../constants/patient';
 import { permissionAuth } from '../contexts/permission';
 import { useToast } from '../contexts/toast';
@@ -213,16 +208,9 @@ export default function ScheduleCalendar() {
 
   // useCallback: passada como openModalEdit pro CalendarComponent
   // memoizado (só usa setters estáveis, então identidade fixa pra sempre).
-  const renderModalView = useCallback(({ event }: any) => {
-    const evento = {
-      id: Number(event.id),
-      ...event._def.extendedProps,
-      ...event._def.extendedProps.data,
-      dataAtual: formatdateeua(event._instance.range.start),
-      // dataInicio: formatdateeua(event._instance.range.start),
-      date: getDateFormat(event._instance.range.start),
-      groupId: event._def.groupId,
-    };
+  // O react-big-calendar já entrega o evento "achatado" (sem o wrapper
+  // interno `_def.extendedProps` que era específico do FullCalendar).
+  const renderModalView = useCallback((evento: any) => {
     setEvent(evento);
     setOpenView(true);
   }, []);
@@ -235,8 +223,8 @@ export default function ScheduleCalendar() {
 
   // useCallback: passada como dateClick pro CalendarComponent memoizado
   // (idem renderModalView, só setters estáveis).
-  const handleCalendarDateClick = useCallback((moment: any) => {
-    setEvent({ dataInicio: moment });
+  const handleCalendarDateClick = useCallback((dataInicio: string) => {
+    setEvent({ dataInicio });
     setOpen(true);
     setIsEdit(false);
   }, []);
@@ -281,8 +269,8 @@ export default function ScheduleCalendar() {
           <CalendarComponent
             openModalEdit={renderModalView}
             events={evenetsList}
-            onNext={renderEvents}
-            onPrev={renderEvents}
+            resources={dropDownList?.localidades}
+            onRangeChange={renderEvents}
             dateClick={handleCalendarDateClick}
           />
           {/* A busca de eventos ao trocar de data pode levar alguns

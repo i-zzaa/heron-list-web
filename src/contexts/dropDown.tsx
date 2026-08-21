@@ -313,6 +313,9 @@ export const DropdownProvider = ({ children }: Props) => {
       statusEventos: await renderStatusEventos(),
       modalidades: await renderModalidade(statusPacienteCod),
       terapeutas: await renderTerapeutas(),
+      // Usado pela visão "Salas" da agenda pra montar as colunas por
+      // localidade — sem isso o CalendarComponent nunca recebe `resources`.
+      localidades: await renderLocalidade(),
     };
 
     return dropDownList;
