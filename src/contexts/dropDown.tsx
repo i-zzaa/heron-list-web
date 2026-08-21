@@ -276,9 +276,13 @@ export const DropdownProvider = ({ children }: Props) => {
   };
 
   const renderDropdownBaixa = async (statusPacienteCod: string) => {
+    const convenios: any = await renderConvenio();
     const dropDownList = {
       pacientes: await renderPacientes(statusPacienteCod),
-      convenios: await renderConvenio(),
+      // Baixa não deve permitir filtrar por "Particular" (não é convênio).
+      convenios: convenios?.filter(
+        (convenio: any) => String(convenio?.nome).toLowerCase() !== 'particular'
+      ),
       terapeutas: await renderTerapeutas(),
       localidades: await renderLocalidade(),
       // A listagem de baixas devolve `especialidade` como texto solto (não

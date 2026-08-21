@@ -508,6 +508,16 @@ const statusEventosFields = [
       required: false,
     },
   },
+  {
+    labelText: 'Atender',
+    id: 'atender',
+    name: 'atender',
+    customCol: 'col-span-1',
+    type: 'switch',
+    validate: {
+      required: false,
+    },
+  },
 ];
 
 const filterCalendarFields = [

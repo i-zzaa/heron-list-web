@@ -141,11 +141,31 @@ const renderEventContent = (arg: any) => {
   const isAttended = normalizedStatus === 'atendido';
   const isCanceled = normalizedStatus.includes('cancelado');
 
+  // Na visão de mês o FullCalendar não pinta o bloco do evento (só nas
+  // visões de semana/dia) — por isso, aqui, exibimos manualmente uma
+  // bolinha com a cor da especialidade na frente do título.
+  const isMonthView = arg?.view?.type === 'dayGridMonth';
+  const especialidadeColor =
+    arg?.event?.backgroundColor ||
+    arg?.event?.borderColor ||
+    arg?.event?.extendedProps?.especialidade?.cor;
+
   return (
     <div
       className="fc-event-title-container flex items-center gap-1 overflow-hidden"
       data-testid="calendar-event-slot"
     >
+      {isMonthView && especialidadeColor ? (
+        <span
+          className="flex-shrink-0 rounded-full"
+          style={{
+            width: '8px',
+            height: '8px',
+            backgroundColor: especialidadeColor,
+          }}
+          data-testid="calendar-event-dot"
+        />
+      ) : null}
       <span
         className={`truncate ${isCanceled ? 'line-through' : ''}`}
         data-testid="calendar-event-title"
@@ -273,8 +293,14 @@ const CalendarComponentBase = ({
             until: toIsoDateTime(eventItem?.rrule?.until),
           },
           exdate,
-          backgroundColor: eventItem?.backgroundColor || eventItem?.color,
-          borderColor: eventItem?.borderColor || eventItem?.color,
+          backgroundColor:
+            eventItem?.backgroundColor ||
+            eventItem?.color ||
+            eventItem?.especialidade?.cor,
+          borderColor:
+            eventItem?.borderColor ||
+            eventItem?.color ||
+            eventItem?.especialidade?.cor,
           textColor: eventItem?.textColor,
           extendedProps: {
             ...eventItem,
@@ -290,8 +316,14 @@ const CalendarComponentBase = ({
         title: eventItem?.title || eventItem?.paciente?.nome || 'Evento',
         start,
         end,
-        backgroundColor: eventItem?.backgroundColor || eventItem?.color,
-        borderColor: eventItem?.borderColor || eventItem?.color,
+        backgroundColor:
+          eventItem?.backgroundColor ||
+          eventItem?.color ||
+          eventItem?.especialidade?.cor,
+        borderColor:
+          eventItem?.borderColor ||
+          eventItem?.color ||
+          eventItem?.especialidade?.cor,
         textColor: eventItem?.textColor,
         extendedProps: {
           ...eventItem,
