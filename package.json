@@ -12,6 +12,7 @@
     "format": "prettier --write \"src/**/*.{ts,js,tsx}\"",
     "lint": "eslint \"src/**/*.{ts,js}\" --quiet",
     "build": "export NODE_OPTIONS='--max-old-space-size=8192' && tsc && vite build",
+    "heroku-postbuild": "npm run build",
     "test:e2e": "playwright test",
     "test:e2e:agenda": "playwright test e2e/agenda-regressivo.spec.ts",
     "test:e2e:agenda:visual": "playwright test e2e/agenda-regressivo.spec.ts --headed",
