@@ -483,6 +483,23 @@ const ticketFields = [
   },
 ];
 
+const convenioFields = [
+  {
+    labelText: 'Nome',
+    labelFor: 'nome',
+    id: 'nome',
+    name: 'nome',
+    autoComplete: 'nome',
+    isRequired: true,
+    placeholder: 'nome',
+    customCol: 'col-span-6',
+    type: 'text',
+    validate: {
+      required: true,
+    },
+  },
+];
+
 const frequenciaFields = [
   {
     labelText: 'Nome',
@@ -690,4 +707,5 @@ export const Fields: any = {
   statusEventosFields,
   grupoPermissoesFields,
   ticketFields,
+  convenioFields,
 };

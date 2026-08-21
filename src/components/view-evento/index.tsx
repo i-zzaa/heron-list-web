@@ -150,11 +150,18 @@ export const ViewEvento = ({
             <br />
           </>
         ) : null}
-        <p className="flex gap-4 items-center ">
-          {evento.terapeuta.nome} <i className="pi pi-tag"> </i>{' '}
-          {evento.funcao.nome}
+        <p className="flex gap-4 items-center justify-between">
+          <span className="flex gap-4 items-center">
+            {evento.terapeuta.nome} <i className="pi pi-tag"> </i>{' '}
+            {evento.funcao.nome}
+          </span>
+          {evento.paciente?.convenio?.nome ? (
+            <span className="flex gap-4 items-center">
+              <i className="pi pi-id-card"></i>
+              {evento.paciente.convenio.nome}
+            </span>
+          ) : null}
         </p>
-
 
 <div className='flex justify-between mt-8 gap-2'>
 

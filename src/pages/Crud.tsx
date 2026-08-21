@@ -85,6 +85,14 @@ export const Crud = () => {
       onClick: noop,
     },
     {
+      permission: 'CADASTRO_CONVENIO',
+      header: 'Convênio',
+      leftIcon: 'pi pi-id-card',
+      screen: 'CADASTRO_CONVENIO',
+      namelist: 'convenio',
+      onClick: noop,
+    },
+    {
       permission: 'CADASTRO_GRUPO_PERMISSOES',
       header: 'Grupo Permissões',
       leftIcon: 'pi pi-sitemap',
