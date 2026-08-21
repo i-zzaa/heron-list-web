@@ -358,7 +358,11 @@ export function Input({
                 disabled={disabled}
                 id={field.id}
                 {...field}
-                value={getInputValue(value, field.value)}
+                // Precisa cair pra string vazia (não undefined) senão o
+                // input vira "não controlado" depois do reset e o
+                // navegador mantém a última data digitada na tela mesmo
+                // com o valor do formulário já limpo.
+                value={getInputValue(value, field.value) ?? ''}
                 key={field.id}
                 type={type}
                 className={getInputClassName(type, customClass)}

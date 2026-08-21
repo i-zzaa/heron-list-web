@@ -17,6 +17,12 @@ import { STATUS_PACIENT_COD } from '../constants/patient';
 import { NotFound } from '../components/notFound';
 import { Tag } from '../components/tag';
 import { buildEspecialidadeColorMap } from '../util/util';
+import { mapFormValuesToPayload } from '../util/forms';
+import {
+  buildPaginationState,
+  resolveResponseData,
+  resolveResponsePagination,
+} from '../util/pagination';
 
 const fieldsConst = filterBaixaFields;
 const fieldsState: any = {};
@@ -28,11 +34,7 @@ export default function Baixa() {
   const [baixas, setBaixas] = useState<any[]>();
 
   const [filterCurrent, setFilter] = useState<any>({});
-  const [pagination, setPagination] = useState<any>({
-    currentPage: 1,
-    pageSize: 10,
-    totalPages: 0,
-  });
+  const [pagination, setPagination] = useState<any>(buildPaginationState());
 
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -56,18 +58,14 @@ export default function Baixa() {
     setFilter(formState)
 
     try {
-      const format: any = {
+      const format: any = mapFormValuesToPayload({
+        ...formState,
         baixa: formState.baixa === undefined ? false : formState.baixa,
-      };
-      delete formState.baixa;
-
-      Object.keys(formState).forEach((key: any) => {
-        format[key] = formState[key]?.id || undefined;
       });
 
-      const { data }: any = await filter('baixa', format, `page=${pag.currentPage}&pageSize=${pag.pageSize}`);
-      setBaixas(data.data || data.data.data);
-      setPagination(data.pagination || data.data.pagination)
+      const response: any = await filter('baixa', format, `page=${pag.currentPage}&pageSize=${pag.pageSize}`);
+      setBaixas(resolveResponseData(response));
+      setPagination(resolveResponsePagination(response, pag));
     } catch (error) {
       renderToast(buildErrorToast(error, 'Erro na conexão!'));
     } finally {
