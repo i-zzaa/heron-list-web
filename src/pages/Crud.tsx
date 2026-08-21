@@ -8,10 +8,13 @@ import { TemporaryPasswordModal } from '../components';
 import Patient from './Patient';
 import { permissionAuth } from '../contexts/permission';
 import { buildErrorToast } from '../util/error';
+import { usePersistedTabIndex } from '../hooks/usePersistedTabIndex';
 
 export const Crud = () => {
   const { renderToast } = useToast();
   const { hasPermition } = permissionAuth();
+  const { activeIndex, setActiveIndex } =
+    usePersistedTabIndex('tab-index-cadastro');
   const canAccess = (permission: string) => Boolean(hasPermition(permission));
   const noop = () => undefined;
 
@@ -112,7 +115,11 @@ export const Crud = () => {
 
   return (
     <div className="card">
-      <TabView className="tabview-custom">
+      <TabView
+        className="tabview-custom"
+        activeIndex={activeIndex}
+        onTabChange={(e) => setActiveIndex(e.index)}
+      >
         {canAccess('CADASTRO_PACIENTES') && (
           <TabPanel header="Pacientes" leftIcon="pi pi-user">
             <Patient />

@@ -19,6 +19,7 @@ import { buildEspecialidadeColorMap, formaTime, moneyFormat } from '../util/util
 import { LoadingHeron } from '../components/loading';
 import { Accordion, AccordionTab } from 'primereact/accordion';
 import * as XLSX from 'xlsx';
+import { usePersistedTabIndex } from '../hooks/usePersistedTabIndex';
 
 const fieldsConstTerapeuta = filterFinancialFields;
 const fieldsState1: any = {};
@@ -44,6 +45,9 @@ export default function Financial() {
   const [geral, setGeral] = useState<any>({});
 
   const [info, setInfo] = useState<any>({});
+
+  const { activeIndex, setActiveIndex } =
+    usePersistedTabIndex('tab-index-financeiro');
 
   const resetList = (e: any) => {
     setList([]);
@@ -512,7 +516,9 @@ export default function Financial() {
     <div className="grid gap-8">
       <TabView
         className="tabview-custom"
+        activeIndex={activeIndex}
         onBeforeTabChange={(e) => resetList(e)}
+        onTabChange={(e) => setActiveIndex(e.index)}
       >
         <TabPanel header="Terapeuta" leftIcon="pi pi-user">
           {renderScreenTerapeuta()}
