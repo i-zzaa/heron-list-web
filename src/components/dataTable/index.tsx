@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Accordion, AccordionTab } from 'primereact/accordion';
 import { Input } from '../input';
-import { InputSwitch } from 'primereact/inputswitch';
 
 interface DataTableHeronProps {
   value: any;
@@ -42,10 +41,6 @@ export const DataTableHeron = ({
       };
 
   const [cargaHoraria, setCargaHoraria] = useState<any>(WORKINGHOURS);
-
-  // useEffect(()=> {
-  //   if (Object.keys(value).length ) setCargaHoraria(value)
-  // }, [])
 
   const renderHours = (day: string) => {
     return Object.keys(cargaHoraria[day]).map((hour: any) => (

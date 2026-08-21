@@ -26,7 +26,7 @@ export const intercepttRoute = (token: string, login: string) => {
       return config;
     },
     (error) => {
-      console.log('error', error);
+      console.error('error', error);
 
       return Promise.reject(error);
     }
@@ -42,7 +42,7 @@ export const intercepttRoute = (token: string, login: string) => {
         try {
           api.get('/logout');
         } catch (logoutError) {
-          console.log(logoutError);
+          console.error(logoutError);
         }
       }
       return Promise.reject(error);

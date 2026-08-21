@@ -92,6 +92,14 @@ export const Crud = () => {
       namelist: 'grupo-permissoes',
       onClick: noop,
     },
+    {
+      permission: 'CADASTRO_TICKET',
+      header: 'Ticket',
+      leftIcon: 'pi pi-ticket',
+      screen: 'CADASTRO_TICKET',
+      namelist: 'ticket',
+      onClick: noop,
+    },
   ];
 
   return (

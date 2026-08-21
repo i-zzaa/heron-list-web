@@ -116,7 +116,7 @@ export default function Devolutiva() {
     }
   };
 
-  const sendUpdate = async (url: string, body: any, filter: any) => {
+  const sendUpdate = async (url: string, body: any) => {
     try {
       await update(url, body);
       setOpenSchedule(false);
@@ -129,15 +129,6 @@ export default function Devolutiva() {
   const handleSchedule = async ({ item, typeButtonFooter }: any) => {
     switch (typeButtonFooter) {
       case 'devolutiva':
-        // const body: any = {
-        //   id: item.vaga.id,
-        //   devolutiva: !item.vaga.devolutiva,
-        // };
-        // sendUpdate('vagas/devolutiva', body, {
-        //   naFila: false,
-        //   devolutiva: item.vaga.devolutiva,
-        // });4
-
         setPatient(item);
         formatCalendar(item);
         setOpenCalendarForm(true);
@@ -162,7 +153,7 @@ export default function Devolutiva() {
               ? [especialidade.especialidadeId]
               : [],
           };
-          sendUpdate('vagas/agendar', body, { naFila: !item.vaga.naFila });
+          sendUpdate('vagas/agendar', body);
         } else {
           setPatient(item);
           formatCalendar(item);
@@ -192,7 +183,7 @@ export default function Devolutiva() {
     };
 
     setOpenSchedule(false);
-    sendUpdate('vagas/agendar', body, { naFila: !patient.vaga.naFila });
+    sendUpdate('vagas/agendar', body);
   };
 
   const formtDate = (value: PacientsProps) => {
@@ -294,16 +285,12 @@ export default function Devolutiva() {
               const format = especialidades.filter(
                 (value: any) => value !== undefined
               );
-              sendUpdate(
-                'vagas/agendar/especialidade',
-                {
-                  vagaId: patient.vaga.id,
-                  especialidades: format,
-                  statusPacienteCod: STATUS_PACIENT_COD.queue_devolutiva,
-                  pacienteId: formValueState.paciente.id,
-                },
-                { naFila: !patient.vaga.naFila }
-              );
+              sendUpdate('vagas/agendar/especialidade', {
+                vagaId: patient.vaga.id,
+                especialidades: format,
+                statusPacienteCod: STATUS_PACIENT_COD.queue_devolutiva,
+                pacienteId: formValueState.paciente.id,
+              });
 
               renderPatient();
               setOpenCalendarForm(false);

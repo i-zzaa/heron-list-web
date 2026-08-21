@@ -241,8 +241,7 @@ interface Pendencia {
 }
 
 // Categorias reais informadas pelo backend: avisar hoje / evolução não
-// lançada / conflito de agenda — só essas três, não as cinco genéricas de
-// um mockup.
+// lançada / conflito de agenda / documentos (Plano/Laudo) vencendo.
 const PENDENCIA_META: Record<string, { icon: string; color: string }> = {
   'avisar-hoje': { icon: 'pi pi-bell', color: 'text-yellow-500' },
   avisarhoje: { icon: 'pi pi-bell', color: 'text-yellow-500' },
@@ -250,6 +249,8 @@ const PENDENCIA_META: Record<string, { icon: string; color: string }> = {
   evolucaonaolancada: { icon: 'pi pi-file-edit', color: 'text-red-400' },
   'conflito-agenda': { icon: 'pi pi-calendar-times', color: 'text-red-400' },
   conflitoagenda: { icon: 'pi pi-calendar-times', color: 'text-red-400' },
+  'documentos-vencendo': { icon: 'pi pi-file', color: 'text-yellow-500' },
+  documentosvencendo: { icon: 'pi pi-file', color: 'text-yellow-500' },
 };
 
 const buildPendencias = (raw: any): Pendencia[] => {

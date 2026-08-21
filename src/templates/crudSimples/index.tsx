@@ -145,7 +145,6 @@ export default function CrudSimples({
       }
       setLoading(true);
       const response = await search(namelist, word.search);
-      setValue('search', '');
       const lista = response.status === 200 ? response.data : [];
       setList(lista);
       setPagination(buildPaginationState(1, 0, 0));

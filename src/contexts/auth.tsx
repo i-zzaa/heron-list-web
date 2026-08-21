@@ -1,4 +1,4 @@
-import React, {
+import {
   createContext,
   useState,
   useEffect,
@@ -86,7 +86,7 @@ export const AuthProvider = ({ children }: Props) => {
     try {
       await api.get('/logout');
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }, [clearInactivityTimer]);
 

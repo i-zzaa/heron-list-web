@@ -1,8 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { filter, getList, update } from '../server';
+import { useCallback, useEffect, useState } from 'react';
+import { filter, update } from '../server';
 
 import { useToast } from '../contexts/toast';
-import { permissionAuth } from '../contexts/permission';
 import { Card, Confirm, Filter, Modal, List } from '../components/index';
 import { filterAvaliationFields } from '../constants/formFields';
 import { ScheduleForm } from '../foms/ScheduleForm';
@@ -24,7 +23,6 @@ const fieldsState: any = {};
 fieldsConst.forEach((field: any) => (fieldsState[field.id] = ''));
 
 export default function Avaliation() {
-  const { hasPermition } = permissionAuth();
   const [patients, setPatients] = useState<PacientsProps[]>([]);
   const [patient, setPatient] = useState<any>();
   const [patientFormatCalendar, setPatientFormatCalendar] = useState<any>();
@@ -41,29 +39,6 @@ export default function Avaliation() {
   const { renderDropdownQueue, renderPacientes } = useDropdown();
 
   const { renderToast } = useToast();
-
-  // const renderPatient = useCallback(async () => {
-  //   setLoading(true);
-  //   try {
-  //     setLoading(true);
-  //     setPatients([]);
-  //     const response = await getList(
-  //       `paciente?statusPacienteCod=${STATUS_PACIENT_COD.queue_avaliation}&page=${pagination.currentPage}&pageSize=${pagination.pageSize}`
-  //     );
-  //     setPatients(response.data);
-  //     setPagination(response.pagination)
-
-  //     setLoading(false);
-  //   } catch ({ message }: any) {
-  //     setLoading(false);
-  //     renderToast({
-  //       type: 'failure',
-  //       title: 'Erro!',
-  //       message: 'Falha na conexão',
-  //       open: true,
-  //     });
-  //   }
-  // }, []);
 
   const handleDisabled = async () => {
     setOpenConfirm(false);
@@ -123,7 +98,7 @@ export default function Avaliation() {
     }
   };
 
-  const sendUpdate = async (url: string, body: any, filter: any) => {
+  const sendUpdate = async (url: string, body: any) => {
     try {
       await update(url, body);
       setOpenSchedule(false);
@@ -157,7 +132,7 @@ export default function Avaliation() {
               ? [especialidade.especialidadeId]
               : [],
           };
-          sendUpdate('vagas/agendar', body, { naFila: !item.vaga.naFila });
+          sendUpdate('vagas/agendar', body);
         } else {
           setPatient(item);
           formatCalendar(item);
@@ -187,7 +162,7 @@ export default function Avaliation() {
     };
 
     setOpenSchedule(false);
-    sendUpdate('vagas/agendar', body, { naFila: !patient.vaga.naFila });
+    sendUpdate('vagas/agendar', body);
   };
 
   const formtDate = (value: PacientsProps) => {
@@ -281,16 +256,12 @@ export default function Avaliation() {
             isEdit={false}
             statusPacienteCod={STATUS_PACIENT_COD.queue_avaliation}
             onClose={async (formValueState: any) => {
-              sendUpdate(
-                'vagas/agendar/especialidade',
-                {
-                  vagaId: patient.vaga.id,
-                  especialidadeId: formValueState.especialidade.id,
-                  statusPacienteCod: STATUS_PACIENT_COD.queue_avaliation,
-                  pacienteId: formValueState.paciente.id,
-                },
-                { naFila: !patient.vaga.naFila }
-              );
+              sendUpdate('vagas/agendar/especialidade', {
+                vagaId: patient.vaga.id,
+                especialidadeId: formValueState.especialidade.id,
+                statusPacienteCod: STATUS_PACIENT_COD.queue_avaliation,
+                pacienteId: formValueState.paciente.id,
+              });
 
               handleSubmitFilter({ naFila: true });
               setOpenCalendarForm(false);

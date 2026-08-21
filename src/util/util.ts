@@ -70,15 +70,25 @@ export const firtUpperCase = (string: string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
 };
 
-export const setColorChips = () => {
+// Pinta os chips do multiselect de Especialidade com a cor de verdade
+// cadastrada em Cadastro > Especialidade (`especialidades` traz `cor` por
+// item, ex. vindo do catálogo completo). O mapa fixo de códigos
+// (colorsData) só entra como fallback pra quem ainda usa a sigla (TO,
+// FONO, PSICO...) em vez do nome completo da especialidade — sem isso,
+// nomes como "Fisioterapia"/"Fonoaudiologia" nunca batiam com as siglas e
+// o chip ficava sempre na cor padrão do PrimeReact, sem nenhuma cor real.
+export const setColorChips = (especialidades: any[] = []) => {
+  const colorMap = buildEspecialidadeColorMap(especialidades);
+
   setTimeout(() => {
     const chips: any = document.querySelectorAll('.p-multiselect-token') || [];
     chips.forEach((chip: any) => {
-      const color = colorsData[chip.textContent.toUpperCase()];
-      const text = colorsTextData[chip.textContent.toUpperCase()];
+      const nome = chip.textContent.toUpperCase();
+      const color = colorMap[nome] || colorsData[nome];
+      if (!color) return;
 
       chip.style.background = color;
-      chip.style.color = text;
+      chip.style.color = colorsTextData[nome] || '#ffffff';
     });
   }, 0);
 };
@@ -89,7 +99,6 @@ export const formatdate = (date: any) => {
 
 export const formatdateeua = (date: any) => {
   moment.locale('pt-br');
-  // return moment(date).add(1, 'days').format('YYYY-MM-DD');
   return moment(date).format('YYYY-MM-DD');
 };
 
@@ -105,7 +114,7 @@ export const diffWeek = (dataInicio: any, dataAtual: any) => {
 
 export const weekDay = [
   'Segunda-feira',
-  'Terca-feira',
+  'Terça-feira',
   'Quarta-feira',
   'Quinta-feira',
   'Sexta-feira',
@@ -174,6 +183,15 @@ export const formtDatePatient = (value: PacientsProps) => {
     }),
     tipoSessaoId: value?.tipoSessao || null,
     observacao: value?.vaga?.observacao || '',
+    // Sem isso, abrir o cadastro pra editar sempre mostrava esses dois
+    // campos em branco — mesmo com a data de emissão já preenchida no
+    // paciente — porque essa função monta o objeto do formulário campo a
+    // campo e esses dois nunca tinham entrado na lista. Os nomes batem com
+    // o que o backend realmente devolve (`dataEmissaoPlanoTerapeutico` /
+    // `dataEmissaoLaudoMedico`), não com o nome curto que a gente supôs
+    // antes de conferir a resposta real.
+    dataEmissaoPlanoTerapeutico: value?.dataEmissaoPlanoTerapeutico || '',
+    dataEmissaoLaudoMedico: value?.dataEmissaoLaudoMedico || '',
   };
 };
 

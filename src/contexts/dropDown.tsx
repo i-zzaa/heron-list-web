@@ -1,4 +1,4 @@
-import { createContext, useContext, useCallback, useMemo } from 'react';
+import { createContext, useContext, useCallback } from 'react';
 import { dropDown, getList } from '../server';
 import {
   COORDENADOR,
@@ -16,6 +16,7 @@ export interface DropdownContextData {
   renderFrequencia: () => void;
   renderLocalidade: () => void;
   renderFuncao: () => void;
+  renderTicket: () => void;
   renderEspecialidade: () => void;
   renderEspecialidadeCatalogo: () => void;
   renderTerapeutas: () => void;
@@ -121,6 +122,11 @@ export const DropdownProvider = ({ children }: Props) => {
 
   const renderFuncao = useCallback(async () => {
     const response: any = await dropDown('funcao');
+    return response;
+  }, []);
+
+  const renderTicket = useCallback(async () => {
+    const response: any = await dropDown('ticket');
     return response;
   }, []);
 
@@ -251,7 +257,10 @@ export const DropdownProvider = ({ children }: Props) => {
     const dropDownList = {
       pacientes: await renderPacientes(statusPacienteCod),
       convenios: await renderConvenio(),
-      especialidades: await renderEspecialidade(),
+      // Catálogo completo (com `cor`), não o dropdown enxuto — essa lista
+      // alimenta o multiselect de Especialidade no cadastro de paciente, e
+      // sem a cor real cadastrada os chips não têm como ser pintados.
+      especialidades: await renderEspecialidadeCatalogo(),
       tipoSessao: await renderTipoSessao(),
       periodos: await renderPeriodo(),
       status: await renderStatus(statusPacienteCod),
@@ -289,6 +298,7 @@ export const DropdownProvider = ({ children }: Props) => {
       // um objeto aninhado) — precisamos do catálogo completo aqui pra
       // conseguir casar nome -> cor cadastrada no backend.
       especialidades: await renderEspecialidadeCatalogo(),
+      tickets: await renderTicket(),
     };
 
     return dropDownList;
@@ -355,6 +365,7 @@ export const DropdownProvider = ({ children }: Props) => {
         renderFrequencia,
         renderLocalidade,
         renderFuncao,
+        renderTicket,
         renderEspecialidade,
         renderEspecialidadeCatalogo,
         renderTerapeutas,

@@ -8,9 +8,8 @@ import { InputSwitch } from 'primereact/inputswitch';
 import { Checkbox } from 'primereact/checkbox';
 import { ListBox } from 'primereact/listbox';
 
-import { colorsData, colorsTextData, setColorChips } from '../../util/util';
+import { setColorChips } from '../../util/util';
 import { clsx } from 'clsx';
-import moment from 'moment';
 import { PickListHeron } from '../pickListHeron';
 import { DataTableHeron } from '../dataTable';
 import { InputNumber } from 'primereact/inputnumber';
@@ -128,6 +127,11 @@ export function Input({
           />
         );
       case 'multiselect':
+        // A cor de cada chip vem da especialidade cadastrada (options traz
+        // `cor` por item) — repintar também no onChange garante que uma
+        // especialidade recém-selecionada já apareça colorida, sem esperar
+        // o próximo re-render.
+        setColorChips(options);
         return (
           <Controller
             name={id}
@@ -139,10 +143,19 @@ export function Input({
                 id={field.id}
                 display="chip"
                 optionLabel="nome"
+                // Sem isso o PrimeReact só reconhece um item como
+                // selecionado (e só preenche o texto do chip) se o objeto
+                // salvo no formulário for IGUAL, campo a campo, ao objeto
+                // da lista de opções — então bastava a lista de opções
+                // trazer um campo a mais (como `cor`) pra os chips
+                // renderizarem em branco. Comparando só por `id` resolve
+                // isso pra sempre, independente de quantos campos a mais
+                // as opções tragam no futuro.
+                dataKey="id"
                 filter
                 value={getInputValue(value, field.value)}
                 onChange={(e: any) => {
-                  setColorChips();
+                  setColorChips(options);
                   onChange && onChange(e.value);
                   field.onChange(e.value);
                 }}

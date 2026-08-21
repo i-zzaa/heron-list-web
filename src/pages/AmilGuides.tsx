@@ -3,7 +3,7 @@ import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import moment from 'moment';
 
-import { ButtonHeron, Card, Filter, Modal, Title } from '../components/index';
+import { ButtonHeron, Card, Filter, Modal } from '../components/index';
 import { LoadingHeron } from '../components/loading';
 import { NotFound } from '../components/notFound';
 import PaginationComponent from '../components/Pagination';

@@ -12,6 +12,7 @@ import { filterBaixaFields } from '../constants/formFields';
 import PaginationComponent from '../components/Pagination';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
+import { Dropdown } from 'primereact/dropdown';
 import { STATUS_PACIENT_COD } from '../constants/patient';
 import { NotFound } from '../components/notFound';
 import { Tag } from '../components/tag';
@@ -60,7 +61,7 @@ export default function Baixa() {
       };
       delete formState.baixa;
 
-      await Object.keys(formState).map((key: any) => {
+      Object.keys(formState).forEach((key: any) => {
         format[key] = formState[key]?.id || undefined;
       });
 
@@ -89,6 +90,18 @@ export default function Baixa() {
       handleSubmitFilter();
     } catch (error) {
       renderToast(buildErrorToast(error, 'Não foi possível excluir.'));
+    }
+  };
+
+  // Inclui/altera/remove o ticket vinculado à baixa — `ticketId: null` some
+  // com o vínculo (o próprio Dropdown do PrimeReact já manda `null` quando
+  // o usuário limpa a seleção via `showClear`).
+  const handleUpdateTicket = async (rowData: any, ticketId: number | null) => {
+    try {
+      await update('baixa', { id: rowData.id, ticketId });
+      handleSubmitFilter();
+    } catch (error) {
+      renderToast(buildErrorToast(error, 'Não foi possível atualizar o ticket.'));
     }
   };
 
@@ -126,6 +139,20 @@ const deleteBodyTemplate = (rowData: any): any => {
     </div>
   )
 };
+
+  const ticketBodyTemplate = (rowData: any): any => (
+    <Dropdown
+      value={rowData.ticketId ?? null}
+      options={dropDownList?.tickets}
+      optionLabel="nome"
+      optionValue="id"
+      placeholder="Selecionar"
+      showClear
+      disabled={!hasPermition('AGENDA_BAIXA_UPDATE')}
+      className="w-full"
+      onChange={(e: any) => handleUpdateTicket(rowData, e.value ?? null)}
+    />
+  );
 
   const especialidadeColorMap = buildEspecialidadeColorMap(dropDownList?.especialidades);
 
@@ -171,6 +198,7 @@ const deleteBodyTemplate = (rowData: any): any => {
             <Column field="localidade" header="Local"></Column>
             <Column field="dataBaixa" header="Data/Hora Baixa"></Column>
             <Column field="usuario" header="Usuário"></Column>
+            <Column field="ticket" header="Ticket" style={{ minWidth: '10rem' }} body={ticketBodyTemplate} />
             <Column field="baixa" header="Baixa" dataType="boolean" bodyClassName="text-center" headerStyle={{ textAlign: 'center' }}  body={verifiedBodyTemplate} />
             <Column field="excluir" header="Excluir" dataType="boolean" bodyClassName="text-center" headerStyle={{ textAlign: 'center' }}  body={deleteBodyTemplate} />
         </DataTable> : 

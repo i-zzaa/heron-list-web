@@ -86,8 +86,14 @@ const FREQ_MAP: Record<string, number> = {
   daily: RRule.DAILY,
 };
 
+// O backend manda `start`/`end` já como data+hora completos, só que com
+// espaço em vez de "T" (ex.: "2026-08-03 15:00", não "2026-08-03T15:00") —
+// checar só `.includes('T')` classificava isso como "hora solta" e
+// prefixava a data de novo (`"2026-08-03 2026-08-03 15:00"`), uma string
+// inválida que o moment não parseia — por isso o evento inteiro sumia da
+// agenda. Detecta pela presença da data no começo, não pelo separador.
 const hasDateTime = (value: unknown) =>
-  typeof value === 'string' && value.includes('T');
+  typeof value === 'string' && /^\d{4}-\d{2}-\d{2}[ T]/.test(value.trim());
 
 const toIsoDateTime = (value: unknown): string => {
   const str = String(value ?? '');

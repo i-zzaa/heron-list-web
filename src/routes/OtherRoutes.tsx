@@ -3,6 +3,7 @@ import { permissionAuth } from '../contexts/permission';
 import { Layout } from '../foms/Layout';
 import { Nav } from '../components/Nav';
 import { MustChangePasswordModal } from '../components/mustChangePasswordModal';
+import { NotificationsBell } from '../components/notificationsBell';
 import { Crud } from '../pages/Crud';
 import Home from '../pages/Home';
 import Profile from '../pages/Profile';
@@ -56,6 +57,7 @@ const OtherRoutes = () => {
   return (
     <div className="min-h-full overflow-hidden bg-background h-screen w-full">
       <Nav />
+      <NotificationsBell />
       <main className={`${ open ? 'ml-36' : 'ml-14'} p-4 duration-700`}>
         {/* Enquanto a troca de senha obrigatória estiver pendente, as
             páginas não são montadas: evita que telas por trás do modal

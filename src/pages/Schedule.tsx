@@ -1,7 +1,5 @@
 import { TabPanel, TabView } from 'primereact/tabview';
 import { permissionAuth } from '../contexts/permission';
-import Avaliation from './Avaliation';
-import Therapy from './Therapy';
 import ScheduleCalendar from './ScheduleCalendar';
 import Baixa from './Baixa';
 

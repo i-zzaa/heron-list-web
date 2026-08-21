@@ -1,14 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { filter, getList, getPost } from '../server';
-import {
-  ButtonHeron,
-  Card,
-  Filter,
-  TextSubtext,
-  Title,
-} from '../components/index';
-import { permissionAuth } from '../contexts/permission';
+import { getPost } from '../server';
+import { ButtonHeron, Card, Filter } from '../components/index';
 import { useToast } from '../contexts/toast';
 import { buildErrorToast } from '../util/error';
 import {
@@ -17,7 +10,6 @@ import {
 } from '../constants/financial';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { Dropdown } from 'primereact/dropdown';
 import { useDropdown } from '../contexts/dropDown';
 import { STATUS_PACIENT_COD } from '../constants/patient';
 import { NotFound } from '../components/notFound';
@@ -45,7 +37,6 @@ export default function Financial() {
   const [loading, setLoading] = useState<boolean>(false);
   const [dropDownList, setDropDownList] = useState<any>([]);
 
-  const { hasPermition } = permissionAuth();
   const { renderDropdownFinancial } = useDropdown();
   const { renderToast } = useToast();
 
@@ -66,7 +57,7 @@ export default function Financial() {
     try {
       const format: any = {};
 
-      await Object.keys(formState).map((key: any) => {
+      Object.keys(formState).forEach((key: any) => {
         if (key.indexOf('Id') !== -1) {
           format[key] = formState[key]?.id || undefined;
         } else {
@@ -131,17 +122,6 @@ export default function Financial() {
           <span className="font-inter">{reducerHorasTotal(data)}</span>
         </span>
       </span>
-    );
-  };
-
-  const pacienteBodyTemplate = (rowData: any) => {
-    return rowData.devolutiva ? (
-      <div className="flex gap-2">
-        <i className="pi pi-tag text-violet-600" />
-        {rowData.paciente}
-      </div>
-    ) : (
-      rowData.paciente
     );
   };
 

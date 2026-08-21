@@ -111,12 +111,6 @@ export const DataTableSessaoHeron = ({
     if (valueForm.field === 'especialidade' || valueForm.field === 'funcao')
       return;
 
-    // let { rowIndex, field } = valueForm;
-
-    // const list = [...sessoes];
-    // list[rowIndex][field] = sessao;
-
-    // setSessoes(list);
     onChange(sessoes);
   };
 

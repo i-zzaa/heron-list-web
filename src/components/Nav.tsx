@@ -36,7 +36,7 @@ export const Nav = () => {
 
   return (
     <aside onMouseEnter={()=>  setOpen(true)} onMouseLeave={()=> setOpen(false)} className={`fixed border-box shadow-3xl ${open ? 'w-36' :'w-12'} h-[98vh] mt-[1vh] ml-1 rounded-3xl  bg-primary duration-700 flex flex-col`}>
-      {open ? <div className="bg-logo-md-write bg-no-repeat bg-cover h-20 "></div> :  <div className="bg-logo-mini bg-no-repeat bg-cover h-12 w-12 duration-700"></div>}
+      {open ? <div className="bg-logo-md-write bg-no-repeat bg-cover h-20 "></div> :  <div className="bg-logo-mini bg-no-repeat rounded-full bg-cover h-12 w-12 duration-700"></div>}
 
       {/* O bloco de nome/perfil é o próprio link pra tela de Perfil — em
           vez de um item separado no menu, é onde o usuário já espera
@@ -45,7 +45,12 @@ export const Nav = () => {
         to={profileRoute?.path || CONSTANTES_ROUTERS.PROFILE}
         data-testid="nav-profile-link"
         className={`block border-y border-primary-text my-6 py-2 duration-700 ${
-          isProfileActive ? 'bg-primary-hover' : 'hover:bg-primary-hover'
+          // O hover dos itens do menu (mais abaixo) troca o fundo pra branco
+          // sólido E o texto pra roxo — aqui o texto continuava branco, então
+          // um fundo branco sólido apagava tudo. Um relevo sutil (branco bem
+          // translúcido sobre o roxo) já indica "isso é clicável" sem
+          // precisar trocar a cor do texto.
+          isProfileActive ? 'bg-primary-hover' : 'hover:bg-primary-hover/10'
         }`}
       >
         <h3 className={`text-center font-light text-sm duration-1000 ${isProfileActive ? 'text-primary-text-hover' : 'text-primary-text'}`}> {  open ? user.nome : user?.nome?.charAt(0) }</h3>

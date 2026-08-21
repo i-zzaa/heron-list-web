@@ -106,7 +106,7 @@ export const PatientTherapy = ({
   };
 
   useEffect(() => {
-    value?.nome && setColorChips();
+    value?.nome && setColorChips(dropdown?.especialidades);
   }, [value]);
 
   return (

@@ -22,7 +22,7 @@ fieldsConst.forEach((field: any) => (fieldsState[field.id] = ''));
 
 export default function Therapy() {
   const { hasPermition } = permissionAuth();
-  const [fields, setFields] = useState(fieldsConst);
+  const [fields] = useState(fieldsConst);
 
   const [patients, setPatients] = useState<PacientsProps[]>([]);
   const [patient, setPatient] = useState<any>();

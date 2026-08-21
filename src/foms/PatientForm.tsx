@@ -6,7 +6,8 @@ import { create, update } from '../server';
 import { buildErrorToast } from '../util/error';
 import { ButtonHeron, Input } from '../components/index';
 import { moneyFormat, setColorChips } from '../util/util';
-import { PERIODO, STATUS, STATUS_PACIENT_COD, TIPO_SESSAO } from '../constants/patient';
+import { PERIODO, STATUS, TIPO_SESSAO } from '../constants/patient';
+import { notifyDocumentAlertsMightHaveChanged } from '../util/documentAlertsBus';
 
 export interface OptionProps {
   id: string;
@@ -33,6 +34,8 @@ export interface PacientsProps {
   status: OptionProps;
   tipoSessao: OptionProps;
   sessao: any[];
+  dataEmissaoPlanoTerapeutico?: string;
+  dataEmissaoLaudoMedico?: string;
 }
 
 export const PatientForm = ({
@@ -63,30 +66,20 @@ export const PatientForm = ({
 
     try {
       let data;
-      const formatValues =
-        statusPacienteCod === STATUS_PACIENT_COD.queue_avaliation
-          ? {
-              ...body,
-              periodoId: body?.periodoId?.id || PERIODO.integral,
-              convenioId: body?.convenioId?.id || null,
-              statusId: body?.statusId?.id || STATUS.padrao,
-              tipoSessaoId: body?.tipoSessaoId?.id || TIPO_SESSAO.terapeuta,
-              especialidades: (body?.especialidades || []).map(
-                (item: OptionProps) => item.id
-              ),
-              statusPacienteCod: statusPacienteCod,
-            }
-          : {
-              ...body,
-              periodoId: body?.periodoId?.id || PERIODO.integral, // padrao 3 de integral
-              convenioId: body?.convenioId?.id || null,
-              statusId: body?.statusId?.id || STATUS.padrao, // padrao 1 de padrao
-              tipoSessaoId: body?.tipoSessaoId?.id || TIPO_SESSAO.terapeuta,
-              especialidades: (body?.especialidades || []).map(
-                (item: OptionProps) => item.id
-              ),
-              statusPacienteCod: statusPacienteCod,
-            };
+      // As duas ramas de `statusPacienteCod` (avaliação vs. demais filas)
+      // montavam exatamente o mesmo objeto — não havia diferença real entre
+      // elas, só duplicação.
+      const formatValues = {
+        ...body,
+        periodoId: body?.periodoId?.id || PERIODO.integral,
+        convenioId: body?.convenioId?.id || null,
+        statusId: body?.statusId?.id || STATUS.padrao,
+        tipoSessaoId: body?.tipoSessaoId?.id || TIPO_SESSAO.terapeuta,
+        especialidades: (body?.especialidades || []).map(
+          (item: OptionProps) => item.id
+        ),
+        statusPacienteCod,
+      };
 
       if (isEdit) {
         formatValues.id = value.id;
@@ -102,6 +95,11 @@ export const PatientForm = ({
         message: data?.data.message,
         open: true,
       });
+
+      // Emissão do Plano/Laudo pode ter mudado — o sino precisa buscar a
+      // lista de vencimentos de novo, senão um aviso já resolvido continua
+      // aparecendo até recarregar a página.
+      notifyDocumentAlertsMightHaveChanged();
 
       return onClose();
     } catch (error) {
@@ -138,12 +136,9 @@ export const PatientForm = ({
   };
 
   useEffect(() => {
-    value?.nome && setColorChips();
+    value?.nome && setColorChips(dropdown?.especialidades);
 
-    if (
-      // statusPacienteCod === STATUS_PACIENT_COD.crud_therapy &&
-      value?.sessao
-    ) {
+    if (value?.sessao) {
       setSessoes(value.sessao);
     }
   }, [value]);

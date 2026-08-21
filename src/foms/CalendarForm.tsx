@@ -8,7 +8,7 @@ import { STATUS_PACIENT_COD } from '../constants/patient';
 import { useDropdown } from '../contexts/dropDown';
 import { permissionAuth } from '../contexts/permission';
 import { useToast } from '../contexts/toast';
-import { create, dropDown, getList, update } from '../server';
+import { create, getList, update } from '../server';
 import { buildErrorToast } from '../util/error';
 
 // Rótulos exibidos no toast de campo obrigatório — precisam bater com os
@@ -96,7 +96,6 @@ export const CalendarForm = ({
     setValue,
     unregister,
     handleSubmit,
-    watch,
     formState: { errors },
     control,
     trigger,
@@ -148,13 +147,12 @@ export const CalendarForm = ({
         return;
       }
 
-      let data;
       if (isEdit) {
         payload.id = value.id;
         payload.changeAll = changeAll;
-        data = await update('evento', payload);
+        await update('evento', payload);
       } else {
-        data = await create('evento', payload);
+        await create('evento', payload);
       }
 
       onClose(payload);
@@ -490,7 +488,7 @@ export const CalendarForm = ({
             }`}
             errors={errors}
             control={control}
-            onChange={(value: any) => {
+            onChange={() => {
               const start = getValues('start');
               const time = moment.duration(start);
               const startCalc: any = time.add(1, 'hours');

@@ -1,4 +1,3 @@
-import { Card } from '../../components/card';
 import { Input } from '../../components/input';
 import { ButtonHeron } from '../../components/button';
 import { useForm } from 'react-hook-form';
@@ -160,8 +159,5 @@ export function Filter({
         </form>
       </AccordionTab>
     </Accordion>
-    // <Card legend={legend}>
-
-    // </Card>
   );
 }

@@ -1,11 +1,3 @@
-// export enum statusPacienteCod {
-//   queue_avaliation = 1,
-//   queue_therapy = 2,
-//   therapy = 3,
-//   avaliation = 4,
-//   crud_therapy = 5,
-// }
-
 export enum TIPO_SESSAO {
   av_neuropsico = 1,
   av_psicodiag = 2,
@@ -178,6 +170,28 @@ export const patientAvaliationFields = [
     customCol: 'col-span-6 sm:col-span-6 mb-8',
   },
   {
+    labelText: 'Emissão do Plano Terapêutico',
+    id: 'dataEmissaoPlanoTerapeutico',
+    name: 'dataEmissaoPlanoTerapeutico',
+    type: 'date',
+    customCol: 'col-span-6 sm:col-span-3',
+    singleSelect: false,
+    validate: {
+      required: false,
+    },
+  },
+  {
+    labelText: 'Emissão do Laudo Médico',
+    id: 'dataEmissaoLaudoMedico',
+    name: 'dataEmissaoLaudoMedico',
+    type: 'date',
+    customCol: 'col-span-6 sm:col-span-3',
+    singleSelect: false,
+    validate: {
+      required: false,
+    },
+  },
+  {
     labelText: 'Observação',
     id: 'observacao',
     name: 'observacao',
@@ -321,6 +335,28 @@ export const patientTherapyFields = [
       required: 'Campo obrigatório!',
     },
     customCol: 'col-span-6 sm:col-span-6 mb-8',
+  },
+  {
+    labelText: 'Emissão do Plano Terapêutico',
+    id: 'dataEmissaoPlanoTerapeutico',
+    name: 'dataEmissaoPlanoTerapeutico',
+    type: 'date',
+    customCol: 'col-span-6 sm:col-span-3',
+    singleSelect: false,
+    validate: {
+      required: false,
+    },
+  },
+  {
+    labelText: 'Emissão do Laudo Médico',
+    id: 'dataEmissaoLaudoMedico',
+    name: 'dataEmissaoLaudoMedico',
+    type: 'date',
+    customCol: 'col-span-6 sm:col-span-3',
+    singleSelect: false,
+    validate: {
+      required: false,
+    },
   },
   {
     labelText: 'Observação',
@@ -701,6 +737,28 @@ export const patientCrudFields = [
       required: 'Campo obrigatório!',
     },
     customCol: 'col-span-6 sm:col-span-6 mb-8',
+  },
+  {
+    labelText: 'Emissão do Plano Terapêutico',
+    id: 'dataEmissaoPlanoTerapeutico',
+    name: 'dataEmissaoPlanoTerapeutico',
+    type: 'date',
+    customCol: 'col-span-6 sm:col-span-3',
+    singleSelect: false,
+    validate: {
+      required: false,
+    },
+  },
+  {
+    labelText: 'Emissão do Laudo Médico',
+    id: 'dataEmissaoLaudoMedico',
+    name: 'dataEmissaoLaudoMedico',
+    type: 'date',
+    customCol: 'col-span-6 sm:col-span-3',
+    singleSelect: false,
+    validate: {
+      required: false,
+    },
   },
   {
     labelText: 'Observação',

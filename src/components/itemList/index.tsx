@@ -185,7 +185,6 @@ function itemListSimples({
   textPrimaryLeft,
   textPrimaryRight,
   textSecondLeft,
-  onClickLink,
   onClick,
   textButtonFooter,
   iconButtonFooter,

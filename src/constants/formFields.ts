@@ -466,6 +466,23 @@ const modalidadeFields = [
   },
 ];
 
+const ticketFields = [
+  {
+    labelText: 'Nome',
+    labelFor: 'nome',
+    id: 'nome',
+    name: 'nome',
+    autoComplete: 'nome',
+    isRequired: true,
+    placeholder: 'nome',
+    customCol: 'col-span-6',
+    type: 'text',
+    validate: {
+      required: true,
+    },
+  },
+];
+
 const frequenciaFields = [
   {
     labelText: 'Nome',
@@ -605,11 +622,23 @@ const filterBaixaFields = [
     singleSelect: false,
   },
   {
+    // 2ª linha do filtro (Casa/Ticket/Data Inicial/Data Final) — 4 campos
+    // por linha, por isso cada um ocupa 1/6 (menor que os da 1ª linha, que
+    // ocupam 2/6) em vez de quebrar em mais uma linha de 3.
     permission: 'AGENDA_BAIXA_FILTRO_SELECT_LOCALIDADE',
     labelText: 'Casa',
     id: 'localidadeId',
     name: 'localidades',
-    customCol: 'col-span-6 sm:col-span-2',
+    customCol: 'col-span-6 sm:col-span-1',
+    type: 'select',
+    singleSelect: false,
+  },
+  {
+    permission: 'AGENDA_BAIXA_FILTRO_SELECT_TICKET',
+    labelText: 'Ticket',
+    id: 'ticketId',
+    name: 'tickets',
+    customCol: 'col-span-6 sm:col-span-1',
     type: 'select',
     singleSelect: false,
   },
@@ -619,7 +648,7 @@ const filterBaixaFields = [
     labelText: 'Data Inicial',
     id: 'dataInicio',
     name: 'dataInicio',
-    customCol: 'col-span-6 sm:col-span-2',
+    customCol: 'col-span-6 sm:col-span-1',
     type: 'date',
   },
   {
@@ -627,7 +656,7 @@ const filterBaixaFields = [
     labelText: 'Data Final',
     id: 'datatFim',
     name: 'datatFim',
-    customCol: 'col-span-6 sm:col-span-2',
+    customCol: 'col-span-6 sm:col-span-1',
     type: 'date',
   },
 
@@ -660,4 +689,5 @@ export const Fields: any = {
   frequenciaFields,
   statusEventosFields,
   grupoPermissoesFields,
+  ticketFields,
 };

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { filter, getList, update } from '../server';
+import { useSearchParams } from 'react-router-dom';
+import { filter, update } from '../server';
 
 import { useToast } from '../contexts/toast';
 import { permissionAuth } from '../contexts/permission';
@@ -27,7 +28,7 @@ export default function Patient() {
   const SCREEN = 'CADASTRO_PACIENTES';
   const { hasPermition } = permissionAuth();
 
-  const [fields, setFields] = useState(fieldsConst);
+  const [fields] = useState(fieldsConst);
 
   const [patients, setPatients] = useState<PacientsProps[]>([]);
   const [patient, setPatient] = useState<any>();
@@ -45,27 +46,11 @@ export default function Patient() {
 
   const { renderToast } = useToast();
 
-  // const renderPatient = useCallback(async () => {
-  //   try {
-  //     setLoading(true);
-  //     setPatients([]);
-  //     const response = await getList(
-  //       `paciente?statusPacienteCod=${STATUS_PACIENT_COD.crud_therapy}&page=${pagination.currentPage}&pageSize=${pagination.pageSize}`
-  //     );
-  //     setPatients(response.data);
-  //     setPagination(response.pagination)
-
-  //     setLoading(false);
-  //   } catch (error) {
-  //     setLoading(false);
-  //     renderToast({
-  //       type: 'failure',
-  //       title: 'Erro!',
-  //       message: 'Falha na conexão',
-  //       open: true,
-  //     });
-  //   }
-  // }, []);
+  // Chegando aqui a partir do sino de notificações (?pacienteId=X), filtra
+  // a lista só por esse paciente e abre o cadastro dele sozinho — sem isso
+  // o usuário cairia na tela e teria que procurar o paciente à mão.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const pacienteIdParam = searchParams.get('pacienteId');
 
   const handleDisabled = async () => {
     setOpenConfirm(false);
@@ -119,7 +104,7 @@ export default function Patient() {
     }
   };
 
-  const sendUpdate = async (url: string, body: any, filter: any) => {
+  const sendUpdate = async (url: string, body: any) => {
     try {
       await update(url, body);
       setOpenSchedule(false);
@@ -145,10 +130,7 @@ export default function Patient() {
           id: item.vaga.id,
           devolutiva: !item.vaga.devolutiva,
         };
-        sendUpdate('vagas/devolutiva', body, {
-          naFila: false,
-          devolutiva: item.vaga.devolutiva,
-        });
+        sendUpdate('vagas/devolutiva', body);
         break;
 
       default:
@@ -172,7 +154,7 @@ export default function Patient() {
               ? [especialidade.especialidadeId]
               : [],
           };
-          sendUpdate('vagas/agendar', body, { naFila: !item.vaga.naFila });
+          sendUpdate('vagas/agendar', body);
         } else {
           setPatient(item);
           formatCalendar(item);
@@ -207,7 +189,7 @@ export default function Patient() {
     };
 
     setOpenSchedule(false);
-    sendUpdate('vagas/agendar', body, { naFila: !patient.vaga.naFila });
+    sendUpdate('vagas/agendar', body);
   };
 
   const formtDate = (value: PacientsProps) => {
@@ -223,11 +205,39 @@ export default function Patient() {
   }, []);
 
   useEffect(() => {
-    !hasPermition('CADASTRO_PACIENTES_FILTRO_SELECT_AGENDADOS')
-      ? handleSubmitFilter({ naFila: true, disabled: false })
-      : handleSubmitFilter();
+    if (pacienteIdParam) {
+      // `pacientes` é o mesmo filtro por paciente já usado na tela (campo
+      // select do Filtro) — mapFormValuesToPayload extrai o `.id` daqui.
+      handleSubmitFilter({ pacientes: { id: Number(pacienteIdParam) } });
+    } else if (!hasPermition('CADASTRO_PACIENTES_FILTRO_SELECT_AGENDADOS')) {
+      handleSubmitFilter({ naFila: true, disabled: false });
+    } else {
+      handleSubmitFilter();
+    }
     renderDropdown();
-  }, []);
+    // Precisa reagir a `pacienteIdParam`, não só rodar uma vez: clicar de
+    // novo no sino estando já na rota /cadastro só troca a query string —
+    // a página não desmonta, então sem essa dependência esse efeito nunca
+    // rodaria de novo e o modal não abriria.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pacienteIdParam]);
+
+  // Assim que a lista filtrada por `pacienteId` chegar, abre o cadastro
+  // desse paciente sozinho e limpa o parâmetro da URL (pra não reabrir
+  // sozinho de novo se o usuário fechar o modal e a lista atualizar).
+  useEffect(() => {
+    if (!pacienteIdParam) return;
+
+    const target = patients.find(
+      (item: any) => String(item.id) === pacienteIdParam
+    );
+
+    if (target) {
+      formtDate(target);
+      searchParams.delete('pacienteId');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [patients]);
 
   return (
     <div className="grid">
@@ -304,16 +314,12 @@ export default function Patient() {
             isEdit={false}
             statusPacienteCod={STATUS_PACIENT_COD.crud_therapy}
             onClose={async (formValueState: any) => {
-              sendUpdate(
-                'vagas/agendar/especialidade',
-                {
-                  vagaId: patient.vaga.id,
-                  especialidadeId: formValueState.especialidade.id,
-                  statusPacienteCod: STATUS_PACIENT_COD.crud_therapy,
-                  pacienteId: formValueState.paciente.id,
-                },
-                { naFila: !patient.vaga.naFila }
-              );
+              sendUpdate('vagas/agendar/especialidade', {
+                vagaId: patient.vaga.id,
+                especialidadeId: formValueState.especialidade.id,
+                statusPacienteCod: STATUS_PACIENT_COD.crud_therapy,
+                pacienteId: formValueState.paciente.id,
+              });
 
               handleSubmitFilter();
               setOpenCalendarForm(false);
