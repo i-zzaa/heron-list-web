@@ -31,7 +31,7 @@ fieldsConstPaciente.forEach((field: any) => (fieldsState2[field.id] = ''));
 
 const getCurrentMonthDefaultValues = () => ({
   dataInicio: moment().startOf('month').format('YYYY-MM-DD'),
-  datatFim: moment().endOf('month').format('YYYY-MM-DD'),
+  dataFim: moment().endOf('month').format('YYYY-MM-DD'),
 });
 
 export default function Financial() {

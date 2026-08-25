@@ -1,6 +1,6 @@
 {
   "name": "@heron-list/web",
-  "version": "0.2.3.4",
+  "version": "0.2.3.5",
   "private": true,
   "type": "module",
   "stack": "heroku-20",

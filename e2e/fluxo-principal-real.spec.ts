@@ -260,12 +260,12 @@ test.describe('Fluxo principal real - fila, agenda, baixa e financeiro', () => {
     await openTabByName(page, 'Terapeuta');
     await openFilterIfCollapsed(page);
     await expect(page.getByTestId('dataInicio-field').locator('input')).toBeVisible();
-    await expect(page.getByTestId('datatFim-field').locator('input')).toBeVisible();
+    await expect(page.getByTestId('dataFim-field').locator('input')).toBeVisible();
 
     await openTabByName(page, 'Paciente');
     await openFilterIfCollapsed(page);
     await expect(page.getByTestId('dataInicio-field').locator('input')).toBeVisible();
-    await expect(page.getByTestId('datatFim-field').locator('input')).toBeVisible();
+    await expect(page.getByTestId('dataFim-field').locator('input')).toBeVisible();
   });
 
   test('valida regras basicas do modal de agendamento e dependencias de campos', async ({ page }) => {

@@ -158,7 +158,7 @@ test.describe('Fluxo principal integrado por API', () => {
 
     const financialPayload = {
       dataInicio: readEnv('E2E_FINANCIAL_PERIOD_START') || '2026-01-01',
-      datatFim: readEnv('E2E_FINANCIAL_PERIOD_END') || '2026-12-31',
+      dataFim: readEnv('E2E_FINANCIAL_PERIOD_END') || '2026-12-31',
       terapeutaId: therapistArray[0].id,
       statusEventosId: statusArray[0].id,
     };
@@ -166,7 +166,7 @@ test.describe('Fluxo principal integrado por API', () => {
     const financialTherapist = await apiPost(request, auth, '/financeiro/terapeuta', financialPayload);
     const financialPatient = await apiPost(request, auth, '/financeiro/paciente', {
       dataInicio: financialPayload.dataInicio,
-      datatFim: financialPayload.datatFim,
+      dataFim: financialPayload.dataFim,
       pacienteId: firstTherapyPatient.id,
       statusEventosId: statusArray[0].id,
     });

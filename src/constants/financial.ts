@@ -19,8 +19,8 @@ export const filterFinancialFields = [
   {
     permission: 'FINANCEIRO_FILTRO_SELECT_DATA_FINAL',
     labelText: 'Data Final',
-    id: 'datatFim',
-    name: 'datatFim',
+    id: 'dataFim',
+    name: 'dataFim',
     customCol: 'col-span-6 sm:col-span-1',
     type: 'date',
   },
@@ -59,8 +59,8 @@ export const filterFinancialPacienteFields = [
   {
     permission: 'FINANCEIRO_FILTRO_SELECT_DATA_FINAL',
     labelText: 'Data Final',
-    id: 'datatFim',
-    name: 'datatFim',
+    id: 'dataFim',
+    name: 'dataFim',
     customCol: 'col-span-6 sm:col-span-1',
     type: 'date',
   },

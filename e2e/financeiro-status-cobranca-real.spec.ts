@@ -69,7 +69,7 @@ function mapSeedContext(payload: any): Partial<FinancialContext> {
       source.statusNaoCobravelNome ||
       'Atestado',
     periodStart: source.periodStart || source.dataInicio || readEnv('E2E_FINANCIAL_PERIOD_START') || '2026-01-01',
-    periodEnd: source.periodEnd || source.datatFim || readEnv('E2E_FINANCIAL_PERIOD_END') || '2026-12-31',
+    periodEnd: source.periodEnd || source.dataFim || readEnv('E2E_FINANCIAL_PERIOD_END') || '2026-12-31',
   };
 }
 
@@ -266,14 +266,14 @@ test.describe('Financeiro - Regras de cobranca por status (integrado/API)', () =
 
     const chargeable = await fetchFinancial(request, context, 'terapeuta', {
       dataInicio: context.periodStart,
-      datatFim: context.periodEnd,
+      dataFim: context.periodEnd,
       terapeutaId: therapist!.id,
       statusEventosId: chargeableStatus!.id,
     });
 
     const nonChargeable = await fetchFinancial(request, context, 'terapeuta', {
       dataInicio: context.periodStart,
-      datatFim: context.periodEnd,
+      dataFim: context.periodEnd,
       terapeutaId: therapist!.id,
       statusEventosId: nonChargeableStatus!.id,
     });
@@ -305,14 +305,14 @@ test.describe('Financeiro - Regras de cobranca por status (integrado/API)', () =
 
     const chargeable = await fetchFinancial(request, context, 'paciente', {
       dataInicio: context.periodStart,
-      datatFim: context.periodEnd,
+      dataFim: context.periodEnd,
       pacienteId: patient!.id,
       statusEventosId: chargeableStatus!.id,
     });
 
     const nonChargeable = await fetchFinancial(request, context, 'paciente', {
       dataInicio: context.periodStart,
-      datatFim: context.periodEnd,
+      dataFim: context.periodEnd,
       pacienteId: patient!.id,
       statusEventosId: nonChargeableStatus!.id,
     });
