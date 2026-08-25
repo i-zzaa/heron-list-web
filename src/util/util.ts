@@ -97,6 +97,26 @@ export const formatdate = (date: any) => {
   return moment(date).format('DD/MM/YYYY');
 };
 
+// O backend manda `start`/`end` de evento como data+hora completos (ex.:
+// "2026-08-26 08:00", às vezes em ISO), reservando a hora "limpa" pra
+// `data.start`/`data.end` — usado tanto pelo <input type="time"> do form de
+// edição (que só aceita "HH:mm" puro, senão mostra "--:--") quanto pela
+// exibição no modal de visualização do evento (que sem isso mostrava a data
+// inteira duas vezes: "2026-08-26 08:00 até 2026-08-26 09:00").
+export const formatHorarioEvento = (raw: any): any => {
+  if (!raw) {
+    return raw;
+  }
+
+  const str = String(raw).trim();
+  if (/^\d{2}:\d{2}(:\d{2})?$/.test(str)) {
+    return str.slice(0, 5);
+  }
+
+  const parsed = moment(str.replace(' ', 'T'));
+  return parsed.isValid() ? parsed.format('HH:mm') : str;
+};
+
 export const formatdateeua = (date: any) => {
   moment.locale('pt-br');
   return moment(date).format('YYYY-MM-DD');

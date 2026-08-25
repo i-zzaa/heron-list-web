@@ -4,11 +4,11 @@ import { Calendar, momentLocalizer, View, Views } from 'react-big-calendar';
 // peças que as próprias views "Semana"/"Mês" embrulham por baixo dos panos
 // (ver Week.js/Month.js) — precisamos delas pra montar versões sem domingo,
 // no lugar de reimplementar a grade inteira do zero.
-import TimeGrid from 'react-big-calendar/lib/TimeGrid';
-import DateContentRow from 'react-big-calendar/lib/DateContentRow';
-import RbcHeader from 'react-big-calendar/lib/Header';
-import RbcDateHeader from 'react-big-calendar/lib/DateHeader';
-import PopOverlay from 'react-big-calendar/lib/PopOverlay';
+import * as TimeGridModule from 'react-big-calendar/lib/TimeGrid';
+import * as DateContentRowModule from 'react-big-calendar/lib/DateContentRow';
+import * as RbcHeaderModule from 'react-big-calendar/lib/Header';
+import * as RbcDateHeaderModule from 'react-big-calendar/lib/DateHeader';
+import * as PopOverlayModule from 'react-big-calendar/lib/PopOverlay';
 import { inRange, sortWeekEvents } from 'react-big-calendar/lib/utils/eventLevels';
 import { notify } from 'react-big-calendar/lib/utils/helpers';
 import { navigate as navigateConstants, views as viewConstants } from 'react-big-calendar/lib/utils/constants';
@@ -17,6 +17,39 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { RRule } from 'rrule';
 import moment from 'moment';
 import { firtUpperCase, formatdateeua, getDateFormat } from '../../util/util';
+
+// Esses 5 módulos são CJS puro (`exports.default = X`) — em dev o Vite
+// desembrulha o default direitinho, mas no bundle de produção o
+// `manualChunks` isola o react-big-calendar num chunk próprio e o interop
+// do Rollup embrulha cada um desses módulos de um jeito diferente: a
+// maioria fica só um nível fundo (`mod.default` já é o componente), mas o
+// PopOverlay sai com DOIS níveis (`mod.default` ainda é o objeto de exports
+// original — só `mod.default.default` chega na função de verdade), porque
+// o Rollup sintetiza um namespace mesclado (`_mergeNamespaces`) só pra esse
+// módulo. Usar o import cru sem desembrulhar deixava `<PopOverlay>` com um
+// objeto no lugar da função — React recusa renderizar isso: "Element type
+// is invalid... got: object" (erro minificado #130), só na visão de Mês,
+// só em produção. Por isso o unwrap é recursivo: desce por `.default`
+// enquanto não achar algo chamável (função/classe), em vez de assumir uma
+// profundidade fixa.
+const resolveDefault = (mod: any): any => {
+  let resolved = mod;
+  while (
+    resolved &&
+    typeof resolved !== 'function' &&
+    resolved.default &&
+    resolved.default !== resolved
+  ) {
+    resolved = resolved.default;
+  }
+  return resolved;
+};
+
+const TimeGrid = resolveDefault(TimeGridModule as any);
+const DateContentRow = resolveDefault(DateContentRowModule as any);
+const RbcHeader = resolveDefault(RbcHeaderModule as any);
+const RbcDateHeader = resolveDefault(RbcDateHeaderModule as any);
+const PopOverlay = resolveDefault(PopOverlayModule as any);
 
 // `moment` só entra aqui pra aritmética de datas (soma/range/comparação),
 // que não depende de locale. Pra QUALQUER texto exibido em português (nome

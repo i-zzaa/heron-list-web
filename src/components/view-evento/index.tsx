@@ -3,7 +3,7 @@ import { Dialog } from 'primereact/dialog';
 import { useEffect, useState } from 'react';
 import { ATENDENTE, DESENVOLVEDOR, TERAPEUTA, permissionAuth } from '../../contexts/permission';
 import { isProfile } from '../../util/permissions';
-import { diffWeek, isInPast, weekDay } from '../../util/util';
+import { diffWeek, formatHorarioEvento, isInPast, weekDay } from '../../util/util';
 import { ButtonHeron } from '../button';
 import { Tag } from '../tag';
 import { STATUS_EVENTS } from '../../constants/schedule';
@@ -101,8 +101,13 @@ export const ViewEvento = ({
   );
 
   useEffect(() => {
-    const dateNow = moment().format('YYYY-MM-DD');
-    setButtonEdit(dateNow <= evento.dataAtual);
+    // `dateNow <= evento.dataAtual` (comparação só de data) deixava editar
+    // um evento que já aconteceu mais cedo NO MESMO DIA — só bloqueava a
+    // partir do dia seguinte. Comparando o fim do evento (data + hora)
+    // contra o instante atual, a edição fecha assim que o evento termina.
+    const horaFim = formatHorarioEvento(evento.data?.end ?? evento.end);
+    const fimEvento = moment(`${evento.dataAtual} ${horaFim}`, 'YYYY-MM-DD HH:mm');
+    setButtonEdit(!fimEvento.isValid() || fimEvento.isAfter(moment()));
   });
   return (
     <Dialog
@@ -118,7 +123,10 @@ export const ViewEvento = ({
         <br />
 
         <p className="font-inter font-bold">
-          {evento.date} &bull; {`${evento.start} até ${evento.end}`}
+          {evento.date} &bull;{' '}
+          {`${formatHorarioEvento(
+            evento.data?.start ?? evento.start
+          )} até ${formatHorarioEvento(evento.data?.end ?? evento.end)}`}
         </p>
         {evento.frequencia.id !== 1 && (
           <p>

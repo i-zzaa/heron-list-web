@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import moment from 'moment';
 import { AgendaPage } from './pages/AgendaPage';
 import {
   ESPECIALIDADES,
@@ -56,7 +57,18 @@ const MODALIDADE_RICA = { ...MODALIDADES[2], codigo: 'terapia' }; // Terapia
 const FREQUENCIA_RICA = { ...FREQUENCIAS[0] }; // Recorrente
 const INTERVALO_RICO = { ...INTERVALOS[0] }; // Todas Semanas
 
-const DATA_EVENTO = '2026-08-25'; // terça-feira -> diasFrequencia = [2] ('T')
+// Precisa ser terça-feira (pra bater com o "T" do teste de dias da semana)
+// e no futuro: evento passado não pode mais ser editado (ver ViewEvento),
+// então uma data fixa do passado deixaria esses testes quebrando sozinhos
+// conforme o relógio real avança.
+const DATA_EVENTO = (() => {
+  const data = moment().add(14, 'days');
+  while (data.day() !== 2) {
+    data.add(1, 'days');
+  }
+  return data.format('YYYY-MM-DD');
+})();
+
 const OBSERVACAO_EVENTO = 'Observação preenchida via e2e';
 
 function criarApiMock(evento: Record<string, any>) {
@@ -116,10 +128,15 @@ function montarEvento(overrides: Record<string, any> = {}) {
     dataInicio: DATA_EVENTO,
     dataFim: DATA_EVENTO,
     date: DATA_EVENTO,
-    start: '08:00',
-    end: '09:00',
-    startTime: '08:00',
-    endTime: '09:00',
+    // O backend manda `start`/`end` como data+hora completos (usados pra
+    // posicionar o evento na grade) e a hora "limpa" separada em `data` —
+    // é esse formato de `start`/`end` que quebrava o <input type="time">
+    // do modal de edição (mostrava "--:--").
+    start: `${DATA_EVENTO} 08:00`,
+    end: `${DATA_EVENTO} 09:00`,
+    startTime: `${DATA_EVENTO} 08:00`,
+    endTime: `${DATA_EVENTO} 09:00`,
+    data: { start: '08:00', end: '09:00' },
     exdate: [],
     daysOfWeek: [2],
     diasFrequencia: ['2'],
@@ -160,7 +177,7 @@ async function autenticar(page: any) {
   });
 }
 
-async function abrirEdicaoDoEvento(page: any) {
+async function abrirVisualizacaoDoEvento(page: any) {
   const agendaPage = new AgendaPage(page);
   await agendaPage.abrirAgenda();
   // A visão inicial (Semana) nem sempre deixa o slot na área visível/rolada
@@ -170,6 +187,11 @@ async function abrirEdicaoDoEvento(page: any) {
 
   const dialog = page.locator('.p-dialog:visible').last();
   await expect(dialog).toBeVisible();
+  return dialog;
+}
+
+async function abrirEdicaoDoEvento(page: any) {
+  const dialog = await abrirVisualizacaoDoEvento(page);
   await dialog.locator('button:has(.pi-pencil)').click();
 
   await expect(page.getByTestId('agenda-form')).toBeVisible();
@@ -266,5 +288,99 @@ test.describe('Agenda | modal de edição preenche todos os tipos de campo', () 
 
     // com Local Externo ligado, o select de Local some do formulário
     await expect(page.getByTestId('localidade-select')).toHaveCount(0);
+  });
+
+  test('preenche horário quando a API não manda "data.start"/"data.end", só start/end completos', async ({
+    page,
+  }) => {
+    const evento = montarEvento({ data: undefined });
+    const { routeHandler } = criarApiMock(evento);
+
+    await page.route('**/api/**', routeHandler);
+    await autenticar(page);
+    await abrirEdicaoDoEvento(page);
+
+    await expect(page.getByTestId('hora-inicio-input').locator('input')).toHaveValue('08:00');
+    await expect(page.getByTestId('hora-fim-input').locator('input')).toHaveValue('09:00');
+  });
+
+  test('exibe só a hora no modal de visualização, sem repetir a data', async ({ page }) => {
+    const evento = montarEvento();
+    const { routeHandler } = criarApiMock(evento);
+
+    await page.route('**/api/**', routeHandler);
+    await autenticar(page);
+    const dialog = await abrirVisualizacaoDoEvento(page);
+
+    await expect(dialog).toContainText('08:00 até 09:00');
+    // evento.date aparece uma vez (linha de cima), mas o start/end completo
+    // ("2026-08-25 08:00") não deve vazar pro trecho de horário.
+    await expect(dialog).not.toContainText(`${DATA_EVENTO} 08:00`);
+  });
+});
+
+test.describe('Agenda | evento já ocorrido não pode ser editado', () => {
+  test('esconde o lápis de edição quando o evento foi em um dia anterior', async ({ page }) => {
+    const dataAtual = moment().subtract(1, 'days').format('YYYY-MM-DD');
+    const evento = montarEvento({
+      dataInicio: dataAtual,
+      dataFim: dataAtual,
+      date: dataAtual,
+      start: `${dataAtual} 08:00`,
+      end: `${dataAtual} 09:00`,
+      data: { start: '08:00', end: '09:00' },
+      canDelete: false,
+    });
+    const { routeHandler } = criarApiMock(evento);
+
+    await page.route('**/api/**', routeHandler);
+    await autenticar(page);
+    const agendaPage = new AgendaPage(page);
+    await agendaPage.abrirAgenda();
+    await agendaPage.selecionarEventoPorDataHora(dataAtual, '08:00');
+
+    const dialog = page.locator('.p-dialog:visible').last();
+    await expect(dialog).toBeVisible();
+    await expect(dialog.locator('button:has(.pi-pencil)')).toHaveCount(0);
+  });
+
+  // Regressão: `dateNow <= evento.dataAtual` comparava só a DATA, então um
+  // evento de HOJE que já tinha terminado mais cedo continuava editável até
+  // a virada do dia — só a comparação com data+hora do fim pega esse caso.
+  test('esconde o lápis de edição quando o evento é hoje mas já terminou', async ({ page }) => {
+    const hoje = moment().format('YYYY-MM-DD');
+    const evento = montarEvento({
+      dataInicio: hoje,
+      dataFim: hoje,
+      date: hoje,
+      start: `${hoje} 00:00`,
+      end: `${hoje} 00:01`,
+      data: { start: '00:00', end: '00:01' },
+      canDelete: false,
+    });
+    const { routeHandler } = criarApiMock(evento);
+
+    await page.route('**/api/**', routeHandler);
+    await autenticar(page);
+    const agendaPage = new AgendaPage(page);
+    await agendaPage.abrirAgenda();
+    await agendaPage.selecionarEventoPorDataHora(hoje, '00:00');
+
+    const dialog = page.locator('.p-dialog:visible').last();
+    await expect(dialog).toBeVisible();
+    await expect(dialog.locator('button:has(.pi-pencil)')).toHaveCount(0);
+  });
+
+  test('mantém o lápis de edição visível enquanto o evento ainda não aconteceu', async ({
+    page,
+  }) => {
+    const evento = montarEvento();
+    const { routeHandler } = criarApiMock(evento);
+
+    await page.route('**/api/**', routeHandler);
+    await autenticar(page);
+    const dialog = await abrirVisualizacaoDoEvento(page);
+
+    await expect(dialog.locator('button:has(.pi-pencil)')).toBeVisible();
   });
 });

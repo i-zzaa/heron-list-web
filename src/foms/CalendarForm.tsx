@@ -10,6 +10,7 @@ import { permissionAuth } from '../contexts/permission';
 import { useToast } from '../contexts/toast';
 import { create, getList, update } from '../server';
 import { buildErrorToast } from '../util/error';
+import { formatHorarioEvento } from '../util/util';
 
 // Rótulos exibidos no toast de campo obrigatório — precisam bater com os
 // `labelText` usados nos <Input /> abaixo. Campos repetidos por
@@ -73,23 +74,35 @@ export const CalendarForm = ({
     renderPacienteEspecialidade,
   } = useDropdown();
 
-  const defaultValues = value || {
-    dataInicio: '',
-    dataFim: '',
-    start: '',
-    end: '',
-    paciente: '',
-    especialidade: '',
-    modalidade: '',
-    terapeuta: '',
-    funcao: '',
-    localidade: '',
-    localExternoDescricao: '',
-    frequencia: '',
-    statusEventos: '',
-    diasFrequencia: [],
-    observacao: '',
-  };
+  // O backend manda `start`/`end` como data+hora completos (ex.:
+  // "2026-08-26 08:00", às vezes em ISO) — só que o campo <input type="time">
+  // só reconhece "HH:mm"/"HH:mm:ss" puro, então com o valor cru o navegador
+  // mostra "--:--" mesmo com o horário certo salvo no evento. `evento.data`
+  // já vem com a hora isolada ("data.start"/"data.end"); quando não vier,
+  // formatHorarioEvento extrai a hora de dentro da data+hora completa.
+  const defaultValues = value
+    ? {
+        ...value,
+        start: formatHorarioEvento(value.data?.start ?? value.start),
+        end: formatHorarioEvento(value.data?.end ?? value.end),
+      }
+    : {
+        dataInicio: '',
+        dataFim: '',
+        start: '',
+        end: '',
+        paciente: '',
+        especialidade: '',
+        modalidade: '',
+        terapeuta: '',
+        funcao: '',
+        localidade: '',
+        localExternoDescricao: '',
+        frequencia: '',
+        statusEventos: '',
+        diasFrequencia: [],
+        observacao: '',
+      };
 
   const {
     getValues,
