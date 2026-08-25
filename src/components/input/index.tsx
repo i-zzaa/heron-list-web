@@ -118,6 +118,15 @@ export function Input({
                   return field.onChange(e.value);
                 }}
                 optionLabel="nome"
+                // Assim como no MultiSelect logo abaixo: o PrimeReact só
+                // reconhece o valor atual como selecionado se ele bater
+                // campo a campo com o item de `options`. Objetos vindos da
+                // API (ex.: paciente com `convenio`, especialidade com
+                // `codigo`/`ativo`) trazem campos a mais que a lista de
+                // opções não tem, então a comparação por igualdade profunda
+                // falha e o Dropdown aparece vazio mesmo com o valor
+                // preenchido no formulário. Comparar só por `id` resolve.
+                dataKey="id"
                 filter
                 showClear
                 filterBy="nome"
