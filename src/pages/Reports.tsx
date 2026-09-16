@@ -171,6 +171,7 @@ export default function Reports() {
           loading={loading}
           dropdown={dropDownList}
           requireFilledField
+          defaultOpen
         />
 
         <Card>

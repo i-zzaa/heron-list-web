@@ -21,6 +21,8 @@ export interface FilterProps {
   // Quando true, o Pesquisar fica desabilitado até algum campo do filtro
   // ser preenchido.
   requireFilledField?: boolean;
+  // Quando true, o filtro já abre expandido.
+  defaultOpen?: boolean;
 }
 
 export function Filter({
@@ -37,6 +39,7 @@ export function Filter({
   includeButtonTestId,
   onReset,
   requireFilledField = false,
+  defaultOpen = false,
 }: FilterProps) {
   const { setValue, handleSubmit, control, reset, watch } = useForm({
     defaultValues,
@@ -80,7 +83,7 @@ export function Filter({
   });
 
   return (
-    <Accordion>
+    <Accordion activeIndex={defaultOpen ? 0 : null}>
       <AccordionTab header={legend} tabIndex={0}>
         <form
           id={id}
