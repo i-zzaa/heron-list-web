@@ -11,6 +11,7 @@ import Queue from '../pages/Queue';
 import Schedule from '../pages/Schedule';
 import Financial from '../pages/Financial';
 import AmilGuides from '../pages/AmilGuides';
+import Reports from '../pages/Reports';
 import { useContext } from 'react';
 import { LayoutContext } from '../contexts/layout.context';
 import { useAuth } from '../contexts/auth';
@@ -24,6 +25,7 @@ export enum CONSTANTES_ROUTERS {
   CALENDAR = 'agenda',
   FINANCEIRO = 'financeiro',
   AMIL_GUIDES = 'guia',
+  RELATORIOS = 'relatorios',
 }
 export interface RoutesProps {
   path: string;
@@ -45,6 +47,7 @@ export const ROUTES = [
   { path: CONSTANTES_ROUTERS.CALENDAR, componentRoute: Schedule, icon: 'pi pi-calendar', permission: CONSTANTES_ROUTERS.CALENDAR },
   { path: CONSTANTES_ROUTERS.FINANCEIRO, componentRoute: Financial , icon: 'pi pi-money-bill', permission: CONSTANTES_ROUTERS.FINANCEIRO},
   { path: CONSTANTES_ROUTERS.AMIL_GUIDES, componentRoute: AmilGuides, icon: 'pi pi-file', permission: 'GUIAS_AMIL' },
+  { path: CONSTANTES_ROUTERS.RELATORIOS, componentRoute: Reports, icon: 'pi pi-chart-bar', permission: CONSTANTES_ROUTERS.RELATORIOS },
 ]
 
 const OtherRoutes = () => {

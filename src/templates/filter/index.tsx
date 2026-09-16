@@ -18,6 +18,9 @@ export interface FilterProps {
   onInclude?: () => any;
   includeButtonTestId?: string;
   onReset: () => any;
+  // Quando true, o Pesquisar fica desabilitado até algum campo do filtro
+  // ser preenchido.
+  requireFilledField?: boolean;
 }
 
 export function Filter({
@@ -33,8 +36,11 @@ export function Filter({
   onInclude,
   includeButtonTestId,
   onReset,
+  requireFilledField = false,
 }: FilterProps) {
-  const { setValue, handleSubmit, control, reset } = useForm({ defaultValues });
+  const { setValue, handleSubmit, control, reset, watch } = useForm({
+    defaultValues,
+  });
   const { hasPermition } = permissionAuth();
 
   const handleReset = () => {
@@ -42,7 +48,24 @@ export function Filter({
     onReset();
   };
 
+  // Só os campos do filtro contam — `naFila` é setado por baixo dos panos
+  // (ver useEffect abaixo) e não é algo que o usuário preencheu.
+  // `watch()` re-renderiza o filtro a cada alteração, então só assina
+  // quando a tela pediu essa regra.
+  const formValues: any = requireFilledField ? watch() : {};
+  const searchDisabled =
+    requireFilledField &&
+    !fields.some((field: any) => {
+      const value = formValues?.[field.id];
+      return value !== undefined && value !== null && value !== '';
+    });
+
   const handleSubmit2 = (formState: any) => {
+    // Enter num campo também submete o form, mesmo com o botão desabilitado.
+    if (searchDisabled) {
+      return;
+    }
+
     if (formState.devolutiva) {
       setValue('naFila', true);
       formState.naFila = true;
@@ -121,6 +144,7 @@ export function Filter({
                         type="primary"
                         size="full"
                         loading={loading}
+                        disabled={searchDisabled}
                         onClick={() => handleSubmit(handleSubmit2)}
                       />
                     </div>
@@ -148,6 +172,7 @@ export function Filter({
                         type="primary"
                         size="icon"
                         loading={loading}
+                        disabled={searchDisabled}
                         onClick={() => handleSubmit(handleSubmit2)}
                       />
                     </div>

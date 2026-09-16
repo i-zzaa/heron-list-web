@@ -10,7 +10,7 @@ export interface TagProps {
 import { clsx } from 'clsx';
 
 const CLASSFIX =
-  'text-sm items-center flex text-white py-2 px-6 rounded-full cursor-not-allowed cursor-pointer opacity-25 disabled:opacity-100 ';
+  'text-sm items-center flex text-white py-2 px-6 rounded-full disabled:opacity-25 disabled:cursor-not-allowed';
 
 export function Tag({ onClick, type, color, disabled }: TagProps) {
   // `type` já veio quebrado como objeto/undefined vindo de alguma tela —
@@ -30,6 +30,9 @@ export function Tag({ onClick, type, color, disabled }: TagProps) {
     <button
       onClick={onClick}
       className={clsx(CLASSFIX, {
+        // Só mostra a "mãozinha" quando a pílula é clicável de fato.
+        'cursor-pointer': !disabled && !!onClick,
+        'cursor-default': !disabled && !onClick,
         'bg-to': !color && label === 'TO',
         'bg-fono': !color && label === 'FONO',
         'bg-psico': !color && label === 'PSICO',
@@ -42,7 +45,8 @@ export function Tag({ onClick, type, color, disabled }: TagProps) {
         'bg-violet-800': !color && !hasFixedColor,
       })}
       style={color ? { backgroundColor: color } : undefined}
-      disabled={!disabled}
+      // `disabled` = especialidade já agendada: pílula apagada e sem clique.
+      disabled={disabled}
     >
       {label || '—'}
     </button>

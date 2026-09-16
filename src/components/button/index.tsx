@@ -5,6 +5,7 @@ export interface ButtonProps {
   icon?: string;
   text: string;
   loading?: boolean;
+  disabled?: boolean;
   onClick?: () => void;
   testId?: string;
 }
@@ -18,6 +19,7 @@ export function ButtonHeron({
   color = 'white',
   text,
   loading,
+  disabled,
   onClick,
   testId,
 }: ButtonProps) {
@@ -26,6 +28,7 @@ export function ButtonHeron({
       data-testid={testId}
       icon={icon}
       loading={loading}
+      disabled={disabled}
       label={size === 'icon' ? '' : text}
       onClick={onClick}
       className={clsx(' text-white text-sm rounded-md border-none ', {

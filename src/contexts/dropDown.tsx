@@ -8,6 +8,10 @@ import {
 } from './permission';
 import { isProfile } from '../util/permissions';
 import { resolveResponseData } from '../util/pagination';
+import {
+  SITUACAO_DOCUMENTO_OPTIONS,
+  TIPO_DOCUMENTO_OPTIONS,
+} from '../constants/report';
 
 export interface DropdownContextData {
   renderPacientes: (statusPacienteCod: string) => void;
@@ -33,6 +37,7 @@ export interface DropdownContextData {
   renderDropdownQueue: (statusPacienteCod: string) => any;
   renderDropdownCalendar: (statusPacienteCod: string) => any;
   renderDropdownFinancial: (statusPacienteCod: string) => any;
+  renderDropdownReport: () => any;
   renderDropdownBaixa: (statusPacienteCod: string) => any;
   renderDropdownQueueCalendar: (
     statusPacienteCod: string,
@@ -344,6 +349,16 @@ export const DropdownProvider = ({ children }: Props) => {
     return dropDownList;
   };
 
+  const renderDropdownReport = async () => {
+    const dropDownList = {
+      convenios: await renderConvenio(),
+      tipos: TIPO_DOCUMENTO_OPTIONS,
+      situacoes: SITUACAO_DOCUMENTO_OPTIONS,
+    };
+
+    return dropDownList;
+  };
+
   const renderDropdownCrud = async () => {
     const dropDownList = {
       funcoes: await renderFuncao(),
@@ -380,6 +395,7 @@ export const DropdownProvider = ({ children }: Props) => {
         renderDropdownQueueCalendar,
         renderDropdownCalendar,
         renderDropdownFinancial,
+        renderDropdownReport,
         renderDropdownBaixa
       }}
     >
