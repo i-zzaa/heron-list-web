@@ -1,0 +1,686 @@
+/* Camada visual do Heron por cima do tema do PrimeReact (primereact.css).
+   Mesma linguagem do filtro (templates/filter/styles.css): superfícies
+   brancas com borda clara, cantos arredondados, sombra levemente roxa e
+   destaques no roxo do projeto. Carregado depois dos outros CSS em App.tsx
+   pra sobrescrever o tema sem precisar de !important. */
+
+:root {
+  --heron-border: #e4e4e7;
+  --heron-divider: #f1f1f4;
+  --heron-soft: #f5eef7;
+  --heron-soft-hover: rgba(102, 41, 119, 0.08);
+  --heron-ring: rgba(102, 41, 119, 0.3);
+  --heron-violet-dark: #4f1f5c;
+  --heron-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(102, 41, 119, 0.05);
+  --heron-shadow-overlay: 0 12px 32px rgba(38, 16, 44, 0.16), 0 2px 6px rgba(38, 16, 44, 0.08);
+}
+
+/* ---------- Foco ----------
+   O anel só aparece na navegação por teclado; no clique do mouse ele
+   ficava "grudado" nos botões, abas e ícones. */
+.p-button:focus,
+.p-link:focus,
+.p-tabview .p-tabview-nav li .p-tabview-nav-link:not(.p-disabled):focus,
+.p-dialog .p-dialog-header .p-dialog-header-icon:focus,
+.p-paginator .p-paginator-pages .p-paginator-page:focus {
+  box-shadow: none;
+}
+
+.p-button:focus-visible,
+.p-link:focus-visible,
+.p-dialog .p-dialog-header .p-dialog-header-icon:focus-visible,
+.p-paginator .p-paginator-pages .p-paginator-page:focus-visible {
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--heron-ring);
+}
+
+.p-tabview .p-tabview-nav li .p-tabview-nav-link:not(.p-disabled):focus-visible {
+  box-shadow: inset 0 0 0 2px var(--heron-ring);
+}
+
+/* ---------- Abas ---------- */
+.p-tabview .p-tabview-nav {
+  background: transparent;
+  border-color: var(--heron-border);
+}
+
+.p-tabview .p-tabview-nav li .p-tabview-nav-link {
+  background: transparent;
+  color: var(--gray-800);
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
+
+.p-tabview .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover .p-tabview-nav-link {
+  background: var(--heron-soft-hover);
+  border-color: transparent;
+  color: var(--violet-800);
+}
+
+.p-tabview .p-tabview-panels {
+  background: transparent;
+  padding: 1.25rem 0 0;
+}
+
+/* ---------- Campos ---------- */
+.p-inputtext,
+.p-dropdown,
+.p-multiselect,
+.p-calendar .p-inputtext {
+  border-color: #d4d4d8;
+  border-radius: var(--border-radius);
+}
+
+.p-inputtext:enabled:hover,
+.p-dropdown:not(.p-disabled):hover,
+.p-multiselect:not(.p-disabled):hover {
+  border-color: var(--violet-600);
+}
+
+.p-inputtext:enabled:focus,
+.p-dropdown:not(.p-disabled).p-focus,
+.p-multiselect:not(.p-disabled).p-focus {
+  border-color: var(--violet-800);
+  box-shadow: 0 0 0 1px var(--violet-800);
+}
+
+/* Campos "label-float" (label.css): o foco trocava a borda de 1px pra 2px
+   e o conteúdo pulava 1px — aqui a espessura extra vem da sombra. */
+.label-float input,
+.label-float select,
+.label-float textarea {
+  border-color: #d4d4d8;
+  border-radius: var(--border-radius);
+  background-color: #ffffff;
+}
+
+.label-float input:hover:not(:disabled),
+.label-float textarea:hover:not(:disabled) {
+  border-color: var(--violet-600);
+}
+
+.label-float input:focus,
+.label-float select:focus,
+.label-float textarea:focus {
+  border: 1px solid var(--violet-800);
+  box-shadow: 0 0 0 1px var(--violet-800);
+}
+
+.label-float input:disabled,
+.label-float textarea:disabled {
+  background-color: #fafafa;
+  color: #a1a1aa;
+}
+
+/* ---------- Painéis de seleção (Dropdown / MultiSelect / Autocomplete) ---------- */
+.p-dropdown-panel,
+.p-multiselect-panel,
+.p-autocomplete-panel,
+.p-overlaypanel {
+  border: 1px solid var(--heron-border);
+  border-radius: 0.75rem;
+  box-shadow: var(--heron-shadow-overlay);
+  overflow: hidden;
+}
+
+.p-dropdown-panel .p-dropdown-header,
+.p-multiselect-panel .p-multiselect-header {
+  background: #ffffff;
+  border-bottom-color: var(--heron-divider);
+}
+
+.p-dropdown-panel .p-dropdown-items,
+.p-multiselect-panel .p-multiselect-items {
+  padding: 0.25rem;
+}
+
+.p-dropdown-panel .p-dropdown-items .p-dropdown-item,
+.p-multiselect-panel .p-multiselect-items .p-multiselect-item {
+  border-radius: 0.5rem;
+  color: var(--gray-800);
+}
+
+.p-dropdown-panel .p-dropdown-items .p-dropdown-item:not(.p-highlight):not(.p-disabled):hover,
+.p-multiselect-panel .p-multiselect-items .p-multiselect-item:not(.p-highlight):not(.p-disabled):hover {
+  background: var(--heron-soft-hover);
+  color: var(--violet-800);
+}
+
+.p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight,
+.p-multiselect-panel .p-multiselect-items .p-multiselect-item.p-highlight {
+  background: var(--heron-soft);
+  color: var(--violet-800);
+  font-weight: 700;
+}
+
+/* ---------- Modais ---------- */
+.p-dialog-mask.p-component-overlay {
+  background-color: rgba(38, 16, 44, 0.45);
+  backdrop-filter: blur(2px);
+}
+
+.p-dialog {
+  border-radius: 1rem;
+  box-shadow: var(--heron-shadow-overlay);
+  overflow: hidden;
+}
+
+.p-dialog .p-dialog-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--heron-divider);
+  color: var(--violet-800);
+}
+
+.p-dialog .p-dialog-header .p-dialog-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.p-dialog .p-dialog-header .p-dialog-header-icon {
+  color: var(--gray-800);
+}
+
+.p-dialog .p-dialog-header .p-dialog-header-icon:enabled:hover {
+  background: var(--heron-soft-hover);
+  color: var(--violet-800);
+}
+
+.p-dialog .p-dialog-content {
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.p-dialog .p-dialog-footer {
+  border-top: 1px solid var(--heron-divider);
+}
+
+/* ---------- Accordions (fora do filtro, ex.: grupos do Financeiro) ---------- */
+.p-accordion .p-accordion-header .p-accordion-header-link {
+  background: #ffffff;
+  border-color: var(--heron-border);
+  border-radius: 0.75rem;
+  color: var(--gray-800);
+}
+
+.p-accordion .p-accordion-header:not(.p-highlight):not(.p-disabled):hover .p-accordion-header-link {
+  background: #faf7fb;
+  border-color: var(--violet-600);
+  color: var(--violet-800);
+}
+
+.p-accordion .p-accordion-header:not(.p-disabled).p-highlight .p-accordion-header-link,
+.p-accordion .p-accordion-header:not(.p-disabled).p-highlight:hover .p-accordion-header-link {
+  background: #faf7fb;
+  border-color: var(--heron-border);
+  color: var(--violet-800);
+}
+
+.p-accordion .p-accordion-header:not(.p-disabled) .p-accordion-header-link:focus {
+  box-shadow: none;
+}
+
+.p-accordion .p-accordion-header:not(.p-disabled) .p-accordion-header-link:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--heron-ring);
+}
+
+.p-accordion .p-accordion-content {
+  border-color: var(--heron-border);
+  border-bottom-left-radius: 0.75rem;
+  border-bottom-right-radius: 0.75rem;
+}
+
+.p-accordion .p-accordion-tab {
+  margin-bottom: 0.5rem;
+}
+
+/* ---------- Tabelas ---------- */
+.p-datatable .p-datatable-thead > tr > th {
+  background: #faf7fb;
+  color: var(--gray-800);
+  border-color: var(--heron-divider);
+}
+
+.p-datatable .p-datatable-thead > tr > th:first-child {
+  border-top-left-radius: 0.5rem;
+}
+
+.p-datatable .p-datatable-thead > tr > th:last-child {
+  border-top-right-radius: 0.5rem;
+}
+
+.p-datatable .p-datatable-tbody > tr > td {
+  border-color: var(--heron-divider);
+}
+
+.p-datatable .p-datatable-tbody > tr:hover {
+  background: #fcfafd;
+}
+
+.p-datatable .p-sortable-column.p-highlight,
+.p-datatable .p-sortable-column.p-highlight .p-sortable-column-icon {
+  color: var(--violet-800);
+}
+
+.p-paginator {
+  background: transparent;
+}
+
+.p-paginator .p-paginator-pages .p-paginator-page {
+  border-radius: 0.5rem;
+}
+
+.p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+  background: var(--violet-800);
+  border-color: var(--violet-800);
+  color: #ffffff;
+}
+
+/* ---------- Agenda (react-big-calendar) ---------- */
+.rbc-calendar {
+  color: var(--gray-800);
+}
+
+.rbc-calendar .rbc-today {
+  background-color: #fcf9fd;
+}
+
+.rbc-calendar .rbc-current-time-indicator {
+  background-color: var(--violet-800);
+  height: 2px;
+}
+
+.rbc-calendar .rbc-time-view,
+.rbc-calendar .rbc-month-view {
+  border-color: var(--heron-border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+/* Grade de horários: linhas de hora bem clarinhas e sem a linha de cada
+   slot de 20min, que deixava a grade "riscada" demais. */
+.rbc-calendar .rbc-time-content,
+.rbc-calendar .rbc-time-header-content,
+.rbc-calendar .rbc-time-header.rbc-overflowing {
+  border-color: var(--heron-divider);
+}
+
+.rbc-calendar .rbc-time-content > * + * > *,
+.rbc-calendar .rbc-day-bg + .rbc-day-bg,
+.rbc-calendar .rbc-month-row + .rbc-month-row,
+.rbc-calendar .rbc-header + .rbc-header {
+  border-color: var(--heron-divider);
+}
+
+.rbc-calendar .rbc-timeslot-group {
+  border-bottom-color: var(--heron-divider);
+  min-height: 48px;
+}
+
+.rbc-calendar .rbc-day-slot .rbc-time-slot {
+  border-top: none;
+}
+
+.rbc-calendar .rbc-time-gutter .rbc-label {
+  font-size: 11px;
+  color: #71717a;
+  padding: 0 8px;
+}
+
+/* A agenda não tem eventos de "dia inteiro" — a faixa ficava vazia
+   ocupando espaço embaixo do cabeçalho. */
+.rbc-calendar .rbc-time-header-content .rbc-allday-cell {
+  display: none;
+}
+
+.rbc-calendar .rbc-header {
+  color: var(--gray-800);
+  font-weight: 700;
+  padding: 0.375rem 0.25rem;
+  border-bottom-color: var(--heron-divider);
+}
+
+.rbc-calendar .rbc-time-header-content .rbc-header {
+  padding: 0.5rem 0.25rem;
+  border-bottom: none;
+}
+
+.rbc-calendar .rbc-button-link {
+  color: inherit;
+}
+
+.calendar-day-header {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  line-height: 1;
+}
+
+.calendar-day-header__weekday {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #71717a;
+}
+
+.calendar-day-header__number {
+  width: 1.875rem;
+  height: 1.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #3f3f46;
+}
+
+.calendar-day-header__number.is-today {
+  background: var(--violet-800);
+  color: #ffffff;
+}
+
+/* Eventos da Semana/Dia: fundo clarinho e faixa lateral na cor da
+   especialidade (as cores vêm inline do eventPropGetter). */
+.rbc-calendar .rbc-day-slot .rbc-event.calendar-event {
+  border: none;
+  border-left: 3px solid var(--violet-800);
+  border-top: 1px solid #ffffff;
+  border-bottom: 1px solid #ffffff;
+  border-radius: 0.375rem;
+  padding: 3px 6px;
+  color: #27272a;
+  transition: box-shadow 0.15s;
+}
+
+.rbc-calendar .rbc-day-slot .rbc-event.calendar-event:hover {
+  box-shadow: 0 2px 8px rgba(38, 16, 44, 0.14);
+  z-index: 5;
+}
+
+.rbc-calendar .rbc-event.calendar-event:focus {
+  outline: none;
+}
+
+.rbc-calendar .rbc-event.calendar-event:focus-visible {
+  outline: 2px solid var(--heron-ring);
+  outline-offset: 1px;
+}
+
+.rbc-calendar .rbc-day-slot .rbc-event.calendar-event .rbc-event-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #52525b;
+  padding-right: 0;
+  margin-bottom: 1px;
+}
+
+.rbc-calendar .rbc-day-slot .rbc-event.calendar-event .rbc-event-content {
+  line-height: 1.25;
+}
+
+.calendar-event-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 12px;
+}
+
+.calendar-event-body .pi-check {
+  color: #15803d;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.calendar-event-status {
+  font-size: 10px;
+  color: #52525b;
+}
+
+.rbc-calendar .rbc-event.calendar-event-canceled {
+  opacity: 0.55;
+}
+
+/* Horário vago (paciente "Livre"): tracejado, sem cor de especialidade. */
+.rbc-calendar .rbc-day-slot .rbc-event.calendar-event--livre {
+  background: #ffffff !important;
+  border: 1px dashed #d4d4d8;
+  border-left: 3px dashed #d4d4d8;
+  color: #71717a;
+}
+
+/* Mês e Lista: só a bolinha colorida, sem bloco pintado. */
+.rbc-event.calendar-event--dot,
+.rbc-event.calendar-event--dot.rbc-selected {
+  background: transparent;
+  color: #3f3f46;
+  padding: 1px 4px;
+  border-radius: 0.25rem;
+  font-size: 11px;
+}
+
+.rbc-event.calendar-event--dot:hover {
+  background: var(--heron-soft-hover);
+}
+
+.rbc-event.calendar-event--dot .pi-check,
+.calendar-agenda-event .pi-check {
+  color: #15803d;
+  font-size: 10px;
+}
+
+.calendar-event-time {
+  color: #71717a;
+  font-size: 10px;
+}
+
+.rbc-calendar .rbc-month-view .rbc-header {
+  font-size: 11px;
+  text-transform: capitalize;
+  padding: 0.5rem 0.25rem;
+}
+
+.rbc-calendar .rbc-month-view .rbc-date-cell {
+  padding: 4px 6px 2px;
+  font-size: 12px;
+}
+
+.rbc-calendar .rbc-month-view .rbc-date-cell.rbc-now .rbc-button-link {
+  background: var(--violet-800);
+  color: #ffffff;
+  border-radius: 9999px;
+  min-width: 1.5rem;
+  padding: 2px 6px;
+  font-weight: 700;
+}
+
+.rbc-calendar .rbc-off-range-bg {
+  background: #fafafa;
+}
+
+.rbc-calendar .rbc-off-range {
+  color: #a1a1aa;
+}
+
+.rbc-calendar .rbc-show-more {
+  background: transparent;
+  color: var(--violet-800);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 0 4px;
+}
+
+.rbc-overlay {
+  border: 1px solid var(--heron-border);
+  border-radius: 0.75rem;
+  box-shadow: var(--heron-shadow-overlay);
+  padding: 0.5rem;
+}
+
+.rbc-overlay .rbc-overlay-header {
+  border-bottom-color: var(--heron-divider);
+  color: var(--violet-800);
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+/* Lista */
+.rbc-calendar .rbc-agenda-view table.rbc-agenda-table {
+  border: 1px solid var(--heron-border);
+  border-radius: 0.75rem;
+  border-collapse: separate;
+  overflow: hidden;
+}
+
+.rbc-calendar .rbc-agenda-view table.rbc-agenda-table thead > tr > th {
+  background: #faf7fb;
+  color: var(--gray-800);
+  font-size: 11px;
+  padding: 0.625rem 0.875rem;
+  border-bottom: 1px solid var(--heron-divider);
+}
+
+.rbc-calendar .rbc-agenda-view table.rbc-agenda-table tbody > tr > td {
+  padding: 0.625rem 0.875rem;
+  vertical-align: middle;
+  font-size: 13px;
+}
+
+.rbc-calendar .rbc-agenda-view table.rbc-agenda-table tbody > tr + tr > td {
+  border-top: 1px solid var(--heron-divider);
+}
+
+.rbc-calendar .rbc-agenda-view table.rbc-agenda-table tbody > tr + tr,
+.rbc-calendar .rbc-agenda-view table.rbc-agenda-table tbody > tr > td + td {
+  border-color: var(--heron-divider);
+}
+
+.rbc-calendar .rbc-agenda-view .rbc-agenda-date-cell {
+  background: #ffffff;
+  color: var(--violet-800);
+  font-weight: 700;
+  text-transform: capitalize;
+  vertical-align: top !important;
+}
+
+.rbc-calendar .rbc-agenda-view .rbc-agenda-time-cell {
+  color: #71717a;
+  font-variant-numeric: tabular-nums;
+}
+
+.rbc-calendar .rbc-agenda-view tbody > tr.calendar-event:hover > td.rbc-agenda-time-cell,
+.rbc-calendar .rbc-agenda-view tbody > tr.calendar-event:hover > td.rbc-agenda-event-cell {
+  background: #fcfafd;
+}
+
+.rbc-calendar .rbc-agenda-view tbody > tr.calendar-event {
+  background: transparent;
+  color: #3f3f46;
+}
+
+.calendar-agenda-event {
+  color: #3f3f46;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.calendar-agenda-event:focus-visible {
+  outline: 2px solid var(--heron-ring);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+.calendar-agenda-event.fc-event-title-container .line-through {
+  color: #a1a1aa;
+}
+
+.calendar-event-status-badge {
+  border-radius: 9999px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.rbc-calendar .rbc-agenda-empty {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: #71717a;
+}
+
+/* ---------- Barra da agenda ---------- */
+.calendar-toolbar .p-button.p-button-icon-only {
+  background: #ffffff;
+  border: 1px solid var(--heron-border);
+  color: var(--violet-800);
+  border-radius: 9999px;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  box-shadow: none;
+}
+
+.calendar-toolbar .p-button.p-button-icon-only:enabled:hover {
+  background: var(--heron-soft-hover);
+  border-color: var(--violet-600);
+}
+
+.calendar-toolbar .calendar-today-button {
+  height: 2.25rem;
+  padding: 0 1rem;
+  background: #ffffff;
+  border: 1px solid var(--heron-border);
+  border-radius: 9999px;
+  color: var(--violet-800);
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: none;
+}
+
+.calendar-toolbar .calendar-today-button:enabled:hover {
+  background: var(--heron-soft-hover);
+  border-color: var(--violet-600);
+  color: var(--violet-800);
+}
+
+.calendar-view-switch {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  background: #f4f1f5;
+  border-radius: 0.625rem;
+}
+
+.calendar-view-switch .p-button {
+  flex: 1 1 0;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 0.5rem;
+  color: var(--gray-800);
+  font-size: 12px;
+  padding: 0.5rem 0.25rem;
+  box-shadow: none;
+}
+
+.calendar-view-switch .p-button:enabled:hover {
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--violet-800);
+}
+
+.calendar-view-switch .p-button.is-active,
+.calendar-view-switch .p-button.is-active:enabled:hover {
+  background: #ffffff;
+  color: var(--violet-800);
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08), 0 1px 4px rgba(102, 41, 119, 0.1);
+}
+
+@media screen and (min-width: 1024px) {
+  .calendar-view-switch .p-button {
+    flex: none;
+    padding: 0.5rem 0.875rem;
+  }
+}
+
+.calendar-legend {
+  border-top: 1px solid var(--heron-divider);
+}

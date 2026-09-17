@@ -17,6 +17,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { RRule } from 'rrule';
 import moment from 'moment';
 import { firtUpperCase, formatdateeua, getDateFormat } from '../../util/util';
+import { getStatusEventoTone } from '../../constants/schedule';
 
 // Esses 5 módulos são CJS puro (`exports.default = X`) — em dev o Vite
 // desembrulha o default direitinho, mas no bundle de produção o
@@ -251,6 +252,8 @@ const computeRangeForView = (targetDate: Date, targetView: View) => {
       return { start: m.clone().startOf('day').toDate(), end: m.clone().endOf('day').toDate() };
   }
 };
+
+const MOBILE_BREAKPOINT = 640;
 
 const isSunday = (date: Date) => date.getDay() === 0;
 
@@ -644,20 +647,46 @@ class MonthNoSunday extends Component<any, any> {
   }
 }
 
-const isAttendedEvent = (eventItem: any) => {
-  const statusValue =
-    eventItem?.statusEventos?.nome || eventItem?.statusEventos || eventItem?.status || '';
-  return String(statusValue).trim().toLowerCase() === 'atendido';
-};
+const getStatusName = (eventItem: any) =>
+  String(
+    eventItem?.statusEventos?.nome || eventItem?.statusEventos || eventItem?.status || ''
+  ).trim();
 
-const isCanceledEvent = (eventItem: any) => {
-  const statusValue =
-    eventItem?.statusEventos?.nome || eventItem?.statusEventos || eventItem?.status || '';
-  return String(statusValue).trim().toLowerCase().includes('cancelado');
-};
+const isAttendedEvent = (eventItem: any) =>
+  getStatusName(eventItem).toLowerCase() === 'atendido';
+
+const isCanceledEvent = (eventItem: any) =>
+  getStatusName(eventItem).toLowerCase().includes('cancelado');
+
+// Horário vago (paciente "Livre") — aparece tracejado em vez de colorido.
+const isFreeSlot = (eventItem: any) =>
+  String(eventItem?.paciente?.nome || '').trim().toLowerCase() === 'livre';
+
+const DEFAULT_EVENT_COLOR = '#662977';
 
 const getEventColor = (eventItem: any) =>
   eventItem?.backgroundColor || eventItem?.color || eventItem?.especialidade?.cor;
+
+// Fundo do evento é a cor da especialidade bem clarinha, com o texto escuro
+// por cima — com o bloco pintado na cor cheia e texto branco, especialidades
+// de cor clara (ex.: amarelo da Fono) ficavam ilegíveis.
+const hexToRgba = (hex: unknown, alpha: number) => {
+  const match = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(String(hex ?? '').trim());
+  if (!match) {
+    return undefined;
+  }
+
+  const digits =
+    match[1].length === 3
+      ? match[1]
+          .split('')
+          .map((char) => char + char)
+          .join('')
+      : match[1];
+  const value = parseInt(digits, 16);
+
+  return `rgba(${(value >> 16) & 255}, ${(value >> 8) & 255}, ${value & 255}, ${alpha})`;
+};
 
 // Título "mês de ano" (ex.: "agosto de 2026") replicando o formato que o
 // FullCalendar usava — é literalmente o texto que o e2e casa via regex.
@@ -692,20 +721,34 @@ const formatToolbarTitle = (date: Date, view: View) => {
 // (é um grid próprio, não uma view do rbc), então os botões chamam direto
 // os handlers do CalendarComponentBase (`onPrevNext`/`onSwitchView`), que
 // funcionam igual estando o rbc montado ou não.
+const TOOLBAR_VIEWS: Array<{ view: View; roomMode: boolean; label: string }> = [
+  { view: Views.MONTH, roomMode: false, label: VIEW_LABELS[Views.MONTH] },
+  { view: Views.WEEK, roomMode: false, label: VIEW_LABELS[Views.WEEK] },
+  { view: Views.DAY, roomMode: false, label: VIEW_LABELS[Views.DAY] },
+  { view: Views.DAY, roomMode: true, label: 'Salas' },
+  { view: Views.AGENDA, roomMode: false, label: VIEW_LABELS[Views.AGENDA] },
+];
+
 const CustomToolbar = ({
   date,
   view,
   roomMode,
   onPrevNext,
+  onToday,
   onSwitchView,
 }: any) => {
   return (
-    <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
-      <div className="flex items-center gap-1">
+    <div className="calendar-toolbar flex flex-wrap items-center gap-3 mb-4">
+      <h2 className="fc-toolbar-title order-first sm:order-none w-full sm:w-auto text-lg font-bold text-gray-800 leading-tight">
+        {firtUpperCase(formatToolbarTitle(date, view))}
+      </h2>
+
+      <div className="flex items-center gap-2 sm:order-first">
         <button
           type="button"
           className="fc-prev-button p-button p-component p-button-icon-only"
           onClick={() => onPrevNext('PREV')}
+          aria-label="Anterior"
         >
           <i className="pi pi-chevron-left" />
         </button>
@@ -713,49 +756,95 @@ const CustomToolbar = ({
           type="button"
           className="fc-next-button p-button p-component p-button-icon-only"
           onClick={() => onPrevNext('NEXT')}
+          aria-label="Próximo"
         >
           <i className="pi pi-chevron-right" />
         </button>
+        <button
+          type="button"
+          className="calendar-today-button p-button p-component"
+          onClick={onToday}
+        >
+          Hoje
+        </button>
       </div>
 
-      <span className="fc-toolbar-title font-bold">
-        {firtUpperCase(formatToolbarTitle(date, view))}
+      <div
+        className="calendar-view-switch w-full lg:w-auto lg:ml-auto"
+        role="group"
+        aria-label="Visualização da agenda"
+      >
+        {TOOLBAR_VIEWS.map((option) => {
+          const active =
+            option.roomMode === roomMode && (roomMode || option.view === view);
+
+          return (
+            <button
+              key={option.label}
+              type="button"
+              aria-pressed={active}
+              className={`${
+                option.view === Views.MONTH ? 'fc-dayGridMonth-button' : ''
+              } p-button p-component ${active ? 'is-active' : ''}`}
+              onClick={() => onSwitchView(option.view, option.roomMode)}
+            >
+              {option.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+// Cabeçalho de cada coluna na Semana/Dia: dia da semana pequeno em cima e o
+// número do dia embaixo, com o dia de hoje destacado.
+const DayColumnHeader = ({ date }: { date: Date }) => {
+  const isToday = moment(date).isSame(new Date(), 'day');
+
+  return (
+    <span className="calendar-day-header">
+      <span className="calendar-day-header__weekday">
+        {ptWeekdayShort(date).replace('.', '')}
       </span>
+      <span
+        className={`calendar-day-header__number font-inter ${isToday ? 'is-today' : ''}`}
+      >
+        {moment(date).format('D')}
+      </span>
+    </span>
+  );
+};
 
-      <div className="flex items-center gap-1">
-        {([Views.MONTH, Views.WEEK, Views.DAY] as View[]).map((viewOption) => (
-          <button
-            key={viewOption}
-            type="button"
-            className={`${
-              viewOption === Views.MONTH ? 'fc-dayGridMonth-button' : ''
-            } p-button p-component p-button-sm ${
-              !roomMode && view === viewOption ? 'p-button-raised' : 'p-button-outlined'
-            }`}
-            onClick={() => onSwitchView(viewOption, false)}
-          >
-            {VIEW_LABELS[viewOption]}
-          </button>
-        ))}
-        <button
-          type="button"
-          className={`p-button p-component p-button-sm ${
-            roomMode ? 'p-button-raised' : 'p-button-outlined'
-          }`}
-          onClick={() => onSwitchView(Views.DAY, true)}
-        >
-          Salas
-        </button>
-        <button
-          type="button"
-          className={`p-button p-component p-button-sm ${
-            !roomMode && view === Views.AGENDA ? 'p-button-raised' : 'p-button-outlined'
-          }`}
-          onClick={() => onSwitchView(Views.AGENDA, false)}
-        >
-          {VIEW_LABELS[Views.AGENDA]}
-        </button>
-      </div>
+const CalendarLegend = ({ events }: { events: any[] }) => {
+  const especialidades = useMemo(() => {
+    const byName = new Map<string, string>();
+
+    (Array.isArray(events) ? events : []).forEach((eventItem: any) => {
+      const nome = eventItem?.especialidade?.nome;
+      if (nome && !isFreeSlot(eventItem) && !byName.has(nome)) {
+        byName.set(nome, getEventColor(eventItem) || DEFAULT_EVENT_COLOR);
+      }
+    });
+
+    return Array.from(byName.entries());
+  }, [events]);
+
+  return (
+    <div className="calendar-legend flex flex-wrap items-center gap-x-4 gap-y-2 mt-4 pt-3 text-md text-gray-800">
+      {especialidades.map(([nome, cor]) => (
+        <span key={nome} className="inline-flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cor }} />
+          {nome}
+        </span>
+      ))}
+      <span className="inline-flex items-center gap-1.5 sm:ml-auto">
+        <i className="pi pi-check text-[#15803d]" style={{ fontSize: 11 }} />
+        Atendido
+      </span>
+      <span className="inline-flex items-center gap-1.5">
+        <span className="line-through">Cancelado</span>
+      </span>
     </div>
   );
 };
@@ -964,31 +1053,89 @@ const RoomGrid = ({ date, events, resources, onSelectEvent }: any) => {
 // renderizava: bolinha da cor da especialidade só nas visões de mês/lista
 // (nas outras visões o bloco inteiro do evento já é colorido via
 // eventPropGetter), título riscado quando cancelado e ✓ quando atendido.
-const EventContent = ({ event, view }: any) => {
+const EventContent = ({ event, view, onOpen }: any) => {
   const eventItem = event?.resourceRef || {};
   const isAttended = isAttendedEvent(eventItem);
   const isCanceled = isCanceledEvent(eventItem);
   const isDotView = view === Views.MONTH || view === Views.AGENDA;
   const color = getEventColor(eventItem);
+  const statusName = getStatusName(eventItem);
 
-  return (
-    <div className="fc-event-title-container flex items-center gap-1 overflow-hidden">
-      {isDotView && color ? (
+  const title = (
+    <span
+      className={`truncate ${isCanceled ? 'line-through' : ''} ${
+        isDotView ? '' : 'font-bold'
+      }`}
+      data-testid="calendar-event-title"
+    >
+      {event.title}
+    </span>
+  );
+
+  const attendedIcon = isAttended ? (
+    <i className="pi pi-check flex-shrink-0" title="Atendido" />
+  ) : null;
+
+  if (!isDotView) {
+    return (
+      <div className="fc-event-title-container calendar-event-body">
+        <div className="flex items-center gap-1 min-w-0">
+          {title}
+          {attendedIcon}
+        </div>
+        {statusName ? (
+          <span className="calendar-event-status truncate">{statusName}</span>
+        ) : null}
+      </div>
+    );
+  }
+
+  const content = (
+    <>
+      {color ? (
         <span
           className="flex-shrink-0 rounded-full"
           style={{ width: '8px', height: '8px', backgroundColor: color }}
           data-testid="calendar-event-dot"
         />
       ) : null}
-      <span
-        className={`truncate ${isCanceled ? 'line-through' : ''}`}
-        data-testid="calendar-event-title"
-      >
-        {event.title}
-      </span>
-      {isAttended ? (
-        <i className="pi pi-check flex-shrink-0" title="Atendido" />
+      {view === Views.MONTH ? (
+        <span className="calendar-event-time font-inter flex-shrink-0">
+          {moment(event.start).format('HH:mm')}
+        </span>
       ) : null}
+      {title}
+      {attendedIcon}
+      {view === Views.AGENDA && statusName ? (
+        <span
+          className={`calendar-event-status-badge ml-auto flex-shrink-0 ${getStatusEventoTone(
+            statusName
+          )}`}
+        >
+          {statusName}
+        </span>
+      ) : null}
+    </>
+  );
+
+  // A Lista do react-big-calendar não repassa o clique no evento
+  // (`onSelectEvent`), então ali o próprio conteúdo vira o botão que abre
+  // o detalhe.
+  if (onOpen) {
+    return (
+      <button
+        type="button"
+        className="fc-event-title-container calendar-agenda-event flex items-center gap-2 w-full text-left overflow-hidden"
+        onClick={() => onOpen(event)}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <div className="fc-event-title-container flex items-center gap-1 overflow-hidden">
+      {content}
     </div>
   );
 };
@@ -1001,7 +1148,13 @@ const CalendarComponentBase = ({
   dateClick,
 }: any) => {
   const [date, setDate] = useState<Date>(() => skipSunday(new Date()));
-  const [view, setView] = useState<View>(Views.WEEK);
+  // No celular a Semana vira 6 colunas estreitas demais pra ler o nome do
+  // paciente — ali a agenda já abre no Dia.
+  const [view, setView] = useState<View>(() =>
+    typeof window !== 'undefined' && window.innerWidth < MOBILE_BREAKPOINT
+      ? Views.DAY
+      : Views.WEEK
+  );
   const [roomMode, setRoomMode] = useState(false);
   const [visibleRange, setVisibleRange] = useState<{ start: Date; end: Date }>(
     () => ({
@@ -1183,6 +1336,20 @@ const CalendarComponentBase = ({
     [date, roomMode, view, applyRange]
   );
 
+  const handleToday = useCallback(() => {
+    const isSingleDay = roomMode || view === Views.DAY;
+    const nextDate = isSingleDay ? skipSunday(new Date()) : new Date();
+    setDate(nextDate);
+
+    const range = roomMode
+      ? {
+          start: moment(nextDate).startOf('day').toDate(),
+          end: moment(nextDate).endOf('day').toDate(),
+        }
+      : computeRangeForView(nextDate, view);
+    applyRange(range.start, range.end, view);
+  }, [roomMode, view, applyRange]);
+
   // Troca de view/modo — chamado direto pelos botões da toolbar, sem passar
   // pelo `onView` do rbc (que só existiria com o `<Calendar>` montado).
   const switchView = useCallback(
@@ -1231,32 +1398,30 @@ const CalendarComponentBase = ({
   const eventPropGetter = useCallback(
     (event: any) => {
       const eventItem = event?.resourceRef || {};
-      const color = getEventColor(eventItem);
-      const canceled = isCanceledEvent(eventItem);
-
+      const color = getEventColor(eventItem) || DEFAULT_EVENT_COLOR;
       // Nas visões de mês e lista o evento não pinta o bloco/linha inteiro —
       // só a bolinha (ver EventContent) — senão vira um bastão colorido
       // gigante, difícil de ler com vários eventos no mesmo dia.
-      if (view === Views.MONTH || view === Views.AGENDA) {
-        return {
-          className: canceled ? 'calendar-event-canceled' : undefined,
-          style: {
-            backgroundColor: 'transparent',
-            border: 'none',
-            boxShadow: 'none',
-            color: '#52525B',
-          },
-        };
+      const isDotView = view === Views.MONTH || view === Views.AGENDA;
+      const className = [
+        'calendar-event',
+        isDotView ? 'calendar-event--dot' : '',
+        isCanceledEvent(eventItem) ? 'calendar-event-canceled' : '',
+        isFreeSlot(eventItem) ? 'calendar-event--livre' : '',
+      ]
+        .filter(Boolean)
+        .join(' ');
+
+      if (isDotView) {
+        return { className };
       }
 
       return {
-        className: canceled ? 'calendar-event-canceled' : undefined,
-        style: color
-          ? {
-              backgroundColor: color,
-              borderColor: color,
-            }
-          : undefined,
+        className,
+        style: {
+          backgroundColor: hexToRgba(color, 0.14) || 'rgba(102, 41, 119, 0.14)',
+          borderLeftColor: color,
+        },
       };
     },
     [view]
@@ -1268,7 +1433,16 @@ const CalendarComponentBase = ({
   // wrapper próprio em vez de manipular o DOM depois de montado.
   const components = useMemo(
     () => ({
-      event: (props: any) => <EventContent {...props} view={view} />,
+      event: (props: any) => (
+        <EventContent
+          {...props}
+          view={view}
+          onOpen={view === Views.AGENDA ? handleSelectEvent : undefined}
+        />
+      ),
+      // O mês usa o cabeçalho padrão (só o dia da semana); a MonthNoSunday
+      // cai nele quando `header` não vem definido.
+      ...(view === Views.MONTH ? {} : { header: DayColumnHeader }),
       eventWrapper: ({ event, children }: any) => (
         <div
           data-testid="calendar-event-slot"
@@ -1280,7 +1454,7 @@ const CalendarComponentBase = ({
         </div>
       ),
     }),
-    [view]
+    [view, handleSelectEvent]
   );
 
   return (
@@ -1291,6 +1465,7 @@ const CalendarComponentBase = ({
           view={view}
           roomMode={roomMode}
           onPrevNext={handlePrevNext}
+          onToday={handleToday}
           onSwitchView={switchView}
         />
 
@@ -1348,6 +1523,8 @@ const CalendarComponentBase = ({
             toolbar={false}
           />
         )}
+
+        <CalendarLegend events={events} />
       </div>
     </div>
   );

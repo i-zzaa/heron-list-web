@@ -1,12 +1,17 @@
 import moment from 'moment';
 import { Dialog } from 'primereact/dialog';
-import { useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { ATENDENTE, DESENVOLVEDOR, TERAPEUTA, permissionAuth } from '../../contexts/permission';
 import { isProfile } from '../../util/permissions';
-import { diffWeek, formatHorarioEvento, isInPast, weekDay } from '../../util/util';
+import {
+  diffWeek,
+  firtUpperCase,
+  formatHorarioEvento,
+  isInPast,
+  weekDay,
+} from '../../util/util';
 import { ButtonHeron } from '../button';
-import { Tag } from '../tag';
-import { STATUS_EVENTS } from '../../constants/schedule';
+import { STATUS_EVENTS, getStatusEventoTone } from '../../constants/schedule';
 
 interface Props {
   evento: any;
@@ -16,6 +21,43 @@ interface Props {
   onDelete: () => void;
   onClick: () => void;
   onClickSecond: () => void;
+}
+
+const ptDataLonga = new Intl.DateTimeFormat('pt-BR', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+
+// `evento.date` vem do getDateFormat (moment sem locale pt-BR, ex.:
+// "Quinta-feira, Sep 17, 2026") — pra exibir, formata a partir da data da
+// ocorrência clicada (`dataAtual`, YYYY-MM-DD).
+const formatDataEvento = (evento: any) => {
+  const data = moment(evento?.dataAtual, 'YYYY-MM-DD', true);
+  return data.isValid()
+    ? firtUpperCase(ptDataLonga.format(data.toDate()))
+    : evento?.date;
+};
+
+interface InfoRowProps {
+  icon: string;
+  children: ReactNode;
+  detail?: ReactNode;
+}
+
+function InfoRow({ icon, children, detail }: InfoRowProps) {
+  return (
+    <li className="flex items-start gap-3">
+      <span className="w-8 h-8 shrink-0 flex items-center justify-center rounded-lg bg-violet-800/10 text-violet-800">
+        <i className={icon} style={{ fontSize: 13 }} />
+      </span>
+      <div className="min-w-0 pt-0.5">
+        <p className="text-[14px] text-gray-800 break-words">{children}</p>
+        {detail ? <p className="text-md text-gray-800 opacity-80 break-words">{detail}</p> : null}
+      </div>
+    </li>
+  );
 }
 
 export const ViewEvento = ({
@@ -30,71 +72,82 @@ export const ViewEvento = ({
   const [buttonEdit, setButtonEdit] = useState(true);
   const { hasPermition, perfil } = permissionAuth();
 
+  const isLivre = evento.paciente.nome === STATUS_EVENTS.livre;
+  const corEspecialidade = evento.especialidade?.cor || '#662977';
+
   const canMarkAsAttended =
     (isProfile(perfil, DESENVOLVEDOR) || isProfile(perfil, TERAPEUTA)) &&
     evento.statusEventos.nome !== STATUS_EVENTS.atendido &&
     !isInPast(evento.date) &&
-    evento.paciente.nome !== STATUS_EVENTS.livre;
+    !isLivre;
 
   const canMarkAsAttested =
     (isProfile(perfil, DESENVOLVEDOR) || isProfile(perfil, ATENDENTE)) &&
     isInPast(evento.date) &&
-    evento.paciente.nome !== STATUS_EVENTS.livre &&
+    !isLivre &&
     evento.statusEventos.nome !== STATUS_EVENTS.atendido &&
     evento.statusEventos.nome !== STATUS_EVENTS.atestado;
 
-  const avaliationCount = (evento: any) => {
-    let text = evento.modalidade.nome;
-    if (text !== 'Avaliação' || !evento?.dataInicio || !evento?.dataFim)
-      return <span>{text}</span>;
+  const canEdit = hasPermition('AGENDA_CALENDARIO_LISTA_EDITAR') && buttonEdit;
+  const canDelete =
+    hasPermition('AGENDA_CALENDARIO_LISTA_EXCLUIR') && evento?.canDelete && buttonEdit;
+
+  const modalidadeLabel = () => {
+    const text = evento.modalidade.nome;
+    if (text !== 'Avaliação' || !evento?.dataInicio || !evento?.dataFim) return text;
 
     const current = diffWeek(evento.dataInicio, evento.dataAtual);
     const diffTotal = diffWeek(evento.dataInicio, evento.dataFim);
 
     return (
       <>
-        <span>
-          {text}
-          <span className="font-inter ml-2">{`${current}/${diffTotal}`}</span>{' '}
-        </span>
+        {text}
+        <span className="font-inter ml-1">{`${current}/${diffTotal}`}</span>
       </>
     );
   };
 
   const header = (
-    <div className="flex justify-between items-center gap-8">
-   {  evento.paciente.nome !== STATUS_EVENTS.livre ? <Tag type={evento.especialidade.nome} color={evento.especialidade.cor} disabled={false} /> : <div></div>}
-      <span>{evento.paciente.nome}</span>
-
-      <div className="flex mt-[-0.5rem]">
-        {hasPermition('AGENDA_CALENDARIO_LISTA_EDITAR') ? (
-          <div>
-            {buttonEdit && (
-              <ButtonHeron
-                text="Edit"
-                icon="pi pi-pencil"
-                type="transparent"
-                color="violet"
-                size="icon"
-                onClick={onEdit}
-              />
-            )}
-          </div>
+    <div className="flex items-stretch gap-3">
+      <span
+        className="w-1 shrink-0 rounded-full"
+        style={{ backgroundColor: isLivre ? '#d4d4d8' : corEspecialidade }}
+      />
+      <div className="min-w-0 flex-1">
+        {!isLivre && evento.especialidade?.nome ? (
+          <p className="flex items-center gap-1.5 text-md font-bold uppercase text-gray-800">
+            <span
+              className="w-2 h-2 rounded-full shrink-0"
+              style={{ backgroundColor: corEspecialidade }}
+            />
+            {evento.especialidade.nome}
+          </p>
         ) : null}
+        <h2 className="text-lg font-bold text-gray-800 leading-tight break-words">
+          {evento.paciente.nome}
+        </h2>
+      </div>
 
-        {hasPermition('AGENDA_CALENDARIO_LISTA_EXCLUIR') && evento?.canDelete ? (
-          <div>
-            {buttonEdit && (
-              <ButtonHeron
-                text="Edit"
-                icon="pi pi-trash"
-                type="transparent"
-                color="red"
-                size="icon"
-                onClick={onDelete}
-              />
-            )}
-          </div>
+      <div className="flex items-start gap-1 -mt-1">
+        {canEdit ? (
+          <ButtonHeron
+            text="Editar"
+            icon="pi pi-pencil"
+            type="transparent"
+            color="violet"
+            size="icon"
+            onClick={onEdit}
+          />
+        ) : null}
+        {canDelete ? (
+          <ButtonHeron
+            text="Excluir"
+            icon="pi pi-trash"
+            type="transparent"
+            color="red"
+            size="icon"
+            onClick={onDelete}
+          />
         ) : null}
       </div>
     </div>
@@ -109,91 +162,106 @@ export const ViewEvento = ({
     const fimEvento = moment(`${evento.dataAtual} ${horaFim}`, 'YYYY-MM-DD HH:mm');
     setButtonEdit(!fimEvento.isValid() || fimEvento.isAfter(moment()));
   });
+
   return (
     <Dialog
       header={header}
       visible={open}
       onHide={onClose}
-      breakpoints={{ '960px': '80vw' }}
+      style={{ width: '32rem' }}
+      breakpoints={{ '640px': '94vw' }}
     >
-      <div>
-        <p className="flex gap-4 items-center justify-between">
-          {avaliationCount(evento)} <span>{evento.statusEventos.nome}</span>
-        </p>
-        <br />
-
-        <p className="font-inter font-bold">
-          {evento.date} &bull;{' '}
-          {`${formatHorarioEvento(
-            evento.data?.start ?? evento.start
-          )} até ${formatHorarioEvento(evento.data?.end ?? evento.end)}`}
-        </p>
-        {evento.frequencia.id !== 1 && (
-          <p>
-            {evento.intervalo.nome} &bull;{' '}
-            {evento?.diasFrequencia
-              .map((dia: number) => weekDay[dia - 1])
-              .join('-')}
-          </p>
-        )}
-        <br />
-        <p className="flex gap-4 items-center">
-          <i className="pi pi-map-marker"></i>
-          {evento.isExterno ? (
-            <>
-              {evento.localExternoDescricao}
-              <span className="font-bold font-inter"> {`- ${evento.km}km`} </span>
-            </>
-          ) : (
-            evento.localidade?.nome
-          )}
-        </p>
-        <br />
-        {evento.observacao ? (
-          <>
-            <p className="flex gap-4 items-center">
-              <i className="pi pi-bars"></i>
-              {evento.observacao}
-            </p>
-            <br />
-          </>
-        ) : null}
-        <p className="flex gap-4 items-center justify-between">
-          <span className="flex gap-4 items-center">
-            {evento.terapeuta.nome} <i className="pi pi-tag"> </i>{' '}
-            {evento.funcao.nome}
+      <div className="grid gap-5">
+        <div className="flex flex-wrap items-center gap-2">
+          <span
+            className={`inline-flex items-center px-2.5 py-1 rounded-full text-md font-bold ${getStatusEventoTone(
+              evento.statusEventos.nome
+            )}`}
+            data-testid="view-evento-status"
+          >
+            {evento.statusEventos.nome}
           </span>
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-md text-gray-800 border border-gray-200">
+            {modalidadeLabel()}
+          </span>
+        </div>
+
+        <ul className="grid gap-4">
+          <InfoRow
+            icon="pi pi-calendar"
+            detail={
+              <span className="font-inter">
+                {`${formatHorarioEvento(
+                  evento.data?.start ?? evento.start
+                )} até ${formatHorarioEvento(evento.data?.end ?? evento.end)}`}
+              </span>
+            }
+          >
+            {formatDataEvento(evento)}
+          </InfoRow>
+
+          {evento.frequencia.id !== 1 && (
+            <InfoRow
+              icon="pi pi-replay"
+              detail={evento?.diasFrequencia
+                ?.map((dia: number) => weekDay[dia - 1])
+                .join(' · ')}
+            >
+              {evento.intervalo.nome}
+            </InfoRow>
+          )}
+
+          <InfoRow
+            icon="pi pi-map-marker"
+            detail={
+              evento.isExterno ? (
+                <span className="font-inter">{`${evento.km} km`}</span>
+              ) : undefined
+            }
+          >
+            {evento.isExterno ? evento.localExternoDescricao : evento.localidade?.nome}
+          </InfoRow>
+
+          <InfoRow icon="pi pi-user" detail={evento.funcao.nome}>
+            {evento.terapeuta.nome}
+          </InfoRow>
+
           {evento.paciente?.convenio?.nome ? (
-            <span className="flex gap-4 items-center">
-              <i className="pi pi-id-card"></i>
+            <InfoRow icon="pi pi-id-card" detail="Convênio">
               {evento.paciente.convenio.nome}
-            </span>
+            </InfoRow>
           ) : null}
-        </p>
 
-<div className='flex justify-between mt-8 gap-2'>
+          {evento.observacao ? (
+            <InfoRow icon="pi pi-comment" detail={evento.observacao}>
+              Observação
+            </InfoRow>
+          ) : null}
+        </ul>
 
-        {canMarkAsAttended ? (
-               <ButtonHeron
-                text="Atendido"
+        {canMarkAsAttended || canMarkAsAttested ? (
+          <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t border-gray-200">
+            {canMarkAsAttended ? (
+              <ButtonHeron
+                text="Marcar como atendido"
                 icon="pi pi-check"
                 type="primary"
                 color="white"
                 size="full"
                 onClick={onClick}
               />
-        ) : null}
-        {canMarkAsAttested ? (
-               <ButtonHeron
+            ) : null}
+            {canMarkAsAttested ? (
+              <ButtonHeron
                 text="Atestado"
                 icon="pi pi-book"
-                type="second"
-                color="white"
+                type="outline"
                 size="full"
                 onClick={onClickSecond}
               />
+            ) : null}
+          </div>
         ) : null}
-      </div>
       </div>
     </Dialog>
   );

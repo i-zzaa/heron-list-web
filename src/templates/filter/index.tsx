@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useEffect } from 'react';
 import { permissionAuth } from '../../contexts/permission';
 import { Accordion, AccordionTab } from 'primereact/accordion';
+import './styles.css';
 
 export interface FilterProps {
   id: string;
@@ -83,109 +84,97 @@ export function Filter({
   });
 
   return (
-    <Accordion activeIndex={defaultOpen ? 0 : null}>
-      <AccordionTab header={legend} tabIndex={0}>
-        <form
-          id={id}
-          action="#"
-          onSubmit={handleSubmit(handleSubmit2)}
-          className="flex-1"
+    <div className="filter-heron">
+      <Accordion
+        activeIndex={defaultOpen ? 0 : null}
+        expandIcon="pi pi-chevron-down"
+        collapseIcon="pi pi-chevron-up"
+      >
+        <AccordionTab
+          header={
+            <div className="flex items-center gap-3">
+              <span className="filter-heron__icon">
+                <i className="pi pi-sliders-h" />
+              </span>
+              <span className="text-[15px] font-bold text-violet-800">
+                {legend}
+              </span>
+            </div>
+          }
+          tabIndex={0}
         >
-          <div className="grid grid-cols-6 gap-4">
-            {fields.map(
-              (field: any) =>
-                hasPermition(field.permission) && (
-                  <Input
-                    key={field.id}
-                    labelText={field.labelText}
-                    id={field.id}
-                    type={field.type}
-                    customCol={field.customCol}
-                    control={control}
-                    options={
-                      field.type === 'select' ? dropdown[field.name] : undefined
-                    }
-                    // hidden={field.hidden}
-                  />
-                )
-            )}
-          </div>
-
-          <div className="flex items-center mt-10 gap-2 justify-between">
-            <>
-              {onInclude &&
-                hasPermition(`${screen}_FILTRO_BOTAO_CADASTRAR`) && (
-                  <div className="sm:text-end">
-                    <ButtonHeron
-                      text={nameButton || 'Cadastrar'}
-                      icon="pi pi-user-plus"
-                      type="primary"
-                      size="sm"
-                      onClick={onInclude}
-                      testId={includeButtonTestId}
+          <form
+            id={id}
+            action="#"
+            onSubmit={handleSubmit(handleSubmit2)}
+            className="flex-1"
+          >
+            <div className="grid grid-cols-6 gap-4">
+              {fields.map(
+                (field: any) =>
+                  hasPermition(field.permission) && (
+                    <Input
+                      key={field.id}
+                      labelText={field.labelText}
+                      id={field.id}
+                      type={field.type}
+                      customCol={field.customCol}
+                      control={control}
+                      options={
+                        field.type === 'select'
+                          ? dropdown[field.name]
+                          : undefined
+                      }
+                      // hidden={field.hidden}
                     />
-                  </div>
-                )}
-              <div className="hidden sm:w-2/4 ml-auto sm:grid grid-cols-2 gap-2">
-                <>
-                  {hasPermition(`${screen}_FILTRO_BOTAO_LIMPAR`) && (
-                    <div className="text-end">
+                  )
+              )}
+            </div>
+
+            <div className="filter-heron__actions flex flex-col-reverse sm:flex-row sm:items-center gap-2">
+              <>
+                {onInclude &&
+                  hasPermition(`${screen}_FILTRO_BOTAO_CADASTRAR`) && (
+                    <div className="sm:mr-auto">
                       <ButtonHeron
-                        text="Limpar"
-                        icon="pi pi-filter-slash"
-                        type="second"
+                        text={nameButton || 'Cadastrar'}
+                        icon="pi pi-user-plus"
+                        type="primary"
                         size="full"
-                        onClick={handleReset}
+                        onClick={onInclude}
+                        testId={includeButtonTestId}
                       />
                     </div>
                   )}
-                  {hasPermition(`${screen}_FILTRO_BOTAO_PESQUISAR`) && (
-                    <div className="text-end">
+                <div className="grid grid-cols-2 sm:flex gap-2 sm:ml-auto">
+                  <>
+                    {hasPermition(`${screen}_FILTRO_BOTAO_LIMPAR`) && (
+                      <ButtonHeron
+                        text="Limpar"
+                        icon="pi pi-filter-slash"
+                        type="outline"
+                        size="full"
+                        onClick={handleReset}
+                      />
+                    )}
+                    {hasPermition(`${screen}_FILTRO_BOTAO_PESQUISAR`) && (
                       <ButtonHeron
                         text="Pesquisar"
-                        icon="pi pi-filter"
+                        icon="pi pi-search"
                         type="primary"
                         size="full"
                         loading={loading}
                         disabled={searchDisabled}
                         onClick={() => handleSubmit(handleSubmit2)}
                       />
-                    </div>
-                  )}
-                </>
-              </div>
-              <div className="sm:w-2/4 ml-auto grid sm:hidden grid-cols-2 gap-2">
-                <>
-                  {hasPermition(`${screen}_FILTRO_BOTAO_LIMPAR`) && (
-                    <div className="text-end">
-                      <ButtonHeron
-                        text="Limpar"
-                        icon="pi pi-filter-slash"
-                        type="second"
-                        size="icon"
-                        onClick={handleReset}
-                      />
-                    </div>
-                  )}
-                  {hasPermition(`${screen}_FILTRO_BOTAO_PESQUISAR`) && (
-                    <div className="text-end">
-                      <ButtonHeron
-                        text="Pesquisar"
-                        icon="pi pi-filter"
-                        type="primary"
-                        size="icon"
-                        loading={loading}
-                        disabled={searchDisabled}
-                        onClick={() => handleSubmit(handleSubmit2)}
-                      />
-                    </div>
-                  )}
-                </>
-              </div>
-            </>
-          </div>
-        </form>
-      </AccordionTab>
-    </Accordion>
+                    )}
+                  </>
+                </div>
+              </>
+            </div>
+          </form>
+        </AccordionTab>
+      </Accordion>
+    </div>
   );
 }

@@ -1,0 +1,111 @@
+/* Estilo do filtro das telas de listagem. Tudo fica preso em `.filter-heron`
+   pra não mexer nos outros Accordions do PrimeReact espalhados pelo app. */
+
+.filter-heron .p-accordion-tab {
+  margin-bottom: 0;
+  background: var(--white);
+  border: 1px solid #e4e4e7;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(102, 41, 119, 0.05);
+  overflow: hidden;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.filter-heron .p-accordion-tab-active {
+  border-color: rgba(102, 41, 119, 0.25);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(102, 41, 119, 0.08);
+}
+
+/* Cabeçalho: o ícone de abrir/fechar vai pra direita e o conteúdo do
+   `header` (ícone + título) ocupa o resto. */
+.filter-heron .p-accordion .p-accordion-header .p-accordion-header-link {
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 0;
+  background: var(--white);
+  color: var(--gray-800);
+  font-weight: 400;
+}
+
+.filter-heron .p-accordion .p-accordion-header:not(.p-disabled) .p-accordion-header-link:hover,
+.filter-heron .p-accordion .p-accordion-header:not(.p-disabled).p-highlight .p-accordion-header-link,
+.filter-heron .p-accordion .p-accordion-header:not(.p-disabled).p-highlight:hover .p-accordion-header-link {
+  background: var(--white);
+  border: none;
+  color: var(--gray-800);
+}
+
+/* Anel de foco só pra quem navega por teclado — no clique do mouse ele
+   ficava marcado em volta do cabeçalho. */
+.filter-heron .p-accordion .p-accordion-header:not(.p-disabled) .p-accordion-header-link:focus {
+  box-shadow: none;
+}
+
+.filter-heron .p-accordion .p-accordion-header:not(.p-disabled) .p-accordion-header-link:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--violet-600);
+}
+
+.filter-heron .p-accordion .p-accordion-header .p-accordion-toggle-icon {
+  margin-right: 0;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  color: var(--violet-800);
+  transition: background-color 0.2s;
+}
+
+.filter-heron .p-accordion .p-accordion-header .p-accordion-header-link:hover .p-accordion-toggle-icon {
+  background: rgba(102, 41, 119, 0.08);
+}
+
+.filter-heron .p-accordion .p-accordion-header-text {
+  flex: 1;
+}
+
+.filter-heron .p-accordion .p-accordion-content {
+  padding: 0.25rem 1.25rem 1.25rem;
+  border: none;
+  border-top: 1px solid #f1f1f4;
+  border-radius: 0;
+}
+
+.filter-heron__icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.625rem;
+  background: rgba(102, 41, 119, 0.08);
+  color: var(--violet-800);
+}
+
+.filter-heron__icon .pi {
+  font-size: 0.95rem;
+}
+
+.filter-heron__actions {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f1f1f4;
+}
+
+/* Os botões do filtro têm largura do conteúdo no desktop, em vez de
+   dividir metade da tela entre eles. */
+.filter-heron__actions .p-button {
+  padding: 0.625rem 1.25rem;
+  gap: 0.25rem;
+}
+
+@media screen and (min-width: 640px) {
+  .filter-heron__actions .p-button {
+    min-width: 8.5rem;
+  }
+}

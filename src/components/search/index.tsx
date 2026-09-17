@@ -24,7 +24,7 @@ export function Search({ onSubmit, control, loading }: SearchProps) {
     <div className="grid grid-cols-12 items-center gap-1">
       <div className="col-span-11 relative">
         <Input
-          labelText="Search"
+          labelText="Buscar"
           id="search"
           type="text"
           customCol="w-full"

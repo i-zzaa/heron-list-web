@@ -19,6 +19,7 @@ module.exports = {
       'gray-800': '#52525B',
       'violet-800': '#662977',
       'violet-600': '#66297780',
+      'violet-900': '#4f1f5c',
       'red-400': '#f87171',
       'red-900': '#7f1d1d',
       'green-400': '#4ade80',
@@ -48,6 +49,11 @@ module.exports = {
         'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
     },
     extend: {
+      boxShadow: {
+        // Mesma sombra dos cards do filtro (--heron-shadow em styles/theme.css).
+        heron:
+          '0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(102, 41, 119, 0.05)',
+      },
       fontFamily: {
         sans: ['Raleway', 'sans-serif'],
         'sans-serif': 'sans-serif',
