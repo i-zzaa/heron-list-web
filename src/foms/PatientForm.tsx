@@ -36,6 +36,7 @@ export interface PacientsProps {
   sessao: any[];
   dataEmissaoPlanoTerapeutico?: string;
   dataEmissaoLaudoMedico?: string;
+  codigoVinculo?: string | null;
 }
 
 export const PatientForm = ({
