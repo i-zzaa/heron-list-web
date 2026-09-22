@@ -1,0 +1,31 @@
+src/foms/PatientForm.tsx
+  s_258e3bb14c2974::t_a2e8d2d8f30c89 39
+src/templates/list/index.tsx
+  s_258e3bb14c2974::t_26db89fc5a06ed 9,256-258
+src/components/codigoVinculo/index.tsx
+  s_9ce4cdfb93db94::t_197dfe935300ea 1-59
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "a378afc12aaed7700d4d0f2b265a992104b31245",
+  "prompts": {},
+  "sessions": {
+    "s_258e3bb14c2974": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3e308876-583e-457e-8350-c86559501b0e",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Isa Andressa Novaes Menezes <c1321644@interno.bb.com.br>"
+    },
+    "s_9ce4cdfb93db94": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0ec7d88e-42d0-406f-acd5-2de644fc36c1",
+        "model": "unknown"
+      },
+      "human_author": "Isa Andressa Novaes Menezes <c1321644@interno.bb.com.br>"
+    }
+  }
+}
