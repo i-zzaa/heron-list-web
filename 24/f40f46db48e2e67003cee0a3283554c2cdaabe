@@ -1,0 +1,19 @@
+package.json
+  s_92cea51fefce5c::t_c12ef5a1db81bb 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "24f40f46db48e2e67003cee0a3283554c2cdaabe",
+  "prompts": {},
+  "sessions": {
+    "s_92cea51fefce5c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "32987dd6-93f8-435d-977c-c4d5a38863a3",
+        "model": "unknown"
+      },
+      "human_author": "Isa Andressa Novaes Menezes <c1321644@interno.bb.com.br>"
+    }
+  }
+}
