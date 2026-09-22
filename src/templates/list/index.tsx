@@ -6,7 +6,6 @@ import { permissionAuth } from '../../contexts/permission';
 import { formatdate } from '../../util/util';
 import { LoadingHeron } from '../../components/loading';
 import { STATUS_PACIENT_COD } from '../../constants/patient';
-import { CodigoVinculo } from '../../components/codigoVinculo';
 
 export interface ListProps {
   onSubmit?: (e: any) => any;
@@ -257,9 +256,6 @@ export function List({
                   </>
                 )}
                 {renderStatus(item)}
-                {screen === 'CADASTRO_PACIENTES' && (
-                  <CodigoVinculo codigo={item?.codigoVinculo} />
-                )}
                 {item?.vaga?.dataDevolutiva && (
                   <TextSubtext
                     className="font-inter"
