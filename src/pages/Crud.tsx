@@ -104,6 +104,14 @@ export const Crud = () => {
       onClick: noop,
     },
     {
+      permission: 'CADASTRO_UNIDADE',
+      header: 'Unidade',
+      leftIcon: 'pi pi-building',
+      screen: 'CADASTRO_UNIDADE',
+      namelist: 'unidade',
+      onClick: noop,
+    },
+    {
       permission: 'CADASTRO_TICKET',
       header: 'Ticket',
       leftIcon: 'pi pi-ticket',

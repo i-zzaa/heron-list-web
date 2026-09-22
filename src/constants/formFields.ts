@@ -283,6 +283,17 @@ const usuariosFields: any = [
   },
 
   {
+    labelText: 'Unidade',
+    id: 'unidadeId',
+    name: 'unidades',
+    type: 'select',
+    customCol: 'col-span-6 sm:col-span-3',
+    validate: {
+      required: 'Campo obrigatório!',
+    },
+  },
+
+  {
     labelText: 'Especialidade',
     id: 'especialidadeId',
     name: 'especialidades',
@@ -447,6 +458,16 @@ const localidadeFields = [
       required: true,
     },
   },
+  {
+    labelText: 'Unidade',
+    id: 'unidadeId',
+    name: 'unidades',
+    type: 'select',
+    customCol: 'col-span-6',
+    validate: {
+      required: 'Campo obrigatório!',
+    },
+  },
 ];
 
 const modalidadeFields = [
@@ -467,6 +488,23 @@ const modalidadeFields = [
 ];
 
 const ticketFields = [
+  {
+    labelText: 'Nome',
+    labelFor: 'nome',
+    id: 'nome',
+    name: 'nome',
+    autoComplete: 'nome',
+    isRequired: true,
+    placeholder: 'nome',
+    customCol: 'col-span-6',
+    type: 'text',
+    validate: {
+      required: true,
+    },
+  },
+];
+
+const unidadeFields = [
   {
     labelText: 'Nome',
     labelFor: 'nome',
@@ -708,4 +746,5 @@ export const Fields: any = {
   grupoPermissoesFields,
   ticketFields,
   convenioFields,
+  unidadeFields,
 };

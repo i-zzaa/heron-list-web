@@ -127,6 +127,17 @@ export const patientAvaliationFields = [
     },
   },
   {
+    labelText: 'Unidade',
+    id: 'unidadeId',
+    name: 'unidades',
+    type: 'select',
+    customCol: 'col-span-6 sm:col-span-3',
+    singleSelect: false,
+    validate: {
+      required: 'Campo obrigatório!',
+    },
+  },
+  {
     labelText: 'Especialidade',
     id: 'especialidades',
     name: 'especialidades',

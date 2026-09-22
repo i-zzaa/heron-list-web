@@ -190,6 +190,9 @@ export const formtDatePatient = (value: PacientsProps) => {
     carteirinha: value?.carteirinha || '',
     periodoId: value?.vaga?.periodo || null,
     convenioId: value?.convenio || null,
+    // O backend devolve `unidade` (objeto id/nome); o select do formulário
+    // espera esse objeto em `unidadeId`, mesmo padrão de convenio/status.
+    unidadeId: value?.unidade || null,
     statusId: value?.status || null,
     dataContato: value?.vaga?.dataContato || '',
     dataVoltouAba: value?.vaga?.dataVoltouAba || '',

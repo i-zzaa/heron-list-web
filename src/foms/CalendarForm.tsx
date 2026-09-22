@@ -1,6 +1,6 @@
 import moment from 'moment';
 moment.locale('pt-br');
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { ButtonHeron, Confirm, Input, Title } from '../components';
 import { SelectButtonComponent } from '../components/selectButton';
@@ -112,9 +112,34 @@ export const CalendarForm = ({
     formState: { errors },
     control,
     trigger,
+    watch,
   } = useForm({ defaultValues });
 
   const lockScheduleFields = isEdit;
+
+  const pacienteSelecionado = watch('paciente');
+
+  /**
+   * Salas da unidade do paciente: agendar um paciente de Itupeva não deve
+   * oferecer sala de Jundiaí. O dropdown de localidade já vem com `unidadeId`
+   * do backend, então dá pra filtrar aqui sem outra requisição.
+   *
+   * Se a unidade não tem nenhuma sala cadastrada (é o caso de Itupeva hoje),
+   * cai de volta na lista inteira — melhor oferecer sala demais do que travar
+   * o agendamento com um select vazio.
+   */
+  const localidadesDaUnidade = useMemo(() => {
+    const todas = dropDownList?.localidades ?? [];
+    const unidadeId = (pacienteSelecionado as any)?.unidadeId;
+
+    if (!unidadeId) return todas;
+
+    const daUnidade = todas.filter(
+      (localidade: any) => localidade?.unidadeId === unidadeId
+    );
+
+    return daUnidade.length ? daUnidade : todas;
+  }, [dropDownList?.localidades, (pacienteSelecionado as any)?.unidadeId]);
 
   const immutableEventFields = [
     'modalidade',
@@ -714,7 +739,7 @@ export const CalendarForm = ({
               customCol="col-span-6 sm:col-span-3"
               errors={errors}
               control={control}
-              options={dropDownList?.localidades}
+              options={localidadesDaUnidade}
               validate={{
                 required: true,
               }}

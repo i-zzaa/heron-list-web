@@ -21,6 +21,7 @@ export interface DropdownContextData {
   renderLocalidade: () => void;
   renderFuncao: () => void;
   renderTicket: () => void;
+  renderUnidade: () => void;
   renderEspecialidade: () => void;
   renderEspecialidadeCatalogo: () => void;
   renderTerapeutas: () => void;
@@ -132,6 +133,11 @@ export const DropdownProvider = ({ children }: Props) => {
 
   const renderTicket = useCallback(async () => {
     const response: any = await dropDown('ticket');
+    return response;
+  }, []);
+
+  const renderUnidade = useCallback(async () => {
+    const response: any = await dropDown('unidade');
     return response;
   }, []);
 
@@ -269,6 +275,7 @@ export const DropdownProvider = ({ children }: Props) => {
       tipoSessao: await renderTipoSessao(),
       periodos: await renderPeriodo(),
       status: await renderStatus(statusPacienteCod),
+      unidades: await renderUnidade(),
     };
 
     return dropDownList;
@@ -365,7 +372,8 @@ export const DropdownProvider = ({ children }: Props) => {
       especialidades: await renderEspecialidade(),
       perfies: await renderPerfil(),
       permissoes: await renderPermissao(),
-      grupoPermissoes: await renderGrupoPermissoes()
+      grupoPermissoes: await renderGrupoPermissoes(),
+      unidades: await renderUnidade()
     };
 
     return dropDownList;
@@ -381,6 +389,7 @@ export const DropdownProvider = ({ children }: Props) => {
         renderLocalidade,
         renderFuncao,
         renderTicket,
+        renderUnidade,
         renderEspecialidade,
         renderEspecialidadeCatalogo,
         renderTerapeutas,

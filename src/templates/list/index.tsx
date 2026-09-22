@@ -95,7 +95,11 @@ export function List({
         item?.perfil?.nome.toUpperCase() ||
         item?.sala ||
         item?.especialidade?.nome;
-      const textSecondLeft = item?.login || '';
+      // Usuário já mostrava o login aqui; localidade não mostrava nada. A
+      // unidade entra nos dois, separada por ponto quando há login.
+      const textSecondLeft = [item?.login, item?.unidade?.nome]
+        .filter(Boolean)
+        .join(' · ');
       const ATIVO = item.hasOwnProperty('ativo') ?  item?.ativo :  true
 
       return (

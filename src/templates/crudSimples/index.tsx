@@ -378,7 +378,8 @@ export default function CrudSimples({
             const shouldReloadCrudDropdown =
               !dropDownList?.perfies ||
               !dropDownList?.grupoPermissoes ||
-              !dropDownList?.especialidades;
+              !dropDownList?.especialidades ||
+              !dropDownList?.unidades;
 
             const currentDropDownList = shouldReloadCrudDropdown
               ? await renderDropdownCrud()
@@ -414,6 +415,13 @@ export default function CrudSimples({
               elemento.grupoPermissaoId = findOptionById(
                 currentDropDownList.grupoPermissoes,
                 elemento.grupoPermissaoId || elemento.grupoPermissao
+              );
+            }
+
+            if (elemento.unidade || elemento.unidadeId) {
+              elemento.unidadeId = findOptionById(
+                currentDropDownList.unidades,
+                elemento.unidadeId || elemento.unidade
               );
             }
 
