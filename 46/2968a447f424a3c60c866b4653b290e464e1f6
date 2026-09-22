@@ -1,0 +1,41 @@
+src/constants/formFields.ts
+  s_258e3bb14c2974::t_7ede83aa6c8717 486-502,710
+src/pages/Crud.tsx
+  s_258e3bb14c2974::t_1e7313482c7655 87-94
+package.json
+  s_92cea51fefce5c::t_2b8a1bd769f437 3
+src/components/view-evento/index.tsx
+  s_624a3b8305f6d4::t_da4376e0bc082c 153-163
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "462968a447f424a3c60c866b4653b290e464e1f6",
+  "prompts": {},
+  "sessions": {
+    "s_258e3bb14c2974": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3e308876-583e-457e-8350-c86559501b0e",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Isa Andressa Novaes Menezes <c1321644@interno.bb.com.br>"
+    },
+    "s_624a3b8305f6d4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "02985269-c095-40e9-beda-8899653e3abd",
+        "model": "unknown"
+      },
+      "human_author": "Isa Andressa Novaes Menezes <c1321644@interno.bb.com.br>"
+    },
+    "s_92cea51fefce5c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "32987dd6-93f8-435d-977c-c4d5a38863a3",
+        "model": "unknown"
+      },
+      "human_author": "Isa Andressa Novaes Menezes <c1321644@interno.bb.com.br>"
+    }
+  }
+}
