@@ -1,0 +1,73 @@
+src/contexts/dropDown.tsx
+  s_258e3bb14c2974::t_a330679c5ca3e8 11-14,40,352-361,398
+package.json
+  s_92cea51fefce5c::t_d05dc15591b984 3
+src/components/button/index.tsx
+  s_e1e3c0b3afbd10::t_886463cf5a1dcd 8,22,31
+src/components/tag/index.tsx
+  s_af93723c525edd::t_d7bd75b154e809 13,33-35,48-49
+src/constants/report.ts
+  s_1278469c19f926::t_8286876a3646b7 1-54
+src/pages/Reports.tsx
+  s_624a3b8305f6d4::t_02854a8824cb2f 1-261
+src/routes/OtherRoutes.tsx
+  s_1278469c19f926::t_3de84faec7273b 14,28,50
+src/templates/filter/index.tsx
+  s_e1e3c0b3afbd10::t_7006292b76cc2a 21-23,39,41-43,51-62,64-68,147,175
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "3f31a591d76649068257ae66a7e10f256d1e40e8",
+  "prompts": {},
+  "sessions": {
+    "s_1278469c19f926": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0292fb7d-b429-4531-80ad-5f53b69031ff",
+        "model": "unknown"
+      },
+      "human_author": "Isa Andressa Novaes Menezes <c1321644@interno.bb.com.br>"
+    },
+    "s_258e3bb14c2974": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3e308876-583e-457e-8350-c86559501b0e",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Isa Andressa Novaes Menezes <c1321644@interno.bb.com.br>"
+    },
+    "s_624a3b8305f6d4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "02985269-c095-40e9-beda-8899653e3abd",
+        "model": "unknown"
+      },
+      "human_author": "Isa Andressa Novaes Menezes <c1321644@interno.bb.com.br>"
+    },
+    "s_92cea51fefce5c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "32987dd6-93f8-435d-977c-c4d5a38863a3",
+        "model": "unknown"
+      },
+      "human_author": "Isa Andressa Novaes Menezes <c1321644@interno.bb.com.br>"
+    },
+    "s_af93723c525edd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "400a7bcd-b0f1-4eec-8c11-e5dc29ab3f68",
+        "model": "unknown"
+      },
+      "human_author": "Isa Andressa Novaes Menezes <c1321644@interno.bb.com.br>"
+    },
+    "s_e1e3c0b3afbd10": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0ad8d3b6-3f45-4e71-9bdd-6ef3ee675b8a",
+        "model": "unknown"
+      },
+      "human_author": "Isa Andressa Novaes Menezes <c1321644@interno.bb.com.br>"
+    }
+  }
+}
