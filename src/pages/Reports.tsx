@@ -331,6 +331,39 @@ export default function Reports() {
     </div>
   );
 
+  // Coluna do documento: emissão e vencimento em texto corrido, como antes
+  // do novo tema — a situação fica na coluna ao lado, não empilhada aqui.
+  const renderDocumento = (documento: DocumentoResumo | null) => {
+    if (!documento) {
+      return <span className="text-gray-400">Não emitido</span>;
+    }
+
+    return (
+      <span className="font-inter text-sm">
+        Emissão {formatdate(documento.dataEmissao)} · Vencimento{' '}
+        {formatdate(documento.dataVencimento)}
+      </span>
+    );
+  };
+
+  const renderSituacao = (documento: DocumentoResumo | null) => {
+    if (!documento) {
+      return <span className="text-gray-400">-</span>;
+    }
+
+    return (
+      <span
+        className={`w-fit px-2 py-1 rounded text-xs whitespace-nowrap ${
+          documento.vencido
+            ? 'bg-red-400/10 text-red-400'
+            : 'bg-green-400/10 text-green-600'
+        }`}
+      >
+        {getSituacaoLabel(documento)}
+      </span>
+    );
+  };
+
   const renderTabela = () => (
     <div className="hidden md:block">
       <DataTable
@@ -339,37 +372,33 @@ export default function Reports() {
         paginator={registrosFiltrados.length > 20}
         rows={20}
       >
-        <Column
-          sortable
-          field="pacienteNome"
-          header="Paciente"
-          body={(registro: RelatorioPacienteItem) => (
-            <span className="text-[13px] font-bold text-gray-800">
-              {registro.pacienteNome}
-            </span>
-          )}
-        />
+        <Column sortable field="pacienteNome" header="Paciente" />
         <Column
           sortable
           field="convenio"
           header="Convênio"
-          body={(registro: RelatorioPacienteItem) => (
-            <span className="text-[13px] text-gray-800">
-              {registro.convenio || '-'}
-            </span>
-          )}
+          body={(registro: RelatorioPacienteItem) => registro.convenio || '-'}
         />
-        {documentosVisiveis.map(({ tipo, campo }) => (
+        {documentosVisiveis.flatMap(({ tipo, campo, sigla }) => [
           <Column
             key={tipo}
             sortable
-            field={`${campo}.diasParaVencer`}
+            field={`${campo}.dataVencimento`}
             header={getTipoDocumentoLabel(tipo)}
-            body={(registro: RelatorioPacienteItem) => (
-              <DocumentoCelula documento={registro[campo]} />
-            )}
-          />
-        ))}
+            body={(registro: RelatorioPacienteItem) =>
+              renderDocumento(registro[campo])
+            }
+          />,
+          <Column
+            key={`${tipo}-situacao`}
+            sortable
+            field={`${campo}.diasParaVencer`}
+            header={`Situação ${sigla}`}
+            body={(registro: RelatorioPacienteItem) =>
+              renderSituacao(registro[campo])
+            }
+          />,
+        ])}
       </DataTable>
     </div>
   );
