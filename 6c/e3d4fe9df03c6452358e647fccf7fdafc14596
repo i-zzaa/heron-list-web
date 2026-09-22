@@ -1,0 +1,29 @@
+src/constants/formFields.ts
+  s_258e3bb14c2974::t_8e8bf33a389387 674-675
+package.json
+  s_92cea51fefce5c::t_9431f5df9c5c95 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "6ce3d4fe9df03c6452358e647fccf7fdafc14596",
+  "prompts": {},
+  "sessions": {
+    "s_258e3bb14c2974": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3e308876-583e-457e-8350-c86559501b0e",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Isa Andressa Novaes Menezes <c1321644@interno.bb.com.br>"
+    },
+    "s_92cea51fefce5c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "32987dd6-93f8-435d-977c-c4d5a38863a3",
+        "model": "unknown"
+      },
+      "human_author": "Isa Andressa Novaes Menezes <c1321644@interno.bb.com.br>"
+    }
+  }
+}
