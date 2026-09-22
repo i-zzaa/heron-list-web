@@ -1,0 +1,21 @@
+package.json
+  s_92cea51fefce5c::t_b2f75101c00e75 16-17
+scripts/deploy.sh
+  s_92cea51fefce5c::t_a7f38eb673d02e 1-177
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "3219b694a4ece94eea79746759eb6a4ab671939e",
+  "prompts": {},
+  "sessions": {
+    "s_92cea51fefce5c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "32987dd6-93f8-435d-977c-c4d5a38863a3",
+        "model": "unknown"
+      },
+      "human_author": "Isa Andressa Novaes Menezes <c1321644@interno.bb.com.br>"
+    }
+  }
+}
