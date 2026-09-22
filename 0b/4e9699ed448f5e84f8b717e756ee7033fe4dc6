@@ -1,0 +1,41 @@
+src/foms/CalendarForm.tsx
+  s_258e3bb14c2974::t_ff78789c1bcbae 13,77-105
+src/util/util.ts
+  s_258e3bb14c2974::t_c86369fd94e838 100-119
+src/components/calendar/index.tsx
+  s_0e9f90cf84e8e3::t_91e4257128d634 7-11,21-53
+src/components/view-evento/index.tsx
+  s_624a3b8305f6d4::t_d7743816c952ea 6,104-110,126-129
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "0b4e9699ed448f5e84f8b717e756ee7033fe4dc6",
+  "prompts": {},
+  "sessions": {
+    "s_0e9f90cf84e8e3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-ac4301b0ca547f062",
+        "model": "unknown"
+      },
+      "human_author": "Isa Andressa Novaes Menezes <c1321644@interno.bb.com.br>"
+    },
+    "s_258e3bb14c2974": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3e308876-583e-457e-8350-c86559501b0e",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Isa Andressa Novaes Menezes <c1321644@interno.bb.com.br>"
+    },
+    "s_624a3b8305f6d4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "02985269-c095-40e9-beda-8899653e3abd",
+        "model": "unknown"
+      },
+      "human_author": "Isa Andressa Novaes Menezes <c1321644@interno.bb.com.br>"
+    }
+  }
+}
