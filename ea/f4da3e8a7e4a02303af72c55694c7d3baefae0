@@ -1,0 +1,29 @@
+src/pages/Crud.tsx
+  s_258e3bb14c2974::t_d1248ebf2c3395 11,16-17,118-122
+package.json
+  s_92cea51fefce5c::t_ad9ec289f5cc0a 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "eaf4da3e8a7e4a02303af72c55694c7d3baefae0",
+  "prompts": {},
+  "sessions": {
+    "s_258e3bb14c2974": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3e308876-583e-457e-8350-c86559501b0e",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Isa Andressa Novaes Menezes <c1321644@interno.bb.com.br>"
+    },
+    "s_92cea51fefce5c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "32987dd6-93f8-435d-977c-c4d5a38863a3",
+        "model": "unknown"
+      },
+      "human_author": "Isa Andressa Novaes Menezes <c1321644@interno.bb.com.br>"
+    }
+  }
+}
