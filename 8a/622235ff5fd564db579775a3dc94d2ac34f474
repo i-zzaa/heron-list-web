@@ -1,0 +1,19 @@
+src/pages/Reports.tsx
+  s_c7813805bf3e24::t_21630872dcc156 334-366,375,380,382,386,388-401
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "8a622235ff5fd564db579775a3dc94d2ac34f474",
+  "prompts": {},
+  "sessions": {
+    "s_c7813805bf3e24": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "312fb310-fbb6-4fd6-944b-7886cc950ff9",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Isa Andressa Novaes Menezes <c1321644@interno.bb.com.br>"
+    }
+  }
+}
