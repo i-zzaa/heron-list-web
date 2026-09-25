@@ -1,0 +1,24 @@
+src/pages/Home.tsx
+  s_4c89a3a42aef7a::t_dbf97dd73dc75a 1,5-22,29,32-44,47-72,74-87
+  s_4c89a3a42aef7a::t_9d23bfdcbd79f2 88-89
+src/pages/home.css
+  s_4c89a3a42aef7a::t_367654d26053bb 1-599
+src/pages/Dashboard.tsx
+  s_4c89a3a42aef7a::t_0ab10b57650b05 1,238,243-251,260,270-297,335-343,346-350,360-395,399,401,404,409,411-423,431-474,479-480,490,492-498,507-508,527,541-543,550-551,555-556,560,597-599,644-646,648-649,651-652,655,657,660,667-668,676-677,679-689,691,696-716,719-728,731,733,736-763,765,767,770-797,799,802,804,807-810,813-817,820,822,825-832,835-854
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "b54c21d6bd1a3a0fb7a62c2a691acddd4360fcf1",
+  "prompts": {},
+  "sessions": {
+    "s_4c89a3a42aef7a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "018feb3d-7621-4fa0-b967-3ef8f671f411",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Isa Andressa Novaes Menezes <c1321644@interno.bb.com.br>"
+    }
+  }
+}
