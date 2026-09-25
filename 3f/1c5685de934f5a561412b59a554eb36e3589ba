@@ -1,0 +1,37 @@
+e2e/cadastro-funcao.spec.ts
+  s_4c89a3a42aef7a::t_74d8f2e8319789 18,32,45
+e2e/cadastro-grupo-permissoes.spec.ts
+  s_4c89a3a42aef7a::t_5b4fb95b3a670b 17,34,47
+e2e/cadastro-localidade.spec.ts
+  s_4c89a3a42aef7a::t_a36089779a3336 17,32,51
+e2e/cadastro-status-eventos.spec.ts
+  s_4c89a3a42aef7a::t_883c162b17fe9a 17,34,47
+e2e/cadastros/support.ts
+  s_4c89a3a42aef7a::t_97878ef8178d95 86,171-172,230-233,493,503
+src/pages/Crud.tsx
+  s_4c89a3a42aef7a::t_b0781980669e9b 11-30,63-75,78-82,85-89,93-97,99-101,105-110,112-138,142-146,148-150,154-158,160-162,166-170,172-174,178-182,184-186,190-193,195-248,250-258,260-262
+src/pages/Patient.tsx
+  s_4c89a3a42aef7a::t_b26fee574d396c 7,24-30,36-42,258-323,325-356,359,384-400
+src/pages/cadastro/ListaCadastro.tsx
+  s_4c89a3a42aef7a::t_c9b3349507fc4a 1-219
+src/pages/cadastro/cadastro.css
+  s_4c89a3a42aef7a::t_ceca9ac6f9408a 1-543
+src/templates/crudSimples/index.tsx
+  s_4c89a3a42aef7a::t_60cdc54892c576 3,11-18,39-43,52-55,57,146-148,366-372,374-376,378-380,382-383,385,387-395,397-402,404-409,411-416,418-423,425-432,434-436,438-440,442-598,600,602-618,624,687-731
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "3f1c5685de934f5a561412b59a554eb36e3589ba",
+  "prompts": {},
+  "sessions": {
+    "s_4c89a3a42aef7a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "018feb3d-7621-4fa0-b967-3ef8f671f411",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Isa Andressa Novaes Menezes <c1321644@interno.bb.com.br>"
+    }
+  }
+}
