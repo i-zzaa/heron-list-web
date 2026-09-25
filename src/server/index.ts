@@ -72,6 +72,15 @@ export const update = async (url: string, data: any) => {
   return await api.put(url, data);
 };
 
+// O grupo do usuário não vai no POST/PUT de /usuarios (o backend ignora):
+// tem rota própria, restrita a quem administra grupos de permissão.
+export const updateGrupoPermissaoUsuario = async (
+  id: number,
+  grupoPermissaoId: number | null
+) => {
+  return await api.put(`usuarios/${id}/grupo-permissao`, { grupoPermissaoId });
+};
+
 export const deleteItem = async (url: string) => {
   return await api.delete(`${url}`);
 };

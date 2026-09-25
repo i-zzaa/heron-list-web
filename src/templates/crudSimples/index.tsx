@@ -16,7 +16,13 @@ import {
   ListaCadastro,
   SecaoCadastro,
 } from '../../pages/cadastro/ListaCadastro';
-import { create, getList, search, update } from '../../server';
+import {
+  create,
+  getList,
+  search,
+  update,
+  updateGrupoPermissaoUsuario,
+} from '../../server';
 import { buildErrorToast } from '../../util/error';
 
 import { Fields } from '../../constants/formFields';
@@ -95,6 +101,11 @@ export default function CrudSimples({
     unregister,
     reset,
   } = useForm<any>();
+
+  // Mesma tag que o backend exige em PUT /usuarios/:id/grupo-permissao.
+  const podeTrocarGrupo = Boolean(
+    hasPermition('CADASTRO_GRUPO_PERMISSOES_LISTA_BOTAO_EDITAR')
+  );
 
   const buildFormPayload = (userState: any) => {
     const formatValues = { ...userState };
@@ -179,11 +190,29 @@ export default function CrudSimples({
       let data;
       const formatValues = buildFormPayload(userState);
 
+      // POST/PUT /usuarios ignoram o grupo; ele é salvo à parte, logo abaixo.
+      const grupoPermissaoId =
+        namelist === 'usuarios' ? formatValues.grupoPermissaoId : undefined;
+      if (namelist === 'usuarios') delete formatValues.grupoPermissaoId;
+
       if (isEdit) {
         formatValues.id = item.id;
         data = await update(namelist, formatValues);
       } else {
         data = await create(namelist, formatValues);
+      }
+
+      const usuarioId = isEdit ? item.id : data?.data?.id;
+      const grupoAtual = isEdit
+        ? item.grupoPermissaoId?.id ?? item.grupoPermissaoId
+        : undefined;
+      if (
+        podeTrocarGrupo &&
+        usuarioId &&
+        grupoPermissaoId !== undefined &&
+        grupoPermissaoId !== grupoAtual
+      ) {
+        await updateGrupoPermissaoUsuario(usuarioId, grupoPermissaoId);
       }
 
       // POST /usuarios devolve senhaTemporaria (texto plano, só nesta
@@ -349,7 +378,11 @@ export default function CrudSimples({
   }, [renderAgendar]);
 
   useEffect(() => {
-    const _fields = Fields[resolveFieldsKey()];
+    // Sem permissão de administrar grupos o backend recusa a troca, então o
+    // campo (obrigatório) nem aparece.
+    const _fields = Fields[resolveFieldsKey()].filter(
+      (field: any) => podeTrocarGrupo || field.id !== 'grupoPermissaoId'
+    );
     const fieldsState: any = {};
     _fields.forEach((field: any) => (fieldsState[field.id] = ''));
     setFields(_fields);
