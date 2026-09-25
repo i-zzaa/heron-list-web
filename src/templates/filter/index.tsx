@@ -1,7 +1,7 @@
 import { Input } from '../../components/input';
 import { ButtonHeron } from '../../components/button';
 import { useForm } from 'react-hook-form';
-import { useEffect } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { permissionAuth } from '../../contexts/permission';
 import { Accordion, AccordionTab } from 'primereact/accordion';
 import './styles.css';
@@ -18,6 +18,9 @@ export interface FilterProps {
   onSubmit: (formState: any) => any;
   onInclude?: () => any;
   includeButtonTestId?: string;
+  // Botões ao lado do Cadastrar/Agendar (ex.: importar planilha). A tela
+  // decide a permissão de cada um.
+  extraActions?: ReactNode;
   onReset: () => any;
   // Quando true, o Pesquisar fica desabilitado até algum campo do filtro
   // ser preenchido.
@@ -38,6 +41,7 @@ export function Filter({
   onSubmit,
   onInclude,
   includeButtonTestId,
+  extraActions,
   onReset,
   requireFilledField = false,
   defaultOpen = false,
@@ -46,6 +50,9 @@ export function Filter({
     defaultValues,
   });
   const { hasPermition } = permissionAuth();
+
+  const showInclude =
+    !!onInclude && !!hasPermition(`${screen}_FILTRO_BOTAO_CADASTRAR`);
 
   const handleReset = () => {
     reset(defaultValues);
@@ -133,9 +140,9 @@ export function Filter({
 
             <div className="filter-heron__actions flex flex-col-reverse sm:flex-row sm:items-center gap-2">
               <>
-                {onInclude &&
-                  hasPermition(`${screen}_FILTRO_BOTAO_CADASTRAR`) && (
-                    <div className="sm:mr-auto">
+                {(showInclude || extraActions) && (
+                  <div className="sm:mr-auto flex flex-col sm:flex-row gap-2">
+                    {showInclude && (
                       <ButtonHeron
                         text={nameButton || 'Cadastrar'}
                         icon="pi pi-user-plus"
@@ -144,8 +151,10 @@ export function Filter({
                         onClick={onInclude}
                         testId={includeButtonTestId}
                       />
-                    </div>
-                  )}
+                    )}
+                    {extraActions}
+                  </div>
+                )}
                 <div className="grid grid-cols-2 sm:flex gap-2 sm:ml-auto">
                   <>
                     {hasPermition(`${screen}_FILTRO_BOTAO_LIMPAR`) && (

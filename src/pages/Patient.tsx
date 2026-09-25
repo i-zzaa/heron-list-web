@@ -19,6 +19,8 @@ import PaginationComponent from '../components/Pagination';
 import { buildPaginationState, resolveResponseData, resolveResponsePagination } from '../util/pagination';
 import { mapFormValuesToPayload } from '../util/forms';
 import { buildErrorToast } from '../util/error';
+import { ButtonHeron } from '../components/button';
+import { ImportarPacientes } from '../components/importacao/ImportarPacientes';
 
 const fieldsConst = filterCurdPatientFields;
 const fieldsState: any = {};
@@ -39,6 +41,7 @@ export default function Patient() {
   const [openCalendarForm, setOpenCalendarForm] = useState<boolean>(false);
   const [openSchedule, setOpenSchedule] = useState<boolean>(false);
   const [openConfirm, setOpenConfirm] = useState<boolean>(false);
+  const [openImportar, setOpenImportar] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
   const [dropDownList, setDropDownList] = useState<any>([]);
@@ -255,7 +258,36 @@ export default function Patient() {
           setPatient(null);
           setOpen(true);
         }}
+        extraActions={
+          hasPermition(`${SCREEN}_FILTRO_BOTAO_CADASTRAR`) ? (
+            <ButtonHeron
+              text="Importar"
+              icon="pi pi-file-excel"
+              type="outline"
+              size="full"
+              htmlType="button"
+              testId="patient-import"
+              onClick={() => setOpenImportar(true)}
+            />
+          ) : null
+        }
       />
+
+      {openImportar ? (
+        <Modal
+          title="Importar pacientes da planilha"
+          open={openImportar}
+          onClose={() => setOpenImportar(false)}
+          width="min(960px, 95vw)"
+        >
+          <ImportarPacientes
+            onClose={(importou) => {
+              setOpenImportar(false);
+              if (importou) handleSubmitFilter();
+            }}
+          />
+        </Modal>
+      ) : null}
 
       <Card>
         <List

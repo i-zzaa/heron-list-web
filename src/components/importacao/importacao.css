@@ -1,0 +1,556 @@
+/* Modais de importação (pacientes e agenda do Google). Tudo preso em
+   `.importacao-heron`, na mesma linguagem do filtro e dos modais
+   (styles/theme.css): superfícies brancas, borda clara, roxo do projeto. */
+
+.importacao-heron {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  color: var(--gray-800);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ---------- Etapas ---------- */
+.importacao-heron .imp-etapas {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.importacao-heron .imp-etapa {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #a1a1aa;
+  font-weight: 600;
+}
+
+.importacao-heron .imp-etapa-numero {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--heron-border);
+  background: #ffffff;
+  font-size: 12px;
+}
+
+.importacao-heron .imp-etapa.ativa {
+  color: var(--violet-800);
+}
+
+.importacao-heron .imp-etapa.ativa .imp-etapa-numero {
+  background: var(--violet-800);
+  border-color: var(--violet-800);
+  color: #ffffff;
+}
+
+.importacao-heron .imp-etapa.feita {
+  color: var(--violet-800);
+}
+
+.importacao-heron .imp-etapa.feita .imp-etapa-numero {
+  background: var(--heron-soft);
+  border-color: transparent;
+  color: var(--violet-800);
+}
+
+.importacao-heron .imp-etapa-linha {
+  flex: 0 0 2rem;
+  height: 1px;
+  background: var(--heron-border);
+}
+
+/* ---------- Etapa 1: arquivo ---------- */
+.importacao-heron .imp-arquivo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.25rem;
+}
+
+@media (min-width: 900px) {
+  .importacao-heron .imp-arquivo {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    align-items: stretch;
+  }
+}
+
+.importacao-heron .imp-dicas {
+  background: var(--heron-soft);
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+}
+
+.importacao-heron .imp-dicas h4 {
+  margin: 0 0 0.75rem;
+  color: var(--violet-800);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.importacao-heron .imp-dicas ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: dica;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.importacao-heron .imp-dicas li {
+  counter-increment: dica;
+  display: flex;
+  gap: 0.625rem;
+}
+
+.importacao-heron .imp-dicas li::before {
+  content: counter(dica);
+  flex: 0 0 1.375rem;
+  height: 1.375rem;
+  border-radius: 9999px;
+  background: #ffffff;
+  color: var(--violet-800);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.importacao-heron .imp-colunas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-top: 0.375rem;
+}
+
+.importacao-heron .imp-coluna {
+  background: #ffffff;
+  border: 1px solid var(--heron-border);
+  border-radius: 0.375rem;
+  padding: 0 0.5rem;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--violet-800);
+}
+
+.importacao-heron .imp-lado {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.importacao-heron .imp-drop {
+  flex: 1;
+  min-height: 12rem;
+  border: 2px dashed var(--heron-border);
+  border-radius: 0.75rem;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.importacao-heron .imp-drop:hover,
+.importacao-heron .imp-drop:focus-visible,
+.importacao-heron .imp-drop.arrastando {
+  border-color: var(--violet-600);
+  background: #faf7fb;
+  outline: none;
+}
+
+.importacao-heron .imp-drop.carregando {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.importacao-heron .imp-drop-icone {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 9999px;
+  background: var(--heron-soft);
+  color: var(--violet-800);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+.importacao-heron .imp-drop-titulo {
+  color: var(--violet-800);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.importacao-heron .imp-drop-dica {
+  color: #71717a;
+  font-size: 12px;
+}
+
+/* ---------- Campos ---------- */
+.importacao-heron .imp-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.importacao-heron .imp-campo > span {
+  color: var(--violet-800);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.importacao-heron .imp-campo small {
+  color: #71717a;
+  font-size: 11px;
+}
+
+/* ---------- Resumo ---------- */
+.importacao-heron .imp-cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.importacao-heron .imp-origem {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-width: 0;
+}
+
+.importacao-heron .imp-origem i {
+  color: var(--violet-800);
+  font-size: 1.125rem;
+}
+
+.importacao-heron .imp-origem strong {
+  display: block;
+  color: var(--violet-800);
+  font-size: 14px;
+}
+
+.importacao-heron .imp-origem small {
+  display: block;
+  color: #71717a;
+  font-size: 12px;
+}
+
+.importacao-heron .imp-resumo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.importacao-heron .imp-numero {
+  display: flex;
+  align-items: baseline;
+  gap: 0.375rem;
+  border: 1px solid var(--heron-border);
+  border-radius: 0.625rem;
+  padding: 0.375rem 0.75rem;
+  background: #ffffff;
+  font-size: 12px;
+}
+
+.importacao-heron .imp-numero b {
+  font-size: 16px;
+}
+
+.importacao-heron .imp-numero.destaque {
+  border-color: transparent;
+  background: var(--heron-soft);
+  color: var(--violet-800);
+}
+
+.importacao-heron .imp-numero.ok {
+  border-color: transparent;
+  background: #ecfdf3;
+  color: #15803d;
+}
+
+.importacao-heron .imp-numero.erro {
+  border-color: transparent;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+/* ---------- Configuração geral (agenda) ---------- */
+.importacao-heron .imp-config {
+  border: 1px solid var(--heron-border);
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: #ffffff;
+  box-shadow: var(--heron-shadow);
+}
+
+.importacao-heron .imp-config h4 {
+  margin: 0 0 0.75rem;
+  color: var(--violet-800);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.importacao-heron .imp-config-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.75rem 1rem;
+}
+
+/* ---------- Tabela ---------- */
+.importacao-heron .imp-tabela {
+  border: 1px solid var(--heron-border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.importacao-heron .imp-tabela .p-datatable .p-datatable-thead > tr > th {
+  background: #faf7fb;
+  color: var(--violet-800);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0.625rem 0.75rem;
+  border-color: var(--heron-divider);
+}
+
+.importacao-heron .imp-tabela .p-datatable .p-datatable-tbody > tr > td {
+  padding: 0.5rem 0.75rem;
+  border-color: var(--heron-divider);
+  vertical-align: middle;
+  font-size: 12px;
+}
+
+.importacao-heron .imp-tabela .p-datatable .p-datatable-tbody > tr.imp-linha-fora > td {
+  background: #fafafa;
+  color: #a1a1aa;
+}
+
+.importacao-heron .imp-tabela .p-paginator {
+  border: none;
+  border-top: 1px solid var(--heron-divider);
+}
+
+.importacao-heron .imp-tabela .p-datatable-wrapper {
+  max-height: max(16rem, calc(100vh - 34rem));
+  overflow: auto;
+}
+
+.importacao-heron .imp-tabela.pacientes .p-datatable-wrapper {
+  max-height: max(16rem, calc(100vh - 27rem));
+}
+
+/* Cabeçalho fixo enquanto a lista rola. */
+.importacao-heron .imp-tabela .p-datatable .p-datatable-thead > tr > th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.importacao-heron .imp-tabela.agenda table {
+  /* fixed só vale com largura explícita; a mínima faz rolar no celular. */
+  table-layout: fixed;
+  width: 100%;
+  min-width: 75rem;
+}
+
+.importacao-heron .imp-tabela .p-dropdown {
+  width: 100%;
+}
+
+.importacao-heron .imp-tabela .p-dropdown .p-dropdown-label,
+.importacao-heron .imp-config .p-dropdown .p-dropdown-label {
+  padding: 0.4375rem 0.625rem;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.importacao-heron .imp-config .p-dropdown .p-dropdown-label {
+  font-size: 13px;
+}
+
+.importacao-heron .imp-tabela .p-dropdown .p-dropdown-trigger {
+  width: 2rem;
+}
+
+.importacao-heron .p-dropdown .p-dropdown-label.p-placeholder {
+  color: #a1a1aa;
+}
+
+.importacao-heron .p-dropdown.p-invalid .p-dropdown-label.p-placeholder {
+  color: #b91c1c;
+}
+
+.importacao-heron .imp-google {
+  overflow-wrap: anywhere;
+}
+
+.importacao-heron .imp-quando strong {
+  display: block;
+  color: var(--gray-800);
+  font-size: 12px;
+}
+
+.importacao-heron .imp-quando span,
+.importacao-heron .imp-google span {
+  display: block;
+  color: #71717a;
+  font-size: 11px;
+}
+
+
+/* ---------- Situação (pílulas) ---------- */
+.importacao-heron .imp-pilula {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 9999px;
+  padding: 0.125rem 0.625rem;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.importacao-heron .imp-pilula.pronto {
+  background: var(--heron-soft);
+  color: var(--violet-800);
+}
+
+.importacao-heron .imp-pilula.ok {
+  background: #ecfdf3;
+  color: #15803d;
+}
+
+.importacao-heron .imp-pilula.neutro {
+  background: #f4f4f5;
+  color: #52525b;
+}
+
+.importacao-heron .imp-pilula.erro {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.importacao-heron .imp-mensagem {
+  display: block;
+  margin-top: 0.25rem;
+  color: #b91c1c;
+  font-size: 11px;
+}
+
+/* ---------- Rodapé ---------- */
+.importacao-heron .imp-rodape {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--heron-divider);
+}
+
+@media (min-width: 640px) {
+  .importacao-heron .imp-rodape {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.importacao-heron .imp-rodape-info {
+  flex: 1;
+  font-size: 12px;
+  color: #71717a;
+}
+
+.importacao-heron .imp-rodape-info.erro {
+  color: #b91c1c;
+}
+
+.importacao-heron .imp-rodape-botoes {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .importacao-heron .imp-rodape-botoes {
+    flex-direction: row;
+  }
+
+  .importacao-heron .imp-rodape-botoes > * {
+    min-width: 11rem;
+  }
+}
+
+/* ---------- Concluído ---------- */
+.importacao-heron .imp-concluido {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: #ecfdf3;
+  color: #15803d;
+}
+
+.importacao-heron .imp-concluido.parcial {
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.importacao-heron .imp-concluido i {
+  font-size: 1.5rem;
+}
+
+.importacao-heron .imp-concluido strong {
+  display: block;
+  font-size: 14px;
+}
+
+/* ---------- Filtro da lista (pacientes) ---------- */
+.importacao-heron .imp-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.importacao-heron .imp-filtro {
+  border: 1px solid var(--heron-border);
+  background: #ffffff;
+  color: var(--gray-800);
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.importacao-heron .imp-filtro:hover {
+  border-color: var(--violet-600);
+  color: var(--violet-800);
+}
+
+.importacao-heron .imp-filtro.ativo {
+  background: var(--violet-800);
+  border-color: var(--violet-800);
+  color: #ffffff;
+}
+
+.importacao-heron .imp-filtro:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--heron-ring);
+}

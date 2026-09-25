@@ -8,6 +8,9 @@ export interface ButtonProps {
   disabled?: boolean;
   onClick?: () => void;
   testId?: string;
+  // Tipo do <button>. Sem ele o navegador trata como submit, e um botão
+  // dentro de formulário (ex.: o filtro) também dispara a pesquisa.
+  htmlType?: 'button' | 'submit';
 }
 import { clsx } from 'clsx';
 import { Button } from 'primereact/button';
@@ -22,10 +25,12 @@ export function ButtonHeron({
   disabled,
   onClick,
   testId,
+  htmlType,
 }: ButtonProps) {
   return (
     <Button
       data-testid={testId}
+      type={htmlType}
       icon={icon}
       loading={loading}
       disabled={disabled}

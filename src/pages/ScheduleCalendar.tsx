@@ -17,6 +17,8 @@ import { buildEventFilterUrl } from '../util/calendar';
 import { isProfile } from '../util/permissions';
 import { resolveResponseData } from '../util/pagination';
 import { buildErrorToast } from '../util/error';
+import { ButtonHeron } from '../components/button';
+import { ImportarAgendaGoogle } from '../components/importacao/ImportarAgendaGoogle';
 
 const fieldsConst = filterCalendarFields;
 
@@ -55,6 +57,7 @@ export default function ScheduleCalendar() {
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [openView, setOpenView] = useState<boolean>(false);
   const [openConfirm, setOpenConfirm] = useState<boolean>(false);
+  const [openImportar, setOpenImportar] = useState<boolean>(false);
 
   const [evenetsList, setEventsList] = useState<any>([]);
   const [currentDate, setCurrentDate] = useState<any>({
@@ -261,7 +264,36 @@ export default function ScheduleCalendar() {
             setOpen(true);
             setIsEdit(false);
           }}
+          extraActions={
+            hasPermition('AGENDA_CALENDARIO_FILTRO_BOTAO_CADASTRAR') ? (
+              <ButtonHeron
+                text="Importar"
+                icon="pi pi-google"
+                type="outline"
+                size="full"
+                htmlType="button"
+                testId="importar-agenda-google-button"
+                onClick={() => setOpenImportar(true)}
+              />
+            ) : null
+          }
         />
+      ) : null}
+
+      {openImportar ? (
+        <Modal
+          title="Importar agenda do Google"
+          open={openImportar}
+          onClose={() => setOpenImportar(false)}
+          width="min(1400px, 96vw)"
+        >
+          <ImportarAgendaGoogle
+            onClose={(importou) => {
+              setOpenImportar(false);
+              if (importou) renderEvents();
+            }}
+          />
+        </Modal>
       ) : null}
 
       <Card>
