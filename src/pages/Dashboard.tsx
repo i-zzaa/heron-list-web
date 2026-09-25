@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -13,9 +13,7 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 
 import { getList } from '../server';
-import { Card } from '../components/index';
 import { LoadingHeron } from '../components/loading';
-import { NotFound } from '../components/notFound';
 import { permissionAuth } from '../contexts/permission';
 import { useToast } from '../contexts/toast';
 import { buildErrorToast } from '../util/error';
@@ -237,20 +235,20 @@ interface Pendencia {
   descricao: string;
   total?: number;
   icon: string;
-  color: string;
+  tom: 'alerta' | 'aviso' | 'info';
 }
 
 // Categorias reais informadas pelo backend: avisar hoje / evolução não
 // lançada / conflito de agenda / documentos (Plano/Laudo) vencendo.
-const PENDENCIA_META: Record<string, { icon: string; color: string }> = {
-  'avisar-hoje': { icon: 'pi pi-bell', color: 'text-yellow-500' },
-  avisarhoje: { icon: 'pi pi-bell', color: 'text-yellow-500' },
-  'evolucao-nao-lancada': { icon: 'pi pi-file-edit', color: 'text-red-400' },
-  evolucaonaolancada: { icon: 'pi pi-file-edit', color: 'text-red-400' },
-  'conflito-agenda': { icon: 'pi pi-calendar-times', color: 'text-red-400' },
-  conflitoagenda: { icon: 'pi pi-calendar-times', color: 'text-red-400' },
-  'documentos-vencendo': { icon: 'pi pi-file', color: 'text-yellow-500' },
-  documentosvencendo: { icon: 'pi pi-file', color: 'text-yellow-500' },
+const PENDENCIA_META: Record<string, { icon: string; tom: Pendencia['tom'] }> = {
+  'avisar-hoje': { icon: 'pi pi-bell', tom: 'aviso' },
+  avisarhoje: { icon: 'pi pi-bell', tom: 'aviso' },
+  'evolucao-nao-lancada': { icon: 'pi pi-file-edit', tom: 'alerta' },
+  evolucaonaolancada: { icon: 'pi pi-file-edit', tom: 'alerta' },
+  'conflito-agenda': { icon: 'pi pi-calendar-times', tom: 'alerta' },
+  conflitoagenda: { icon: 'pi pi-calendar-times', tom: 'alerta' },
+  'documentos-vencendo': { icon: 'pi pi-file', tom: 'aviso' },
+  documentosvencendo: { icon: 'pi pi-file', tom: 'aviso' },
 };
 
 const buildPendencias = (raw: any): Pendencia[] => {
@@ -259,10 +257,7 @@ const buildPendencias = (raw: any): Pendencia[] => {
     const tipo = String(pick(item, 'tipo', 'codigo', 'chave') ?? '')
       .toLowerCase()
       .trim();
-    const meta = PENDENCIA_META[tipo] || {
-      icon: 'pi pi-info-circle',
-      color: 'text-gray-400',
-    };
+    const meta = PENDENCIA_META[tipo] || { icon: 'pi pi-info-circle', tom: 'info' as const };
 
     return {
       descricao: pick(item, 'descricao', 'mensagem', 'texto', 'label') ?? '-',
@@ -270,6 +265,34 @@ const buildPendencias = (raw: any): Pendencia[] => {
       ...meta,
     };
   });
+};
+
+// Pacientes ativos por convênio (/dashboard/pacientes-convenio), com a
+// divisão por unidade.
+interface ConvenioResumo {
+  nome: string;
+  quantidade: number;
+  percentual: number;
+  unidades: { nome: string; quantidade: number }[];
+  cor: string;
+}
+
+// Roxo do projeto primeiro, depois cores que já aparecem no sistema
+// (especialidades) — o maior convênio fica sempre na cor da marca.
+const CONVENIO_CORES = ['#662977', '#a78bda', '#f6bf26', '#ef6c00', '#4285F4', '#4ade80', '#795548', '#94a3b8'];
+
+const buildPacientesConvenio = (raw: any): ConvenioResumo[] => {
+  const items = resolveResponseData(raw) || [];
+  return items.map((item: any, index: number) => ({
+    nome: pick(item, 'nome', 'convenio') ?? '-',
+    quantidade: Number(pick(item, 'quantidade', 'total') ?? 0),
+    percentual: Number(pick(item, 'percentual') ?? 0),
+    unidades: (item?.unidades || []).map((u: any) => ({
+      nome: pick(u, 'nome') ?? '-',
+      quantidade: Number(pick(u, 'quantidade') ?? 0),
+    })),
+    cor: CONVENIO_CORES[index % CONVENIO_CORES.length],
+  }));
 };
 
 interface SessaoHoje {
@@ -309,18 +332,22 @@ const buildTopTerapeutas = (raw: any): TopTerapeuta[] => {
   }));
 };
 
-const STATUS_BADGE_CLASS: Record<string, string> = {
-  confirmada: 'bg-green-400/10 text-green-400',
-  realizada: 'bg-green-400/10 text-green-400',
-  atendido: 'bg-green-400/10 text-green-400',
-  'em atendimento': 'bg-[#3b82f6]/10 text-[#3b82f6]',
-  aguardando: 'bg-yellow-400/10 text-yellow-600',
-  falta: 'bg-red-400/10 text-red-400',
-  cancelada: 'bg-red-400/10 text-red-400',
+const STATUS_TOM: Record<string, string> = {
+  confirmada: 'ok',
+  confirmado: 'ok',
+  realizada: 'ok',
+  atendido: 'ok',
+  aguardando: 'aviso',
+  avisar: 'aviso',
+  falta: 'erro',
+  cancelada: 'erro',
 };
 
-const getStatusBadgeClass = (status: string) =>
-  STATUS_BADGE_CLASS[status?.toLowerCase()?.trim()] || 'bg-gray-200 text-gray-800';
+const statusTom = (status: string) => {
+  const chave = String(status || '').toLowerCase().trim();
+  if (chave.startsWith('cancelad')) return 'erro';
+  return STATUS_TOM[chave] || '';
+};
 
 const getInitials = (name?: string) =>
   (name || '')
@@ -330,40 +357,118 @@ const getInitials = (name?: string) =>
     .map((part) => part[0]?.toUpperCase())
     .join('') || '?';
 
-const PanelTitle = ({ icon, text }: { icon: string; text: string }) => (
-  <div className="flex items-center gap-2 mb-4">
-    <i className={`${icon} text-violet-800`} />
-    <h3 className="font-semibold text-gray-800 text-sm">{text}</h3>
+const Painel = ({
+  icon,
+  titulo,
+  subtitulo,
+  extra,
+  className = '',
+  children,
+}: {
+  icon: string;
+  titulo: string;
+  subtitulo?: string;
+  extra?: ReactNode;
+  className?: string;
+  children: ReactNode;
+}) => (
+  <section className={`home-painel ${className}`}>
+    <div className="home-painel-topo">
+      <div className="home-painel-titulo">
+        <span className="home-icone">
+          <i className={icon} />
+        </span>
+        <div>
+          <h3>{titulo}</h3>
+          {subtitulo && <small>{subtitulo}</small>}
+        </div>
+      </div>
+      {extra && <div className="home-painel-extra">{extra}</div>}
+    </div>
+    {children}
+  </section>
+);
+
+const Vazio = ({ texto = 'Sem dados no período' }: { texto?: string }) => (
+  <div className="home-vazio">
+    <i className="pi pi-inbox" />
+    {texto}
   </div>
 );
 
-const HorizontalBars = ({
+const BarrasHorizontais = ({
   items,
+  sufixo = '',
 }: {
   items: { label: string; value: number; color?: string }[];
+  sufixo?: string;
 }) => {
   const max = Math.max(...items.map((item) => item.value), 1);
 
   return (
-    <div className="grid gap-3">
+    <div className="home-barras">
       {items.map((item) => (
-        <div key={item.label} className="grid grid-cols-[1fr_auto] items-center gap-3 text-sm">
-          <div>
-            <span className="text-gray-600 block mb-1">{item.label}</span>
-            <div className="h-2 rounded-full bg-gray-200 overflow-hidden">
-              <div
-                className={item.color ? 'h-full rounded-full' : 'h-full rounded-full bg-violet-800'}
-                style={{
-                  width: `${Math.min((item.value / max) * 100, 100)}%`,
-                  backgroundColor: item.color,
-                }}
-              />
-            </div>
+        <div key={item.label} className="home-barra-linha">
+          <span>{item.label}</span>
+          <b>
+            {item.value}
+            {sufixo}
+          </b>
+          <div className="home-barra-trilho">
+            <span
+              style={{
+                width: `${Math.min((item.value / max) * 100, 100)}%`,
+                backgroundColor: item.color,
+              }}
+            />
           </div>
-          <span className="font-inter text-gray-700 w-8 text-right">{item.value}</span>
         </div>
       ))}
     </div>
+  );
+};
+
+const PacientesPorConvenio = ({ convenios }: { convenios: ConvenioResumo[] }) => {
+  const max = Math.max(...convenios.map((c) => c.quantidade), 1);
+
+  return (
+    <>
+      <div className="conv-barra" role="img" aria-label="Distribuição dos pacientes por convênio">
+        {convenios.map((c) => (
+          <span
+            key={c.nome}
+            title={`${c.nome}: ${c.quantidade} (${c.percentual}%)`}
+            style={{ width: `${c.percentual}%`, backgroundColor: c.cor }}
+          />
+        ))}
+      </div>
+      <ul className="conv-lista">
+        {convenios.map((c) => (
+          <li key={c.nome} className="conv-item">
+            <span className="conv-cor" style={{ backgroundColor: c.cor }} />
+            <span className="conv-nome" title={c.nome}>
+              {c.nome}
+            </span>
+            <span className="conv-numero">
+              {c.quantidade}
+              <small>{c.percentual || !c.quantidade ? `${c.percentual}%` : '<1%'}</small>
+            </span>
+            <span className="conv-trilho">
+              <span style={{ width: `${(c.quantidade / max) * 100}%`, backgroundColor: c.cor }} />
+            </span>
+            {c.unidades.length > 1 && (
+              <span className="conv-unidades">
+                {c.unidades.map((u) => (
+                  <span key={u.nome}>
+                    {u.nome} {u.quantidade}
+                  </span>
+                ))}
+              </span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </>
   );
 };
 
@@ -371,8 +476,8 @@ const chartBarOptions = {
   responsive: true,
   maintainAspectRatio: false,
   scales: {
-    x: { grid: { display: false } },
-    y: { grid: { display: false }, beginAtZero: true },
+    x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+    y: { grid: { color: '#f1f1f4' }, border: { display: false }, beginAtZero: true, ticks: { precision: 0 } },
   },
   plugins: {
     legend: { display: false },
@@ -382,8 +487,15 @@ const chartBarOptions = {
 const chartDonutOptions = {
   responsive: true,
   maintainAspectRatio: false,
+  cutout: '68%',
   plugins: {
-    legend: { position: 'bottom' as const, display: true, align: 'start' as const, labels: { boxWidth: 10, font: { size: 11 } } },
+    legend: {
+      // Ao lado do gráfico cabe no desktop; no celular os nomes cortavam.
+      position: (typeof window !== 'undefined' && window.innerWidth < 640 ? 'bottom' : 'right') as
+        | 'bottom'
+        | 'right',
+      labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, font: { size: 11 } },
+    },
   },
 };
 
@@ -392,8 +504,8 @@ const chartHorizontalBarOptions = {
   maintainAspectRatio: false,
   indexAxis: 'y' as const,
   scales: {
-    x: { grid: { display: false }, beginAtZero: true, ticks: { precision: 0 } },
-    y: { grid: { display: false } },
+    x: { grid: { color: '#f1f1f4' }, border: { display: false }, beginAtZero: true, ticks: { precision: 0 } },
+    y: { grid: { display: false }, ticks: { font: { size: 11 } } },
   },
   plugins: {
     legend: { display: false },
@@ -412,7 +524,7 @@ const toFunnelChartData = (items: { label: string; value: number }[]) => ({
       data: items.map((item) => item.value),
       backgroundColor: items.map((_, index) => FUNNEL_SHADES[index % FUNNEL_SHADES.length]),
       borderRadius: 6,
-      barThickness: 22,
+      barThickness: 20,
     },
   ],
 });
@@ -426,30 +538,26 @@ const PERIODO_OPTIONS: { value: Periodo; label: string }[] = [
 ];
 
 const PERIODO_SUBTITLE: Record<Periodo, string> = {
-  hoje: 'Visão operacional de hoje',
-  semana: 'Visão operacional da semana',
-  mes: 'Visão operacional do mês',
+  hoje: 'Números de hoje',
+  semana: 'Números desta semana',
+  mes: 'Números deste mês',
 };
 
 export default function Dashboard() {
   const { hasPermition } = permissionAuth();
   const { renderToast } = useToast();
 
-  // Backend ainda não confirmou suporte a esse filtro em todos os
-  // endpoints (a maioria foi descrita como "hoje" por natureza — fila
-  // atual, sessões de hoje etc.). Manda `periodo` na querystring mesmo
-  // assim: endpoint que ainda não suporta simplesmente ignora o parâmetro
-  // e devolve o de sempre, sem quebrar nada; quando o backend passar a
-  // tratar, já funciona sem mudança nenhuma aqui.
+  // Endpoint que não trata `periodo` simplesmente ignora o parâmetro e
+  // devolve o estado atual (fila, fluxo, convênios), sem quebrar nada.
   const [periodo, setPeriodo] = useState<Periodo>('hoje');
   const [loading, setLoading] = useState(true);
   // O spinner de página inteira só faz sentido na primeira carga. Ao trocar
-  // de pílula depois, os cards já têm dado na tela — melhor manter tudo
-  // visível (inclusive as pílulas, pra dar pra trocar de novo) e só indicar
-  // "atualizando" de leve, em vez de sumir com a página inteira de novo.
+  // de período depois, os painéis já têm dado na tela — só indica
+  // "atualizando" de leve.
   const hasLoadedOnce = useRef(false);
 
   const [resumo, setResumo] = useState<ResumoCard[]>([]);
+  const [pacientesConvenio, setPacientesConvenio] = useState<ConvenioResumo[]>([]);
   const [especialidadeChart, setEspecialidadeChart] = useState<any>(null);
   const [statusChart, setStatusChart] = useState<{ total: number; chart: any } | null>(null);
   const [ocupacao, setOcupacao] = useState<{ label: string; value: number }[]>([]);
@@ -486,6 +594,9 @@ export default function Dashboard() {
 
       await Promise.allSettled([
         loadSection('DASHBOARD_RESUMO', '/dashboard/resumo', (raw) => setResumo(buildResumo(raw))),
+        loadSection('DASHBOARD_RESUMO', '/dashboard/pacientes-convenio', (raw) =>
+          setPacientesConvenio(buildPacientesConvenio(raw))
+        ),
         loadSection('DASHBOARD_SESSOES_ESPECIALIDADE', '/dashboard/sessoes-especialidade', (raw) =>
           setEspecialidadeChart(buildEspecialidadeChart(raw))
         ),
@@ -530,33 +641,31 @@ export default function Dashboard() {
     return <LoadingHeron />;
   }
 
+  const pode = (tag: string) => Boolean(hasPermition(tag));
+  const totalConvenios = pacientesConvenio.reduce((soma, c) => soma + c.quantidade, 0);
+
   return (
-    // Sem cabeçalho de perfil/alterar senha aqui — Home.tsx (onde este
-    // componente é montado) já tem esse bloco; ver Home.tsx.
-    <div className="grid gap-4 mt-6" data-testid="dashboard-page">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="flex flex-col gap-4" data-testid="dashboard-page">
+      <div className="home-secao">
         <div>
-          <h1 className="text-xl font-bold text-gray-800">Dashboard da Clínica</h1>
-          <p className="text-sm text-gray-400">
+          <h2>Visão da clínica</h2>
+          <small>
             {PERIODO_SUBTITLE[periodo]}
             {loading && hasLoadedOnce.current && (
-              <i className="pi pi-spin pi-spinner ml-2" style={{ fontSize: 11 }} />
+              <i className="pi pi-spin pi-spinner home-atualizando" />
             )}
-          </p>
+          </small>
         </div>
 
-        <div className="flex items-center gap-1 rounded-full bg-gray-200 p-1" data-testid="dashboard-periodo-filter">
+        <div className="home-periodo" role="group" aria-label="Período" data-testid="dashboard-periodo-filter">
           {PERIODO_OPTIONS.map((option) => (
             <button
               key={option.value}
               type="button"
               onClick={() => setPeriodo(option.value)}
               data-testid={`dashboard-periodo-${option.value}`}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                periodo === option.value
-                  ? 'bg-violet-800 text-white'
-                  : 'text-gray-500 hover:text-violet-800'
-              }`}
+              aria-pressed={periodo === option.value}
+              className={`home-pilula ${periodo === option.value ? 'ativa' : ''}`}
             >
               {option.label}
             </button>
@@ -564,182 +673,185 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {Boolean(hasPermition('DASHBOARD_RESUMO')) && resumo.length > 0 && (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      {pode('DASHBOARD_RESUMO') && resumo.length > 0 && (
+        <div className="home-grade">
           {resumo.map((card) => (
-            <Card key={card.label}>
-              <div className="flex gap-4 items-center">
-                <i className={`${card.icon} text-violet-800`} style={{ fontSize: 20 }} />
-                <div className="grid">
-                  <span className="text-gray-500 text-xs">{card.label}</span>
-                  <span className="font-inter text-lg font-semibold text-gray-800">
-                    {card.value}
-                    {card.value !== '—' ? card.suffix : ''}
-                  </span>
-                  {card.deltaDescricao && (
-                    <span className="text-xs text-gray-400">{card.deltaDescricao}</span>
-                  )}
-                </div>
+            <section key={card.label} className="home-painel home-kpi s3">
+              <span className="home-icone">
+                <i className={card.icon} />
+              </span>
+              <div>
+                <span className="home-kpi-rotulo">{card.label}</span>
+                <span className="home-kpi-valor">
+                  {card.value}
+                  {card.value !== '—' ? card.suffix : ''}
+                </span>
+                {card.deltaDescricao && <span className="home-kpi-delta">{card.deltaDescricao}</span>}
               </div>
-            </Card>
+            </section>
           ))}
         </div>
       )}
 
-      {/* Proporção 2:1:1 igual à referência — o gráfico de barras precisa
-          de mais espaço horizontal pra caber os rótulos das especialidades
-          do que o donut e as barrinhas de ocupação. */}
-      <div className="grid gap-4 xl:grid-cols-4">
-        {Boolean(hasPermition('DASHBOARD_SESSOES_ESPECIALIDADE')) && (
-          <div className="xl:col-span-2">
-            <Card>
-              <PanelTitle icon="pi pi-chart-bar" text="Sessões por especialidade" />
-              {especialidadeChart?.labels?.length ? (
-                <div style={{ height: 220 }}>
-                  <Bar options={chartBarOptions} data={especialidadeChart} />
-                </div>
-              ) : (
-                <NotFound />
-              )}
-            </Card>
-          </div>
+      <div className="home-grade">
+        {pode('DASHBOARD_RESUMO') && (
+          <Painel
+            icon="pi pi-id-card"
+            titulo="Pacientes por convênio"
+            subtitulo="Pacientes ativos hoje"
+            extra={
+              totalConvenios ? (
+                <>
+                  <b>{totalConvenios}</b> pacientes
+                </>
+              ) : undefined
+            }
+            className="s5"
+          >
+            {pacientesConvenio.length ? (
+              <PacientesPorConvenio convenios={pacientesConvenio} />
+            ) : (
+              <Vazio texto="Nenhum paciente ativo" />
+            )}
+          </Painel>
         )}
 
-        {Boolean(hasPermition('DASHBOARD_SESSOES_STATUS')) && (
-          <Card>
-            <PanelTitle icon="pi pi-chart-pie" text="Sessões por status" />
+        {pode('DASHBOARD_SESSOES_ESPECIALIDADE') && (
+          <Painel
+            icon="pi pi-chart-bar"
+            titulo="Sessões por especialidade"
+            subtitulo="Sessões realizadas no período"
+            className="s7"
+          >
+            {especialidadeChart?.labels?.length ? (
+              <div style={{ height: 280 }}>
+                <Bar options={chartBarOptions} data={especialidadeChart} />
+              </div>
+            ) : (
+              <Vazio />
+            )}
+          </Painel>
+        )}
+
+        {pode('DASHBOARD_SESSOES_HOJE') && (
+          <Painel
+            icon="pi pi-calendar"
+            titulo="Próximas sessões de hoje"
+            extra={sessoesHoje.length ? <><b>{sessoesHoje.length}</b> sessões</> : undefined}
+            className="s8"
+          >
+            {sessoesHoje.length ? (
+              <div className="home-tabela">
+                <DataTable value={sessoesHoje} size="small" responsiveLayout="scroll">
+                  <Column
+                    field="horario"
+                    header="Horário"
+                    body={(row: SessaoHoje) => <span className="home-horario">{row.horario}</span>}
+                  />
+                  <Column field="paciente" header="Paciente" />
+                  <Column field="terapia" header="Terapia" />
+                  <Column field="profissional" header="Profissional" />
+                  <Column field="sala" header="Sala" />
+                  <Column
+                    field="status"
+                    header="Status"
+                    body={(row: SessaoHoje) => (
+                      <span className={`home-status ${statusTom(row.status)}`}>{row.status}</span>
+                    )}
+                  />
+                </DataTable>
+              </div>
+            ) : (
+              <Vazio texto="Nenhuma sessão para hoje" />
+            )}
+          </Painel>
+        )}
+
+        {pode('DASHBOARD_PENDENCIAS') && (
+          <Painel icon="pi pi-bell" titulo="Pendências" subtitulo="O que precisa de atenção" className="s4">
+            {pendencias.length ? (
+              <ul className="home-pendencias">
+                {pendencias.map((item, index) => (
+                  <li key={index} className={`home-pendencia ${item.tom}`}>
+                    <i className={item.icon} />
+                    <span className="home-pendencia-texto">
+                      {item.total !== undefined && <b>{item.total}</b>}
+                      {item.descricao}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <Vazio texto="Nenhuma pendência" />
+            )}
+          </Painel>
+        )}
+
+        {pode('DASHBOARD_SESSOES_STATUS') && (
+          <Painel
+            icon="pi pi-chart-pie"
+            titulo="Sessões por status"
+            extra={statusChart?.total ? <><b>{statusChart.total}</b> sessões</> : undefined}
+            className="s4"
+          >
             {statusChart?.chart?.labels?.length ? (
-              <div className="relative" style={{ height: 220 }}>
+              <div style={{ height: 220 }}>
                 <Doughnut options={chartDonutOptions} data={statusChart.chart} />
               </div>
             ) : (
-              <NotFound />
+              <Vazio />
             )}
-          </Card>
+          </Painel>
         )}
 
-        {Boolean(hasPermition('DASHBOARD_OCUPACAO_PERIODO')) && (
-          <Card>
-            <PanelTitle icon="pi pi-clock" text="Ocupação por período" />
-            {ocupacao.length ? (
-              <HorizontalBars items={ocupacao.map((item) => ({ ...item, value: item.value }))} />
-            ) : (
-              <NotFound />
-            )}
-          </Card>
+        {pode('DASHBOARD_OCUPACAO_PERIODO') && (
+          <Painel icon="pi pi-clock" titulo="Ocupação por período" subtitulo="Horários ocupados" className="s4">
+            {ocupacao.length ? <BarrasHorizontais items={ocupacao} sufixo="%" /> : <Vazio />}
+          </Painel>
         )}
-      </div>
 
-      <div className="grid gap-4 xl:grid-cols-3">
-        {Boolean(hasPermition('DASHBOARD_FLUXO_PACIENTES')) && (
-          <Card>
-            <PanelTitle icon="pi pi-sort-amount-down" text="Fluxo de pacientes" />
+        {pode('DASHBOARD_FLUXO_PACIENTES') && (
+          <Painel icon="pi pi-sort-amount-down" titulo="Fluxo de pacientes" subtitulo="Da fila à terapia" className="s4">
             {fluxo.length ? (
               <div style={{ height: 220 }}>
                 <Bar options={chartHorizontalBarOptions} data={toFunnelChartData(fluxo)} />
               </div>
             ) : (
-              <NotFound />
+              <Vazio />
             )}
-          </Card>
+          </Painel>
         )}
 
-        {Boolean(hasPermition('DASHBOARD_FILA_ESPECIALIDADE')) && (
-          <Card>
-            <PanelTitle icon="pi pi-users" text="Fila de espera por especialidade" />
-            {filaEspecialidade.length ? <HorizontalBars items={filaEspecialidade} /> : <NotFound />}
-          </Card>
-        )}
-
-        {Boolean(hasPermition('DASHBOARD_PENDENCIAS')) && (
-          <Card>
-            <PanelTitle icon="pi pi-bell" text="Pendências importantes" />
-            {pendencias.length ? (
-              <div className="grid gap-3">
-                {pendencias.map((item, index) => (
-                  <div key={index} className="flex items-center gap-3 text-sm">
-                    <i className={`${item.icon} ${item.color}`} />
-                    <span className="flex-1 text-gray-700">
-                      {item.total !== undefined ? `${item.total} ` : ''}
-                      {item.descricao}
-                    </span>
-                    <i className="pi pi-chevron-right text-gray-300" style={{ fontSize: 10 }} />
-                  </div>
-                ))}
-              </div>
+        {pode('DASHBOARD_FILA_ESPECIALIDADE') && (
+          <Painel icon="pi pi-users" titulo="Fila de espera por especialidade" className="s6">
+            {filaEspecialidade.length ? (
+              <BarrasHorizontais items={filaEspecialidade} />
             ) : (
-              <NotFound />
+              <Vazio texto="Ninguém na fila" />
             )}
-          </Card>
-        )}
-      </div>
-
-      {/* Tabela + top terapeutas na mesma linha (3:2), igual à referência —
-          antes eram duas linhas inteiras separadas. */}
-      <div className="grid gap-4 xl:grid-cols-5">
-        {Boolean(hasPermition('DASHBOARD_SESSOES_HOJE')) && (
-          <div className="xl:col-span-3">
-            <Card>
-              <PanelTitle icon="pi pi-calendar" text="Próximas sessões de hoje" />
-              {sessoesHoje.length ? (
-                <div className="overflow-x-auto">
-                  <DataTable value={sessoesHoje} responsiveLayout="scroll">
-                    <Column field="horario" header="Horário" />
-                    <Column field="paciente" header="Paciente" />
-                    <Column field="terapia" header="Terapia" />
-                    <Column field="profissional" header="Profissional" />
-                    <Column field="sala" header="Sala" />
-                    <Column
-                      field="status"
-                      header="Status"
-                      body={(row: SessaoHoje) => (
-                        <span className={`rounded-full px-2 py-1 text-xs font-semibold ${getStatusBadgeClass(row.status)}`}>
-                          {row.status}
-                        </span>
-                      )}
-                    />
-                  </DataTable>
-                </div>
-              ) : (
-                <NotFound />
-              )}
-            </Card>
-          </div>
+          </Painel>
         )}
 
-        {Boolean(hasPermition('DASHBOARD_TOP_TERAPEUTAS')) && (
-          <div className="xl:col-span-2">
-            <Card>
-              <PanelTitle icon="pi pi-star" text="Top terapeutas do dia" />
-              {topTerapeutas.length ? (
-                // Lado a lado quando cabe, descendo pra próxima linha
-                // quando não cabe — em vez de forçar uma coluna só.
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {topTerapeutas.map((item) => (
-                    <div
-                      key={item.nome}
-                      className="flex items-center gap-3 rounded-xl border border-gray-200 p-3 min-w-0"
-                    >
-                      <div className="w-10 h-10 rounded-full bg-violet-800 text-white flex items-center justify-center font-bold text-sm shrink-0">
-                        {getInitials(item.nome)}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="text-sm font-medium text-gray-800 truncate" title={item.nome}>
-                          {item.nome}
-                        </div>
-                        <div className="text-xs text-gray-400">
-                          {item.sessoes} sessões
-                          {item.presenca !== null ? ` · ${item.presenca}% presença` : ''}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <NotFound />
-              )}
-            </Card>
-          </div>
+        {pode('DASHBOARD_TOP_TERAPEUTAS') && (
+          <Painel icon="pi pi-star" titulo="Terapeutas com mais sessões" subtitulo="No período" className="s6">
+            {topTerapeutas.length ? (
+              <ol className="home-ranking">
+                {topTerapeutas.map((item, index) => (
+                  <li key={item.nome}>
+                    <span className="home-posicao">{index + 1}</span>
+                    <span className="home-avatar">{getInitials(item.nome)}</span>
+                    <span className="home-ranking-nome">
+                      <strong title={item.nome}>{item.nome}</strong>
+                      {item.presenca !== null && <small>{item.presenca}% de presença</small>}
+                    </span>
+                    <span className="home-ranking-sessoes">{item.sessoes} sessões</span>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <Vazio />
+            )}
+          </Painel>
         )}
       </div>
     </div>

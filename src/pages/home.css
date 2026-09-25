@@ -1,0 +1,599 @@
+/* Home (saudação + dashboard da clínica). Preso em `.home-heron`, na mesma
+   linguagem do filtro e dos modais (styles/theme.css): superfícies brancas,
+   borda clara, sombra levemente roxa e destaques no roxo do projeto. */
+
+.home-heron {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.5rem 0 2rem;
+  color: var(--gray-800);
+  font-size: 13px;
+}
+
+/* ---------- Saudação ---------- */
+.home-heron .home-topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.home-heron .home-data {
+  color: #71717a;
+  font-size: 12px;
+}
+
+.home-heron .home-ola {
+  margin: 0.125rem 0 0;
+  color: var(--violet-800);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.home-heron .home-atalhos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.home-heron .home-atalho {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--heron-border);
+  background: #ffffff;
+  color: var(--violet-800);
+  border-radius: 9999px;
+  padding: 0.5rem 0.95rem;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--heron-shadow);
+  transition: border-color 0.2s, background-color 0.2s, color 0.2s;
+}
+
+.home-heron .home-atalho:hover {
+  border-color: var(--violet-600);
+  background: #faf7fb;
+}
+
+.home-heron .home-atalho.principal {
+  background: var(--violet-800);
+  border-color: var(--violet-800);
+  color: #ffffff;
+}
+
+.home-heron .home-atalho.principal:hover {
+  background: var(--heron-violet-dark);
+}
+
+.home-heron .home-atalho:focus-visible,
+.home-heron .home-pilula:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--heron-ring);
+}
+
+/* ---------- Cabeçalho da seção do dashboard ---------- */
+.home-heron .home-secao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.home-heron .home-secao h2 {
+  margin: 0;
+  color: var(--gray-800);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.home-heron .home-secao small {
+  display: block;
+  color: #71717a;
+  font-size: 12px;
+}
+
+.home-heron .home-periodo {
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border-radius: 9999px;
+  background: #ffffff;
+  border: 1px solid var(--heron-border);
+}
+
+.home-heron .home-pilula {
+  border: none;
+  background: transparent;
+  border-radius: 9999px;
+  padding: 0.375rem 1rem;
+  color: #71717a;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.home-heron .home-pilula:hover {
+  color: var(--violet-800);
+}
+
+.home-heron .home-pilula.ativa {
+  background: var(--violet-800);
+  color: #ffffff;
+}
+
+/* ---------- Grade ---------- */
+.home-heron .home-grade {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .home-heron .home-grade {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home-heron .home-grade > .largo {
+    grid-column: span 2;
+  }
+}
+
+@media (min-width: 1200px) {
+  .home-heron .home-grade {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+
+  .home-heron .home-grade > .s3 { grid-column: span 3; }
+  .home-heron .home-grade > .s4 { grid-column: span 4; }
+  .home-heron .home-grade > .s5 { grid-column: span 5; }
+  .home-heron .home-grade > .s6 { grid-column: span 6; }
+  .home-heron .home-grade > .s7 { grid-column: span 7; }
+  .home-heron .home-grade > .s8 { grid-column: span 8; }
+}
+
+/* ---------- Painel ---------- */
+.home-heron .home-painel {
+  background: #ffffff;
+  border: 1px solid var(--heron-border);
+  border-radius: 0.875rem;
+  box-shadow: var(--heron-shadow);
+  padding: 1.125rem 1.25rem 1.25rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.home-heron .home-painel-topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.home-heron .home-painel-titulo {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-width: 0;
+}
+
+.home-heron .home-icone {
+  flex: 0 0 2rem;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.625rem;
+  background: var(--heron-soft);
+  color: var(--violet-800);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+}
+
+.home-heron .home-painel-titulo h3 {
+  margin: 0;
+  color: var(--gray-800);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.home-heron .home-painel-titulo small {
+  display: block;
+  color: #71717a;
+  font-size: 11px;
+}
+
+.home-heron .home-painel-extra {
+  color: #71717a;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.home-heron .home-painel-extra b {
+  color: var(--violet-800);
+  font-size: 16px;
+}
+
+.home-heron .home-vazio {
+  flex: 1;
+  min-height: 7rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  color: #a1a1aa;
+  font-size: 12px;
+}
+
+.home-heron .home-vazio i {
+  font-size: 1.25rem;
+}
+
+/* ---------- Indicadores ---------- */
+.home-heron .home-kpi {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+.home-heron .home-kpi .home-icone {
+  flex-basis: 2.75rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.875rem;
+  font-size: 1.125rem;
+}
+
+.home-heron .home-kpi-rotulo {
+  color: #71717a;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.home-heron .home-kpi-valor {
+  display: block;
+  color: var(--gray-800);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.home-heron .home-kpi-delta {
+  display: block;
+  color: #71717a;
+  font-size: 11px;
+}
+
+/* ---------- Pacientes por convênio ---------- */
+.home-heron .conv-barra {
+  display: flex;
+  height: 0.75rem;
+  border-radius: 9999px;
+  overflow: hidden;
+  background: var(--heron-divider);
+  margin-bottom: 1rem;
+}
+
+.home-heron .conv-barra span {
+  height: 100%;
+  min-width: 3px;
+}
+
+.home-heron .conv-barra span + span {
+  border-left: 2px solid #ffffff;
+}
+
+.home-heron .conv-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home-heron .conv-item {
+  display: grid;
+  grid-template-columns: 0.625rem minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 0.625rem;
+  row-gap: 0.125rem;
+}
+
+.home-heron .conv-cor {
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 0.1875rem;
+}
+
+.home-heron .conv-nome {
+  font-weight: 700;
+  color: var(--gray-800);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-heron .conv-numero {
+  text-align: right;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+
+.home-heron .conv-numero small {
+  margin-left: 0.375rem;
+  color: #71717a;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.home-heron .conv-trilho {
+  grid-column: 2 / 4;
+  height: 0.375rem;
+  border-radius: 9999px;
+  background: var(--heron-divider);
+  overflow: hidden;
+}
+
+.home-heron .conv-trilho span {
+  display: block;
+  height: 100%;
+  border-radius: 9999px;
+}
+
+.home-heron .conv-unidades {
+  grid-column: 2 / 4;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  color: #71717a;
+  font-size: 11px;
+}
+
+/* ---------- Barras horizontais genéricas ---------- */
+.home-heron .home-barras {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.home-heron .home-barra-linha {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.25rem 0.75rem;
+  align-items: center;
+}
+
+.home-heron .home-barra-linha span {
+  color: var(--gray-800);
+  font-weight: 600;
+}
+
+.home-heron .home-barra-linha b {
+  color: var(--gray-800);
+}
+
+.home-heron .home-barra-trilho {
+  grid-column: 1 / 3;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: var(--heron-divider);
+  overflow: hidden;
+}
+
+.home-heron .home-barra-trilho > span {
+  display: block;
+  height: 100%;
+  border-radius: 9999px;
+  background: var(--violet-800);
+}
+
+/* ---------- Pendências ---------- */
+.home-heron .home-pendencias {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home-heron .home-pendencia {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.625rem;
+  background: #fafafa;
+}
+
+.home-heron .home-pendencia i {
+  width: 1.875rem;
+  height: 1.875rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8125rem;
+}
+
+.home-heron .home-pendencia.alerta i {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.home-heron .home-pendencia.aviso i {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.home-heron .home-pendencia.info i {
+  background: var(--heron-soft);
+  color: var(--violet-800);
+}
+
+.home-heron .home-pendencia-texto {
+  flex: 1;
+  min-width: 0;
+}
+
+.home-heron .home-pendencia b {
+  margin-right: 0.25rem;
+  font-size: 15px;
+}
+
+/* ---------- Tabela de sessões ---------- */
+.home-heron .home-tabela .p-datatable .p-datatable-thead > tr > th {
+  background: #faf7fb;
+  color: var(--violet-800);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0.625rem 0.75rem;
+  border-color: var(--heron-divider);
+}
+
+.home-heron .home-tabela .p-datatable .p-datatable-tbody > tr > td {
+  padding: 0.625rem 0.75rem;
+  border-color: var(--heron-divider);
+  font-size: 12px;
+}
+
+.home-heron .home-tabela .p-datatable-wrapper {
+  max-height: 22rem;
+  overflow: auto;
+  border: 1px solid var(--heron-border);
+  border-radius: 0.75rem;
+}
+
+.home-heron .home-horario {
+  font-weight: 700;
+  color: var(--violet-800);
+}
+
+.home-heron .home-status {
+  display: inline-block;
+  border-radius: 9999px;
+  padding: 0.125rem 0.625rem;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  background: #f4f4f5;
+  color: #52525b;
+}
+
+.home-heron .home-status.ok {
+  background: #ecfdf3;
+  color: #15803d;
+}
+
+.home-heron .home-status.erro {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.home-heron .home-status.aviso {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+/* ---------- Top terapeutas ---------- */
+.home-heron .home-ranking {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home-heron .home-ranking li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.25rem;
+  border-bottom: 1px solid var(--heron-divider);
+}
+
+.home-heron .home-ranking li:last-child {
+  border-bottom: none;
+}
+
+.home-heron .home-posicao {
+  width: 1.25rem;
+  color: #a1a1aa;
+  font-weight: 700;
+  text-align: center;
+}
+
+.home-heron .home-avatar {
+  flex: 0 0 2.25rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+  background: var(--heron-soft);
+  color: var(--violet-800);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.home-heron .home-ranking li:first-child .home-avatar {
+  background: var(--violet-800);
+  color: #ffffff;
+}
+
+.home-heron .home-ranking-nome {
+  flex: 1;
+  min-width: 0;
+}
+
+.home-heron .home-ranking-nome strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-heron .home-ranking-nome small {
+  color: #71717a;
+  font-size: 11px;
+}
+
+.home-heron .home-ranking-sessoes {
+  font-weight: 700;
+  color: var(--violet-800);
+  white-space: nowrap;
+}
+
+/* ---------- Boas-vindas (sem dashboard) ---------- */
+.home-heron .home-boas-vindas {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: linear-gradient(120deg, #ffffff 0%, var(--heron-soft) 100%);
+}
+
+.home-heron .home-boas-vindas .home-icone {
+  flex-basis: 3rem;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 1rem;
+  background: #ffffff;
+  font-size: 1.25rem;
+}
+
+.home-heron .home-atualizando {
+  margin-left: 0.5rem;
+  font-size: 11px;
+  color: var(--violet-800);
+}
