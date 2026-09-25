@@ -1,0 +1,41 @@
+src/util/importacao.ts
+  s_4c89a3a42aef7a::t_33b8ecdd1792a6 1-164
+src/components/importacao/ArquivoImportacao.tsx
+  s_4c89a3a42aef7a::t_d0b5241d1b33fc 1-2,4-36,39-40,43-46,50-51,54,57-58,62-66,69-116,131-153
+  s_4c89a3a42aef7a::t_678ebc87ca85f7 3,37-38,41-42,47-49,52-53,55-56,59-61,67-68,117-130,154-155
+src/components/importacao/ImportarPacientes.tsx
+  s_4c89a3a42aef7a::t_fff9cccb0b5e4b 1-13,21-25,39-52,59-61,64-71,73-77,79-80,89-91,93,106-122,124-129,131-163,165-170,198-200,209-210,246-247,318,320-323,325,328-332
+  s_4c89a3a42aef7a::t_003d1e81fa16dd 14-20,26-38,53-58,62-63,72,78,81-88,92,94-105,123,164,171-197,201-208,211-245,248-317,319,324,326-327
+  s_4c89a3a42aef7a::t_fa49da3c5a13d8 130,333-339
+src/components/importacao/ImportarAgendaGoogle.tsx
+  s_4c89a3a42aef7a::t_02fa29d743b317 12-18,93-94,102,191-193,199-206,256-291,315-316,318-337,341-363,365-366,372-387,389-415,418-428,430-436,438-443,445-572,574-578,580,585-586,588-622
+  s_4c89a3a42aef7a::t_5ce6ff7b87e305 1-11,19-92,95-101,103-185,194-198,207-255,292-314,317,338-340,364,367-371,388,416-417,429,437,444,573,579,581-584,587,623-626,628
+  s_4c89a3a42aef7a::t_9af2852a675fdf 186-190,627
+src/components/importacao/importacao.css
+  s_4c89a3a42aef7a::t_7ce596099281a6 1-474,476-478
+  s_4c89a3a42aef7a::t_36dc02f65023e4 475,479-556
+src/components/button/index.tsx
+  s_4c89a3a42aef7a::t_9cd66ffe7845cc 11-13,28,33
+src/pages/Patient.tsx
+  s_4c89a3a42aef7a::t_dec3e7211b6b75 22-23,44,261-273,276-291
+src/pages/ScheduleCalendar.tsx
+  s_4c89a3a42aef7a::t_a72f9354a0af68 20-21,60,267-279,283-298
+src/templates/filter/index.tsx
+  s_4c89a3a42aef7a::t_10bdd268d064f4 4,21-23,44,54-56,143-145,154-157
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "cb986dce9abb0c5ba6f5775cda0fff64ed48e88b",
+  "prompts": {},
+  "sessions": {
+    "s_4c89a3a42aef7a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "018feb3d-7621-4fa0-b967-3ef8f671f411",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Isa Andressa Novaes Menezes <c1321644@interno.bb.com.br>"
+    }
+  }
+}
