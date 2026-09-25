@@ -1,0 +1,21 @@
+e2e/cadastro-paciente.spec.ts
+  s_4c89a3a42aef7a::t_f46764805c5611 31
+src/constants/patient.ts
+  s_4c89a3a42aef7a::t_9ab03970405233 627-636,740-750
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "dc69b8f81ee56daf6fd0296a4cb97b162176066c",
+  "prompts": {},
+  "sessions": {
+    "s_4c89a3a42aef7a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "018feb3d-7621-4fa0-b967-3ef8f671f411",
+        "model": "unknown"
+      },
+      "human_author": "Isa Andressa Novaes Menezes <c1321644@interno.bb.com.br>"
+    }
+  }
+}
