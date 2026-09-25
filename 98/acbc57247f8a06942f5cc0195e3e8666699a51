@@ -1,0 +1,37 @@
+e2e/cadastro-paciente.spec.ts
+  s_e419da69ba77da::t_86eae8dc364c48 31
+e2e/cadastros/support.ts
+  s_e419da69ba77da::t_ffd7b5ebd111b7 172
+src/constants/formFields.ts
+  s_e419da69ba77da::t_3c8a8c9dd482c0 286-287,289
+src/constants/patient.ts
+  s_e419da69ba77da::t_86b6394d54e44c 130-131,133,741-742,744
+src/foms/CalendarForm.tsx
+  s_e419da69ba77da::t_0a790b6566407d 123-127,129-131,133-135,139,141-142,146
+src/foms/PatientForm.tsx
+  s_e419da69ba77da::t_d497bba1c104b4 33,77-81
+src/pages/Patient.tsx
+  s_e419da69ba77da::t_a8b96dbd0ac8d7 10,300
+src/templates/crudSimples/index.tsx
+  s_e419da69ba77da::t_60069ac08f326d 24,411-419,573-576
+src/templates/list/index.tsx
+  s_e419da69ba77da::t_670d7c423b3d18 6,98-103
+src/util/util.ts
+  s_e419da69ba77da::t_b614315fc86bc0 183-186,197-199
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "98acbc57247f8a06942f5cc0195e3e8666699a51",
+  "prompts": {},
+  "sessions": {
+    "s_e419da69ba77da": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0e707f27-e475-401e-ab32-d4db185a3206",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Isa Andressa Novaes Menezes <c1321644@interno.bb.com.br>"
+    }
+  }
+}
