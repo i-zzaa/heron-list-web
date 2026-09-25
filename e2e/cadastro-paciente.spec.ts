@@ -28,6 +28,7 @@ test.describe('Cadastro - Paciente', () => {
     await fillInVisibleModal(page, 'responsavel-field', 'Responsavel Legal');
     await fillInVisibleModal(page, 'telefone-field', '11999998888');
     await setDropdownInVisibleModal(page, 'convenioId-field', 'Particular');
+    await setDropdownInVisibleModal(page, 'unidadeId-field', 'Jundiaí');
     await setMultiSelectInVisibleModal(page, 'especialidades-field', 'Fono');
 
     const responsePromise = page.waitForResponse(
