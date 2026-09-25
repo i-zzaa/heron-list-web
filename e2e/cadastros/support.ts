@@ -169,7 +169,7 @@ export function createMockState(): MockState {
         nome: 'Paciente Base',
         disabled: false,
         // Unidade é obrigatória no cadastro de paciente.
-        unidade: { id: 1, nome: 'Jundiaí' },
+        unidades: [{ id: 1, nome: 'Jundiaí' }],
       },
     ],
   };

@@ -7,7 +7,7 @@ import { permissionAuth } from '../contexts/permission';
 import { Confirm, Filter, Modal } from '../components/index';
 import { ScheduleForm } from '../foms/ScheduleForm';
 import { CalendarForm } from '../foms/CalendarForm';
-import { formtDatePatient } from '../util/util';
+import { formtDatePatient, nomesDasUnidades } from '../util/util';
 import { useDropdown } from '../contexts/dropDown';
 import {
   filterCurdPatientFields,
@@ -297,7 +297,7 @@ export default function Patient({ secao = SECAO_PADRAO }: { secao?: SecaoCadastr
           { icone: 'pi pi-user', texto: item.responsavel },
           { icone: 'pi pi-phone', texto: item.telefone },
           { icone: 'pi pi-id-card', texto: item.convenio?.nome },
-          { icone: 'pi pi-building', texto: item.unidade?.nome },
+          { icone: 'pi pi-building', texto: nomesDasUnidades(item.unidades) },
           {
             icone: 'pi pi-credit-card',
             texto: item.carteirinha ? `Carteirinha ${item.carteirinha}` : '',

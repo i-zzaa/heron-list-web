@@ -21,7 +21,7 @@ import { buildErrorToast } from '../../util/error';
 
 import { Fields } from '../../constants/formFields';
 import { useDropdown } from '../../contexts/dropDown';
-import { moneyFormat } from '../../util/util';
+import { moneyFormat, nomesDasUnidades } from '../../util/util';
 import Pagination from '../../components/Pagination';
 import { PERFIL } from '../../constants/user';
 import {
@@ -408,6 +408,15 @@ export default function CrudSimples({
       );
     }
 
+    // Usuário tem várias unidades (`unidades`); sala tem uma só (`unidade`).
+    if (Array.isArray(elemento.unidades)) {
+      elemento.unidadeIds = mapOptionsById(
+        currentDropDownList.unidades,
+        elemento.unidades
+      );
+      delete elemento.unidades;
+    }
+
     if (elemento.unidade || elemento.unidadeId) {
       elemento.unidadeId = findOptionById(
         currentDropDownList.unidades,
@@ -561,7 +570,10 @@ export default function CrudSimples({
         selos={selos}
         detalhes={[
           { icone: 'pi pi-at', texto: item_?.login },
-          { icone: 'pi pi-building', texto: item_?.unidade?.nome },
+          {
+            icone: 'pi pi-building',
+            texto: item_?.unidade?.nome || nomesDasUnidades(item_?.unidades),
+          },
         ]}
         acoes={acoes}
       />

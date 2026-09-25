@@ -3,7 +3,7 @@ import { NotFound } from '../../components/notFound';
 import { clsx } from 'clsx';
 import { TextSubtext } from '../../components/textSubtext';
 import { permissionAuth } from '../../contexts/permission';
-import { formatdate } from '../../util/util';
+import { formatdate, nomesDasUnidades } from '../../util/util';
 import { LoadingHeron } from '../../components/loading';
 import { STATUS_PACIENT_COD } from '../../constants/patient';
 
@@ -95,8 +95,12 @@ export function List({
         item?.sala ||
         item?.especialidade?.nome;
       // Usuário já mostrava o login aqui; localidade não mostrava nada. A
-      // unidade entra nos dois, separada por ponto quando há login.
-      const textSecondLeft = [item?.login, item?.unidade?.nome]
+      // unidade (ou as unidades, no usuário) entra nos dois, separada por
+      // ponto quando há login.
+      const textSecondLeft = [
+        item?.login,
+        item?.unidade?.nome || nomesDasUnidades(item?.unidades),
+      ]
         .filter(Boolean)
         .join(' · ');
       const ATIVO = item.hasOwnProperty('ativo') ?  item?.ativo :  true

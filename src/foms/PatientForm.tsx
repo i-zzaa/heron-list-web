@@ -30,7 +30,7 @@ export interface PacientsProps {
   carteirinha: string;
   dataNascimento: string;
   convenio: string;
-  unidade?: OptionProps;
+  unidades?: OptionProps[];
   vaga: any;
   status: OptionProps;
   tipoSessao: OptionProps;
@@ -74,9 +74,11 @@ export const PatientForm = ({
         ...body,
         periodoId: body?.periodoId?.id || PERIODO.integral,
         convenioId: body?.convenioId?.id || null,
-        // Sem unidade escolhida vai null e o backend aplica o default
-        // (1 = Jundiaí), em vez de gravar uma unidade errada.
-        unidadeId: body?.unidadeId?.id || null,
+        // Sem unidade escolhida, o cadastro grava Jundiaí e a edição
+        // mantém as unidades que já estavam gravadas.
+        unidadeIds: (body?.unidadeIds || []).map(
+          (item: OptionProps) => item.id
+        ),
         statusId: body?.statusId?.id || STATUS.padrao,
         tipoSessaoId: body?.tipoSessaoId?.id || TIPO_SESSAO.terapeuta,
         especialidades: (body?.especialidades || []).map(

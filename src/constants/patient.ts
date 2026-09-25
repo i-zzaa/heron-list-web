@@ -127,10 +127,10 @@ export const patientAvaliationFields = [
     },
   },
   {
-    labelText: 'Unidade',
-    id: 'unidadeId',
+    labelText: 'Unidades',
+    id: 'unidadeIds',
     name: 'unidades',
-    type: 'select',
+    type: 'multiselect',
     customCol: 'col-span-6 sm:col-span-3',
     singleSelect: false,
     validate: {
@@ -738,10 +738,10 @@ export const patientCrudFields = [
     },
   },
   {
-    labelText: 'Unidade',
-    id: 'unidadeId',
+    labelText: 'Unidades',
+    id: 'unidadeIds',
     name: 'unidades',
-    type: 'select',
+    type: 'multiselect',
     customCol: 'col-span-6 sm:col-span-3',
     singleSelect: false,
     validate: {

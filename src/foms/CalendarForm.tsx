@@ -120,26 +120,30 @@ export const CalendarForm = ({
   const pacienteSelecionado = watch('paciente');
 
   /**
-   * Salas da unidade do paciente: agendar um paciente de Itupeva não deve
-   * oferecer sala de Jundiaí. O dropdown de localidade já vem com `unidadeId`
-   * do backend, então dá pra filtrar aqui sem outra requisição.
+   * Salas das unidades do paciente: agendar um paciente de Itupeva não deve
+   * oferecer sala de Jundiaí. O dropdown de pacientes traz `unidadeIds` e o
+   * de localidade traz `unidadeId`, então dá pra filtrar aqui sem outra
+   * requisição. Paciente atendido em mais de uma unidade vê as salas de
+   * todas elas.
    *
-   * Se a unidade não tem nenhuma sala cadastrada (é o caso de Itupeva hoje),
-   * cai de volta na lista inteira — melhor oferecer sala demais do que travar
-   * o agendamento com um select vazio.
+   * Se as unidades não têm nenhuma sala cadastrada (é o caso de Itupeva
+   * hoje), cai de volta na lista inteira — melhor oferecer sala demais do
+   * que travar o agendamento com um select vazio.
    */
+  const unidadeIdsDoPaciente: number[] =
+    (pacienteSelecionado as any)?.unidadeIds ?? [];
+
   const localidadesDaUnidade = useMemo(() => {
     const todas = dropDownList?.localidades ?? [];
-    const unidadeId = (pacienteSelecionado as any)?.unidadeId;
 
-    if (!unidadeId) return todas;
+    if (!unidadeIdsDoPaciente.length) return todas;
 
-    const daUnidade = todas.filter(
-      (localidade: any) => localidade?.unidadeId === unidadeId
+    const daUnidade = todas.filter((localidade: any) =>
+      unidadeIdsDoPaciente.includes(localidade?.unidadeId)
     );
 
     return daUnidade.length ? daUnidade : todas;
-  }, [dropDownList?.localidades, (pacienteSelecionado as any)?.unidadeId]);
+  }, [dropDownList?.localidades, unidadeIdsDoPaciente.join(',')]);
 
   const immutableEventFields = [
     'modalidade',

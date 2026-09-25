@@ -180,6 +180,10 @@ export const getDateFormat = (date: any) => {
   return `${weekDay[dow]}, ${dateFormat.format('ll')}`;
 };
 
+// Paciente e usuário podem ter várias unidades: "Jundiaí, Itupeva".
+export const nomesDasUnidades = (unidades?: { nome: string }[]) =>
+  (unidades || []).map((unidade) => unidade.nome).join(', ');
+
 export const formtDatePatient = (value: PacientsProps) => {
   return {
     id: value?.id,
@@ -190,9 +194,9 @@ export const formtDatePatient = (value: PacientsProps) => {
     carteirinha: value?.carteirinha || '',
     periodoId: value?.vaga?.periodo || null,
     convenioId: value?.convenio || null,
-    // O backend devolve `unidade` (objeto id/nome); o select do formulário
-    // espera esse objeto em `unidadeId`, mesmo padrão de convenio/status.
-    unidadeId: value?.unidade || null,
+    // O backend devolve `unidades` (lista de id/nome); o multiselect do
+    // formulário espera essa lista em `unidadeIds`.
+    unidadeIds: value?.unidades || [],
     statusId: value?.status || null,
     dataContato: value?.vaga?.dataContato || '',
     dataVoltouAba: value?.vaga?.dataVoltouAba || '',
