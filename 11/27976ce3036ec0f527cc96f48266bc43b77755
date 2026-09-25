@@ -1,0 +1,21 @@
+src/templates/crudSimples/index.tsx
+  s_429ed512d6dc60::t_3c0a29a187e209 19-25,105-109,193-197,205-217,381-385
+src/server/index.ts
+  s_429ed512d6dc60::t_1e872a0407cdcb 75-83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "1127976ce3036ec0f527cc96f48266bc43b77755",
+  "prompts": {},
+  "sessions": {
+    "s_429ed512d6dc60": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c68d322e-44a2-4719-a6b1-75b72f4221bf",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Isa Andressa Novaes Menezes <c1321644@interno.bb.com.br>"
+    }
+  }
+}
