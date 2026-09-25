@@ -14,7 +14,7 @@ test.describe('Cadastro - Grupo Permissoes', () => {
   test('deve criar um grupo de permissoes', async ({ page }) => {
     await bootstrapCadastroPage(page);
 
-    await openTab(page, 'Grupo Permissões');
+    await openTab(page, 'Grupos de permissão');
     await openCrudModal(
       page,
       'cadastro-add-grupo-permissoes',
@@ -31,7 +31,7 @@ test.describe('Cadastro - Grupo Permissoes', () => {
   test('deve editar um grupo de permissoes', async ({ page }) => {
     const state = await bootstrapCadastroPage(page);
 
-    await openTab(page, 'Grupo Permissões');
+    await openTab(page, 'Grupos de permissão');
     await clickFirstEditAction(page);
     await fillInVisibleModal(page, 'nome-field', 'Grupo Editado');
     await saveCrudModal(page, 'crud-save-grupo-permissoes');
@@ -44,7 +44,7 @@ test.describe('Cadastro - Grupo Permissoes', () => {
   test('deve excluir (inativar) um grupo de permissoes', async ({ page }) => {
     const state = await bootstrapCadastroPage(page);
 
-    await openTab(page, 'Grupo Permissões');
+    await openTab(page, 'Grupos de permissão');
     await clickFirstTrashAction(page);
     await acceptConfirm(page);
 

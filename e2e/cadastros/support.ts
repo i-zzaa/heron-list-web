@@ -83,6 +83,7 @@ const gruposPermissao: Option[] = [
 ];
 
 const convenios: Option[] = [{ id: 1, nome: 'Particular' }];
+const unidades: Option[] = [{ id: 1, nome: 'Jundiaí' }];
 const periodos: Option[] = [{ id: 1, nome: 'Integral' }];
 const tiposSessao: Option[] = [{ id: 1, nome: 'Terapeuta' }];
 const statusPaciente: Option[] = [{ id: 1, nome: 'Padrão' }];
@@ -167,6 +168,8 @@ export function createMockState(): MockState {
         id: 1,
         nome: 'Paciente Base',
         disabled: false,
+        // Unidade é obrigatória no cadastro de paciente.
+        unidade: { id: 1, nome: 'Jundiaí' },
       },
     ],
   };
@@ -222,6 +225,10 @@ export function createCrudRouteHandler(state: MockState) {
 
     if (method === 'GET' && path === '/convenio/dropdown') {
       return json(convenios);
+    }
+
+    if (method === 'GET' && path === '/unidade/dropdown') {
+      return json(unidades);
     }
 
     if (method === 'GET' && path === '/periodo/dropdown') {
@@ -483,7 +490,7 @@ export async function saveCrudModal(page: Page, saveTestId: string) {
 export async function clickFirstEditAction(page: Page) {
   const button = page
     .locator(
-      '.p-tabview-panels .p-tabview-panel:not([aria-hidden="true"]) button:has(.pi-pencil):visible'
+      '[data-cadastro-painel] button:has(.pi-pencil):visible'
     )
     .first();
   await expect(button).toBeVisible();
@@ -493,7 +500,7 @@ export async function clickFirstEditAction(page: Page) {
 export async function clickFirstTrashAction(page: Page) {
   const button = page
     .locator(
-      '.p-tabview-panels .p-tabview-panel:not([aria-hidden="true"]) button:has(.pi-trash):visible'
+      '[data-cadastro-painel] button:has(.pi-trash):visible'
     )
     .first();
   await expect(button).toBeVisible();

@@ -4,7 +4,7 @@ import { filter, update } from '../server';
 
 import { useToast } from '../contexts/toast';
 import { permissionAuth } from '../contexts/permission';
-import { Card, Confirm, Filter, Modal, List } from '../components/index';
+import { Confirm, Filter, Modal } from '../components/index';
 import { ScheduleForm } from '../foms/ScheduleForm';
 import { CalendarForm } from '../foms/CalendarForm';
 import { formtDatePatient } from '../util/util';
@@ -21,12 +21,25 @@ import { mapFormValuesToPayload } from '../util/forms';
 import { buildErrorToast } from '../util/error';
 import { ButtonHeron } from '../components/button';
 import { ImportarPacientes } from '../components/importacao/ImportarPacientes';
+import {
+  AcaoLinha,
+  CabecalhoCadastro,
+  LinhaCadastro,
+  ListaCadastro,
+  SecaoCadastro,
+} from './cadastro/ListaCadastro';
 
 const fieldsConst = filterCurdPatientFields;
 const fieldsState: any = {};
 fieldsConst.forEach((field: any) => (fieldsState[field.id] = ''));
 
-export default function Patient() {
+const SECAO_PADRAO: SecaoCadastro = {
+  titulo: 'Pacientes',
+  descricao: 'Pacientes em terapia, com convênio, unidade e especialidades.',
+  icone: 'pi pi-users',
+};
+
+export default function Patient({ secao = SECAO_PADRAO }: { secao?: SecaoCadastro }) {
   const SCREEN = 'CADASTRO_PACIENTES';
   const { hasPermition } = permissionAuth();
 
@@ -242,35 +255,114 @@ export default function Patient() {
     }
   }, [patients]);
 
+  const renderLinha = (item: any) => {
+    const inativo = !!item?.disabled;
+    const pode = (acao: string) => Boolean(hasPermition(`${SCREEN}_LISTA_BOTAO_${acao}`));
+    const podeAgendar = Boolean(hasPermition(`${SCREEN}_LISTA_TAG_ESPECIALIDADES`));
+
+    const acoes: AcaoLinha[] = [];
+    if (!inativo && pode('EDITAR')) {
+      acoes.push({ icone: 'pi pi-pencil', rotulo: 'Editar', onClick: () => formtDate(item) });
+    }
+    if (!inativo && pode('EXCLUIR')) {
+      acoes.push({
+        icone: 'pi pi-trash',
+        rotulo: 'Inativar',
+        perigo: true,
+        onClick: () => {
+          setPatient(item);
+          setOpenConfirm(true);
+        },
+      });
+    }
+    if (inativo && pode('RETORNAR')) {
+      acoes.push({
+        icone: 'pi pi-replay',
+        rotulo: 'Reativar',
+        comTexto: true,
+        onClick: () => {
+          setPatient(item);
+          setOpenConfirm(true);
+        },
+      });
+    }
+
+    return (
+      <LinhaCadastro
+        key={item.id}
+        titulo={item.nome}
+        inativo={inativo}
+        selos={item.idade ? [{ texto: item.idade }] : []}
+        detalhes={[
+          { icone: 'pi pi-user', texto: item.responsavel },
+          { icone: 'pi pi-phone', texto: item.telefone },
+          { icone: 'pi pi-id-card', texto: item.convenio?.nome },
+          { icone: 'pi pi-building', texto: item.unidade?.nome },
+          {
+            icone: 'pi pi-credit-card',
+            texto: item.carteirinha ? `Carteirinha ${item.carteirinha}` : '',
+          },
+          { icone: 'pi pi-comment', texto: item.vaga?.observacao },
+        ]}
+        etiquetas={(item?.vaga?.especialidades || []).map((esp: any) => ({
+          texto: esp?.especialidade?.nome || 'Sem especialidade',
+          cor: esp?.especialidade?.cor,
+          pendente: !esp?.agendado,
+          onClick:
+            podeAgendar && !inativo
+              ? () => {
+                  setPatient(item);
+                  setOpenSchedule(true);
+                }
+              : undefined,
+        }))}
+        acoes={acoes}
+      />
+    );
+  };
+
   return (
-    <div className="grid">
+    <div className="cad-painel">
+      <CabecalhoCadastro
+        secao={secao}
+        acoes={
+          hasPermition(`${SCREEN}_FILTRO_BOTAO_CADASTRAR`) ? (
+            <>
+              <ButtonHeron
+                text="Importar"
+                icon="pi pi-file-excel"
+                type="outline"
+                size="full"
+                htmlType="button"
+                testId="patient-import"
+                onClick={() => setOpenImportar(true)}
+              />
+              <ButtonHeron
+                text="Novo paciente"
+                icon="pi pi-user-plus"
+                type="primary"
+                size="full"
+                htmlType="button"
+                testId="patient-add"
+                onClick={() => {
+                  setPatient(null);
+                  setOpen(true);
+                }}
+              />
+            </>
+          ) : undefined
+        }
+      />
+
       <Filter
         id="form-filter-patient"
-        legend="Filtro"
+        legend="Filtrar pacientes"
         fields={fields}
         screen={SCREEN}
         onSubmit={handleSubmitFilter}
         onReset={handleSubmitFilter}
         loading={loading}
         dropdown={dropDownList}
-        includeButtonTestId="patient-add"
-        onInclude={() => {
-          setPatient(null);
-          setOpen(true);
-        }}
-        extraActions={
-          hasPermition(`${SCREEN}_FILTRO_BOTAO_CADASTRAR`) ? (
-            <ButtonHeron
-              text="Importar"
-              icon="pi pi-file-excel"
-              type="outline"
-              size="full"
-              htmlType="button"
-              testId="patient-import"
-              onClick={() => setOpenImportar(true)}
-            />
-          ) : null
-        }
       />
 
       {openImportar ? (
@@ -289,29 +381,23 @@ export default function Patient() {
         </Modal>
       ) : null}
 
-      <Card>
-        <List
-          loading={loading}
-          type="complete"
-          items={patients}
-          screen={SCREEN}
-          onClick={handleSchedule}
-          onClickLink={(pacient_: any) => {
-            setPatient(pacient_);
-            setOpenSchedule(true);
-          }}
-          onClickTrash={(pacient_: any) => {
-            setPatient(pacient_);
-            setOpenConfirm(true);
-          }}
-          onClickEdit={formtDate}
-          onClickReturn={({ item }: any) => {
-            setPatient(item);
-            setOpenConfirm(true);
-          }}
-        />
-        {pagination.totalPages > 1 && <PaginationComponent totalPages={pagination.totalPages}  currentPage={pagination.currentPage} onChange={handlePagination}/>}
-      </Card>
+      <ListaCadastro
+        loading={loading}
+        total={pagination.totalItems}
+        rotuloTotal={['paciente', 'pacientes']}
+        vazio="Nenhum paciente encontrado com esse filtro."
+        rodape={
+          pagination.totalPages > 1 ? (
+            <PaginationComponent
+              totalPages={pagination.totalPages}
+              currentPage={pagination.currentPage}
+              onChange={handlePagination}
+            />
+          ) : undefined
+        }
+      >
+        {patients.map((item: any) => renderLinha(item))}
+      </ListaCadastro>
 
       <Modal
         title="Cadastro de Paciente"

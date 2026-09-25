@@ -14,7 +14,7 @@ test.describe('Cadastro - Status Eventos', () => {
   test('deve criar um status de evento', async ({ page }) => {
     const state = await bootstrapCadastroPage(page);
 
-    await openTab(page, 'Status eventos');
+    await openTab(page, 'Status de eventos');
     await openCrudModal(page, 'cadastro-add-status-eventos', 'crud-form-status-eventos');
 
     await fillInVisibleModal(page, 'nome-field', 'Confirmado');
@@ -31,7 +31,7 @@ test.describe('Cadastro - Status Eventos', () => {
   test('deve editar um status de evento', async ({ page }) => {
     const state = await bootstrapCadastroPage(page);
 
-    await openTab(page, 'Status eventos');
+    await openTab(page, 'Status de eventos');
     await clickFirstEditAction(page);
     await fillInVisibleModal(page, 'nome-field', 'Reagendado');
     await saveCrudModal(page, 'crud-save-status-eventos');
@@ -44,7 +44,7 @@ test.describe('Cadastro - Status Eventos', () => {
   test('deve excluir (inativar) um status de evento', async ({ page }) => {
     const state = await bootstrapCadastroPage(page);
 
-    await openTab(page, 'Status eventos');
+    await openTab(page, 'Status de eventos');
     await clickFirstTrashAction(page);
     await acceptConfirm(page);
 

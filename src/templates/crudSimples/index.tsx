@@ -1,16 +1,21 @@
 import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { useToast } from '../../contexts/toast';
-import { useForm } from 'react-hook-form';
+import { useController, useForm } from 'react-hook-form';
 import {
-  Card,
   Modal,
-  SearchAdd,
-  List,
   Confirm,
   ButtonHeron,
   Input,
   TemporaryPasswordModal,
 } from '../../components/index';
+import { permissionAuth } from '../../contexts/permission';
+import {
+  AcaoLinha,
+  CabecalhoCadastro,
+  LinhaCadastro,
+  ListaCadastro,
+  SecaoCadastro,
+} from '../../pages/cadastro/ListaCadastro';
 import { create, getList, search, update } from '../../server';
 import { buildErrorToast } from '../../util/error';
 
@@ -31,6 +36,11 @@ interface Props {
   iconButtonFooter?: string;
   textButtonFooter?: string;
   screen: string;
+  secao: SecaoCadastro;
+  // "Novo <singular>" no botão e "<n> <plural>" no topo da lista.
+  singular: string;
+  plural: string;
+  novo: string;
 }
 
 export default function CrudSimples({
@@ -39,7 +49,12 @@ export default function CrudSimples({
   iconButtonFooter,
   textButtonFooter,
   screen,
+  secao,
+  singular,
+  plural,
+  novo,
 }: Props) {
+  const { hasPermition } = permissionAuth();
   const [list, setList] = useState<any>([]);
   const [pagination, setPagination] = useState<any>(
     buildPaginationState(1, 10, 0)
@@ -128,7 +143,9 @@ export default function CrudSimples({
           )
         );
       } catch (error) {
-        renderToast(buildErrorToast(error, 'Não foi possível carregar a lista.'));
+        renderToast(
+          buildErrorToast(error, 'Não foi possível carregar a lista.')
+        );
       } finally {
         setLoading(false);
         setOpen(false);
@@ -346,193 +363,265 @@ export default function CrudSimples({
     unregister(isTerapeuta, { keepDirtyValues: true });
   }, [unregister]);
 
+  const abrirEdicao = async (item_: any) => {
+    const elemento = { ...item_ };
+    const shouldReloadCrudDropdown =
+      !dropDownList?.perfies ||
+      !dropDownList?.grupoPermissoes ||
+      !dropDownList?.especialidades ||
+      !dropDownList?.unidades;
+
+    const currentDropDownList = shouldReloadCrudDropdown
+      ? await renderDropdownCrud()
+      : dropDownList;
+
+    if (shouldReloadCrudDropdown) {
+      setDropDownList(currentDropDownList);
+    }
+
+    const especialidadeFromItem =
+      elemento.especialidadeId || elemento.terapeuta?.especialidade;
+
+    let funcoesOptions = currentDropDownList.funcoes || [];
+
+    if (especialidadeFromItem?.nome) {
+      funcoesOptions = await renderEspecialidadeFuncao(
+        especialidadeFromItem.nome
+      );
+      setDropDownList((prev: any) => ({
+        ...prev,
+        funcoes: funcoesOptions,
+      }));
+    }
+
+    if (elemento.perfil || elemento.perfilId) {
+      elemento.perfilId = findOptionById(
+        currentDropDownList.perfies,
+        elemento.perfilId || elemento.perfil
+      );
+    }
+
+    if (elemento.grupoPermissao || elemento.grupoPermissaoId) {
+      elemento.grupoPermissaoId = findOptionById(
+        currentDropDownList.grupoPermissoes,
+        elemento.grupoPermissaoId || elemento.grupoPermissao
+      );
+    }
+
+    if (elemento.unidade || elemento.unidadeId) {
+      elemento.unidadeId = findOptionById(
+        currentDropDownList.unidades,
+        elemento.unidadeId || elemento.unidade
+      );
+    }
+
+    if (especialidadeFromItem) {
+      elemento.especialidadeId = findOptionById(
+        currentDropDownList.especialidades,
+        especialidadeFromItem
+      );
+    }
+
+    if (!elemento.funcoesId && Array.isArray(elemento.terapeuta?.funcoes)) {
+      elemento.funcoesId = elemento.terapeuta.funcoes.map(
+        (itemFuncao: any) => ({
+          id: itemFuncao.funcao?.id || itemFuncao.funcaoId,
+          nome: itemFuncao.funcao?.nome,
+        })
+      );
+    }
+
+    if (Array.isArray(elemento.funcoesId)) {
+      elemento.funcoesId = mapOptionsById(funcoesOptions, elemento.funcoesId);
+    }
+
+    if (!Array.isArray(elemento.comissao)) {
+      elemento.comissao = buildComissaoFromFuncoes(elemento.terapeuta?.funcoes);
+    }
+
+    setCargaHoraria({});
+    setComissao([]);
+    Object.keys(elemento).forEach((index: any) => {
+      if (index === 'cargaHoraria') {
+        setCargaHoraria(elemento.cargaHoraria);
+      }
+
+      if (index === 'comissao') {
+        setComissao(elemento.comissao);
+        setValue(index, elemento[index]);
+        return;
+      }
+
+      if (
+        typeof elemento[index] === 'object' &&
+        // !Array.isArray(elemento[index]) &&
+        index !== PERFIL.terapeuta.toLowerCase() &&
+        index !== 'comissao' &&
+        index !== 'cargaHoraria' &&
+        index.indexOf('Id') === -1
+      ) {
+        if (!elemento[`${index}Id`]) {
+          elemento[`${index}Id`] = elemento[index];
+        }
+        index = `${index}Id`;
+      }
+
+      setValue(index, elemento[index]);
+    });
+
+    setIsEdit(true);
+    setItem(elemento);
+    setOpen(true);
+
+    if (namelist === 'grupo-permissoes') {
+      setValues(elemento.permissoesId);
+    }
+
+    if (elemento.hasOwnProperty('terapeuta') && elemento?.terapeuta !== null) {
+      setHidden(false);
+    } else {
+      setHidden(true);
+      unregister(isTerapeuta, { keepDirtyValues: true });
+    }
+  };
+
+  const podeLista = (acao: string) =>
+    Boolean(hasPermition(`${screen}_LISTA_BOTAO_${acao}`));
+
+  const renderLinha = (item_: any) => {
+    const ativo = item_.hasOwnProperty('ativo') ? !!item_.ativo : true;
+    const acoes: AcaoLinha[] = [];
+
+    if (ativo && textButtonFooter) {
+      acoes.push({
+        icone: iconButtonFooter || 'pi pi-bolt',
+        rotulo: textButtonFooter,
+        comTexto: true,
+        onClick: () => onClick(item_),
+      });
+    }
+    if (ativo && podeLista('EDITAR')) {
+      acoes.push({
+        icone: 'pi pi-pencil',
+        rotulo: 'Editar',
+        onClick: () => abrirEdicao(item_),
+      });
+    }
+    if (ativo && podeLista('EXCLUIR')) {
+      acoes.push({
+        icone: 'pi pi-trash',
+        rotulo: 'Desativar',
+        perigo: true,
+        onClick: () => {
+          item_.ativo = false;
+          setItem(item_);
+          setOpenConfirm(true);
+        },
+      });
+    }
+    if (!ativo && podeLista('RETORNAR')) {
+      acoes.push({
+        icone: 'pi pi-replay',
+        rotulo: 'Reativar',
+        comTexto: true,
+        onClick: () => {
+          item_.ativo = true;
+          setIsEdit(true);
+          onSubmit(item_);
+        },
+      });
+    }
+
+    // O que cada cadastro tem de mais útil para reconhecer a linha.
+    const localidade = namelist === 'localidade';
+    const titulo = localidade
+      ? [item_.casa, item_.sala].filter(Boolean).join(' · ')
+      : item_.nome || item_.casa || '';
+    const selo =
+      item_?.perfil?.nome ||
+      (!localidade && item_?.sala) ||
+      item_?.especialidade?.nome;
+    const selos: { texto: string; destaque?: boolean }[] = selo
+      ? [{ texto: String(selo), destaque: !!item_?.perfil?.nome }]
+      : [];
+    if (namelist === 'status-eventos' && item_.cobrar)
+      selos.push({ texto: 'Cobrado' });
+
+    return (
+      <LinhaCadastro
+        key={item_?.login || item_.id}
+        titulo={titulo}
+        avatar={localidade ? <i className="pi pi-map-marker" /> : undefined}
+        corAvatar={
+          ['especialidade', 'status-eventos'].includes(namelist)
+            ? item_.cor
+            : undefined
+        }
+        inativo={!ativo}
+        selos={selos}
+        detalhes={[
+          { icone: 'pi pi-at', texto: item_?.login },
+          { icone: 'pi pi-building', texto: item_?.unidade?.nome },
+        ]}
+        acoes={acoes}
+      />
+    );
+  };
+
   return (
-    <>
-      <SearchAdd
-        onClick={() => {
-          reset();
-          setIsEdit(false);
-          setOpen(true);
-        }}
-        onSubmit={handleSubmit(handleClick)}
-        textButton="Cadastrar usuário"
-        iconButton="pi pi-plus"
-        control={control}
-        loading={loading}
-        screen={screen}
-        addButtonTestId={`cadastro-add-${namelist}`}
+    <div className="cad-painel">
+      <CabecalhoCadastro
+        secao={secao}
+        acoes={
+          hasPermition(`${screen}_BOTAO_CADASTRAR`) ? (
+            <ButtonHeron
+              text={novo}
+              icon="pi pi-plus"
+              type="primary"
+              size="full"
+              htmlType="button"
+              testId={`cadastro-add-${namelist}`}
+              onClick={() => {
+                reset();
+                setIsEdit(false);
+                setOpen(true);
+              }}
+            />
+          ) : undefined
+        }
       />
 
-      <Card>
-        <List
-          loading={loading}
-          screen={screen}
-          type="simples"
-          onClickTrash={(item_: any) => {
-            item_.ativo = false;
-            setItem(item_);
-            setOpenConfirm(true);
-          }}
-          onClickEdit={async (item_: any) => {
-            const elemento = { ...item_ };
-            const shouldReloadCrudDropdown =
-              !dropDownList?.perfies ||
-              !dropDownList?.grupoPermissoes ||
-              !dropDownList?.especialidades ||
-              !dropDownList?.unidades;
-
-            const currentDropDownList = shouldReloadCrudDropdown
-              ? await renderDropdownCrud()
-              : dropDownList;
-
-            if (shouldReloadCrudDropdown) {
-              setDropDownList(currentDropDownList);
-            }
-
-            const especialidadeFromItem =
-              elemento.especialidadeId || elemento.terapeuta?.especialidade;
-
-            let funcoesOptions = currentDropDownList.funcoes || [];
-
-            if (especialidadeFromItem?.nome) {
-              funcoesOptions = await renderEspecialidadeFuncao(
-                especialidadeFromItem.nome
-              );
-              setDropDownList((prev: any) => ({
-                ...prev,
-                funcoes: funcoesOptions,
-              }));
-            }
-
-            if (elemento.perfil || elemento.perfilId) {
-              elemento.perfilId = findOptionById(
-                currentDropDownList.perfies,
-                elemento.perfilId || elemento.perfil
-              );
-            }
-
-            if (elemento.grupoPermissao || elemento.grupoPermissaoId) {
-              elemento.grupoPermissaoId = findOptionById(
-                currentDropDownList.grupoPermissoes,
-                elemento.grupoPermissaoId || elemento.grupoPermissao
-              );
-            }
-
-            if (elemento.unidade || elemento.unidadeId) {
-              elemento.unidadeId = findOptionById(
-                currentDropDownList.unidades,
-                elemento.unidadeId || elemento.unidade
-              );
-            }
-
-            if (especialidadeFromItem) {
-              elemento.especialidadeId = findOptionById(
-                currentDropDownList.especialidades,
-                especialidadeFromItem
-              );
-            }
-
-            if (
-              !elemento.funcoesId &&
-              Array.isArray(elemento.terapeuta?.funcoes)
-            ) {
-              elemento.funcoesId = elemento.terapeuta.funcoes.map(
-                (itemFuncao: any) => ({
-                  id: itemFuncao.funcao?.id || itemFuncao.funcaoId,
-                  nome: itemFuncao.funcao?.nome,
-                })
-              );
-            }
-
-            if (Array.isArray(elemento.funcoesId)) {
-              elemento.funcoesId = mapOptionsById(
-                funcoesOptions,
-                elemento.funcoesId
-              );
-            }
-
-            if (!Array.isArray(elemento.comissao)) {
-              elemento.comissao = buildComissaoFromFuncoes(
-                elemento.terapeuta?.funcoes
-              );
-            }
-
-            setCargaHoraria({});
-            setComissao([]);
-            Object.keys(elemento).forEach((index: any) => {
-              if (index === 'cargaHoraria') {
-                setCargaHoraria(elemento.cargaHoraria);
-              }
-
-              if (index === 'comissao') {
-                setComissao(elemento.comissao);
-                setValue(index, elemento[index]);
-                return;
-              }
-
-              if (
-                typeof elemento[index] === 'object' &&
-                // !Array.isArray(elemento[index]) &&
-                index !== PERFIL.terapeuta.toLowerCase() &&
-                index !== 'comissao' &&
-                index !== 'cargaHoraria' &&
-                index.indexOf('Id') === -1
-              ) {
-                if (!elemento[`${index}Id`]) {
-                  elemento[`${index}Id`] = elemento[index];
-                }
-                index = `${index}Id`;
-              }
-
-              setValue(index, elemento[index]);
-            });
-
-            setIsEdit(true);
-            setItem(elemento);
-            setOpen(true);
-
-            if (namelist === 'grupo-permissoes') {
-              setValues(elemento.permissoesId);
-            }
-
-            if (
-              elemento.hasOwnProperty('terapeuta') &&
-              elemento?.terapeuta !== null
-            ) {
-              setHidden(false);
-            } else {
-              setHidden(true);
-              unregister(isTerapeuta, { keepDirtyValues: true });
-            }
-          }}
-          onClick={(item_: any) => onClick(item_.id)}
-          items={list}
-          iconButtonFooter={iconButtonFooter}
-          textButtonFooter={textButtonFooter}
-          onClickLink={() => {}}
-          onClickReturn={(item_: any) => {
-            item_.ativo = true;
-            setIsEdit(true);
-            onSubmit(item_);
-          }}
+      <form action="#" onSubmit={handleSubmit(handleClick)}>
+        <BuscaCadastro
+          control={control}
+          placeholder={`Buscar ${plural}`}
+          onLimpar={() => handleSubmit(handleClick)()}
         />
+      </form>
 
-        {pagination.totalPages > 1 && (
-          <Pagination
-            totalPages={pagination.totalPages}
-            currentPage={pagination.currentPage}
-            onChange={renderList}
-          />
-        )}
-      </Card>
+      <ListaCadastro
+        loading={loading}
+        total={pagination.totalItems}
+        rotuloTotal={[singular, plural]}
+        vazio={`Nenhum ${singular} encontrado.`}
+        rodape={
+          pagination.totalPages > 1 ? (
+            <Pagination
+              totalPages={pagination.totalPages}
+              currentPage={pagination.currentPage}
+              onChange={renderList}
+            />
+          ) : undefined
+        }
+      >
+        {list.map((item_: any) => renderLinha(item_))}
+      </ListaCadastro>
 
       <Modal
         title="Cadastro"
         open={open}
         width={
-          ['usuarios', 'grupo-permissoes'].includes(namelist)
-            ? '75vw'
-            : '50vw'
+          ['usuarios', 'grupo-permissoes'].includes(namelist) ? '75vw' : '50vw'
         }
         onClose={() => {
           setOpen(false);
@@ -595,6 +684,50 @@ export default function CrudSimples({
         senha={temporaryPassword}
         onClose={() => setTemporaryPassword(null)}
       />
-    </>
+    </div>
+  );
+}
+
+// Busca dos cadastros simples: o valor fica no mesmo formulário (campo
+// `search`, removido do payload em buildFormPayload), Enter pesquisa.
+function BuscaCadastro({
+  control,
+  placeholder,
+  onLimpar,
+}: {
+  control: any;
+  placeholder: string;
+  onLimpar: () => void;
+}) {
+  const { field } = useController({
+    name: 'search',
+    control,
+    defaultValue: '',
+  });
+
+  return (
+    <label className="cad-busca">
+      <i className="pi pi-search" />
+      <input
+        type="search"
+        placeholder={placeholder}
+        aria-label={placeholder}
+        data-testid="cadastro-busca"
+        {...field}
+      />
+      {field.value ? (
+        <button
+          type="button"
+          aria-label="Limpar busca"
+          data-testid="search-clear-button"
+          onClick={() => {
+            field.onChange('');
+            onLimpar();
+          }}
+        >
+          <i className="pi pi-times" />
+        </button>
+      ) : null}
+    </label>
   );
 }

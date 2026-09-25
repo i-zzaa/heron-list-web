@@ -15,7 +15,7 @@ test.describe('Cadastro - Funcao', () => {
   test('deve criar uma funcao', async ({ page }) => {
     await bootstrapCadastroPage(page);
 
-    await openTab(page, 'Função');
+    await openTab(page, 'Funções');
     await openCrudModal(page, 'cadastro-add-funcao', 'crud-form-funcao');
 
     await fillInVisibleModal(page, 'nome-field', 'Funcao E2E');
@@ -29,7 +29,7 @@ test.describe('Cadastro - Funcao', () => {
   test('deve editar uma funcao', async ({ page }) => {
     const state = await bootstrapCadastroPage(page);
 
-    await openTab(page, 'Função');
+    await openTab(page, 'Funções');
     await clickFirstEditAction(page);
     await fillInVisibleModal(page, 'nome-field', 'Funcao Editada');
     await saveCrudModal(page, 'crud-save-funcao');
@@ -42,7 +42,7 @@ test.describe('Cadastro - Funcao', () => {
   test('deve excluir (inativar) uma funcao', async ({ page }) => {
     const state = await bootstrapCadastroPage(page);
 
-    await openTab(page, 'Função');
+    await openTab(page, 'Funções');
     await clickFirstTrashAction(page);
     await acceptConfirm(page);
 

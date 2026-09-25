@@ -1,0 +1,543 @@
+/* Tela de Cadastros. Preso em `.cad-heron`, na mesma linguagem da Home e das
+   importações (styles/theme.css): superfícies brancas, borda clara, roxo do
+   projeto. A paleta do tailwind do projeto é restrita, por isso as cores
+   ficam aqui. */
+
+.cad-heron {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.25rem;
+  padding: 1.5rem 0 2rem;
+  color: var(--gray-800);
+  font-size: 13px;
+}
+
+@media (min-width: 1024px) {
+  .cad-heron {
+    grid-template-columns: 15rem minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+/* ---------- Navegação ---------- */
+.cad-heron .cad-nav {
+  background: #ffffff;
+  border: 1px solid var(--heron-border);
+  border-radius: 0.875rem;
+  box-shadow: var(--heron-shadow);
+  padding: 0.75rem;
+}
+
+@media (min-width: 1024px) {
+  .cad-heron .cad-nav {
+    position: sticky;
+    top: 1rem;
+  }
+}
+
+.cad-heron .cad-nav-titulo {
+  display: block;
+  padding: 0.25rem 0.5rem 0.75rem;
+  color: var(--violet-800);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.cad-heron .cad-grupo + .cad-grupo {
+  margin-top: 0.75rem;
+}
+
+.cad-heron .cad-grupo-nome {
+  display: block;
+  padding: 0 0.5rem 0.25rem;
+  color: #a1a1aa;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.cad-heron .cad-nav-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.cad-heron .cad-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  border: none;
+  background: transparent;
+  border-radius: 0.625rem;
+  padding: 0.5rem 0.625rem;
+  color: var(--gray-800);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.cad-heron .cad-nav-item i {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8125rem;
+  color: #71717a;
+  background: #f4f4f5;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.cad-heron .cad-nav-item:hover {
+  background: #faf7fb;
+  color: var(--violet-800);
+}
+
+.cad-heron .cad-nav-item[aria-selected='true'] {
+  background: var(--heron-soft);
+  color: var(--violet-800);
+}
+
+.cad-heron .cad-nav-item[aria-selected='true'] i {
+  background: var(--violet-800);
+  color: #ffffff;
+}
+
+.cad-heron .cad-nav-item:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--heron-ring);
+}
+
+/* Celular/tablet: vira uma faixa de chips que rola na horizontal. */
+@media (max-width: 1023px) {
+  .cad-heron .cad-nav {
+    padding: 0.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .cad-heron .cad-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cad-heron .cad-nav-titulo,
+  .cad-heron .cad-grupo-nome {
+    display: none;
+  }
+
+  .cad-heron .cad-nav-grupos {
+    display: flex;
+    gap: 0.25rem;
+    width: max-content;
+  }
+
+  .cad-heron .cad-grupo + .cad-grupo {
+    margin-top: 0;
+  }
+
+  .cad-heron .cad-nav-lista {
+    flex-direction: row;
+    gap: 0.25rem;
+  }
+
+  .cad-heron .cad-nav-item {
+    width: auto;
+    white-space: nowrap;
+    padding: 0.375rem 0.75rem 0.375rem 0.375rem;
+    border-radius: 9999px;
+  }
+
+  .cad-heron .cad-nav-item i {
+    border-radius: 9999px;
+  }
+}
+
+/* ---------- Conteúdo ---------- */
+.cad-heron .cad-painel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.cad-heron .cad-cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.cad-heron .cad-cabecalho-titulo {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  min-width: 0;
+}
+
+.cad-heron .cad-cabecalho-icone {
+  flex: 0 0 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.875rem;
+  background: var(--heron-soft);
+  color: var(--violet-800);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.125rem;
+}
+
+.cad-heron .cad-cabecalho h1 {
+  margin: 0;
+  color: var(--violet-800);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.cad-heron .cad-cabecalho p {
+  margin: 0.125rem 0 0;
+  color: #71717a;
+  font-size: 12px;
+}
+
+.cad-heron .cad-cabecalho-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  /* ButtonHeron size="full" traz w-full; aqui os botões ficam lado a lado. */
+  .cad-heron .cad-cabecalho-acoes > * {
+    width: auto;
+    min-width: 9.5rem;
+  }
+}
+
+@media (max-width: 639px) {
+  .cad-heron .cad-cabecalho-acoes {
+    width: 100%;
+  }
+
+  .cad-heron .cad-cabecalho-acoes > * {
+    flex: 1;
+  }
+}
+
+/* O Filtro (templates/filter) já é um card; aqui só tira a margem extra. */
+.cad-heron .filter-heron {
+  margin: 0;
+}
+
+/* ---------- Busca (cadastros simples) ---------- */
+.cad-heron .cad-busca {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  height: 2.75rem;
+  padding: 0 0.875rem;
+  border: 1px solid var(--heron-border);
+  border-radius: 0.75rem;
+  background: #ffffff;
+  box-shadow: var(--heron-shadow);
+  color: #a1a1aa;
+  transition: border-color 0.15s;
+}
+
+.cad-heron .cad-busca:focus-within {
+  border-color: var(--violet-800);
+}
+
+.cad-heron .cad-busca input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #27272a;
+  font: inherit;
+  font-size: 14px;
+}
+
+.cad-heron .cad-busca button {
+  border: none;
+  background: transparent;
+  color: #a1a1aa;
+  padding: 0.25rem;
+  cursor: pointer;
+}
+
+/* ---------- Lista ---------- */
+.cad-heron .cad-lista {
+  background: #ffffff;
+  border: 1px solid var(--heron-border);
+  border-radius: 0.875rem;
+  box-shadow: var(--heron-shadow);
+  overflow: hidden;
+}
+
+.cad-heron .cad-lista-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--heron-divider);
+  background: #faf7fb;
+  color: #71717a;
+  font-size: 12px;
+}
+
+.cad-heron .cad-lista-topo b {
+  color: var(--violet-800);
+  font-size: 14px;
+}
+
+.cad-heron .cad-linhas {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cad-heron .cad-linha {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid var(--heron-divider);
+  transition: background-color 0.15s;
+}
+
+.cad-heron .cad-linha:last-child {
+  border-bottom: none;
+}
+
+.cad-heron .cad-linha:hover {
+  background: #fcfbfd;
+}
+
+.cad-heron .cad-linha.inativa {
+  background: #fafafa;
+}
+
+.cad-heron .cad-linha.inativa .cad-avatar,
+.cad-heron .cad-linha.inativa .cad-linha-titulo {
+  opacity: 0.55;
+}
+
+.cad-heron .cad-avatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  background: var(--heron-soft);
+  color: var(--violet-800);
+  font-weight: 700;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.cad-heron .cad-avatar.cor {
+  background: transparent;
+}
+
+.cad-heron .cad-avatar-ponto {
+  width: 0.875rem;
+  height: 0.875rem;
+  border-radius: 9999px;
+  box-shadow: 0 0 0 3px #ffffff, 0 0 0 4px var(--heron-border);
+}
+
+.cad-heron .cad-linha-corpo {
+  min-width: 0;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.cad-heron .cad-linha-titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.625rem;
+  color: #27272a;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.cad-heron .cad-linha-titulo > span:first-child {
+  overflow-wrap: anywhere;
+}
+
+.cad-heron .cad-selo {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: 0.0625rem 0.5rem;
+  background: #f4f4f5;
+  color: #52525b;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.cad-heron .cad-selo.destaque {
+  background: var(--heron-soft);
+  color: var(--violet-800);
+}
+
+.cad-heron .cad-selo.inativo {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.cad-heron .cad-detalhes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  color: #71717a;
+  font-size: 12px;
+}
+
+.cad-heron .cad-detalhes span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.cad-heron .cad-detalhes i {
+  font-size: 0.75rem;
+  color: #a1a1aa;
+}
+
+.cad-heron .cad-etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.125rem;
+}
+
+.cad-heron .cad-etiqueta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border: 1px solid var(--heron-border);
+  border-radius: 9999px;
+  padding: 0.0625rem 0.625rem 0.0625rem 0.375rem;
+  background: #ffffff;
+  color: #3f3f46;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.cad-heron button.cad-etiqueta {
+  cursor: pointer;
+}
+
+.cad-heron button.cad-etiqueta:hover {
+  border-color: var(--violet-600);
+}
+
+.cad-heron .cad-etiqueta .ponto {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+}
+
+/* Especialidade ainda não agendada: texto um pouco mais claro. */
+.cad-heron .cad-etiqueta.pendente {
+  color: #71717a;
+}
+
+.cad-heron .cad-acoes {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.cad-heron .cad-acao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  height: 2.125rem;
+  min-width: 2.125rem;
+  padding: 0 0.5rem;
+  border: 1px solid transparent;
+  border-radius: 0.625rem;
+  background: transparent;
+  color: #71717a;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.cad-heron .cad-acao:hover {
+  background: var(--heron-soft);
+  color: var(--violet-800);
+}
+
+.cad-heron .cad-acao.perigo:hover {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.cad-heron .cad-acao.com-texto {
+  border-color: var(--heron-border);
+  color: var(--violet-800);
+}
+
+.cad-heron .cad-acao:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--heron-ring);
+}
+
+@media (max-width: 639px) {
+  .cad-heron .cad-linha {
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+    padding: 0.875rem 1rem;
+  }
+
+  .cad-heron .cad-avatar {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .cad-heron .cad-acoes {
+    grid-column: 2;
+    justify-content: flex-start;
+    margin-left: -0.5rem;
+  }
+}
+
+.cad-heron .cad-vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 3rem 1rem;
+  color: #a1a1aa;
+  font-size: 13px;
+  text-align: center;
+}
+
+.cad-heron .cad-vazio i {
+  font-size: 1.5rem;
+}
+
+.cad-heron .cad-paginacao {
+  padding: 0.25rem 1rem 0.5rem;
+  border-top: 1px solid var(--heron-divider);
+}

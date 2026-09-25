@@ -14,7 +14,7 @@ test.describe('Cadastro - Localidade', () => {
   test('deve criar uma localidade', async ({ page }) => {
     await bootstrapCadastroPage(page);
 
-    await openTab(page, 'Localidade');
+    await openTab(page, 'Salas');
     await openCrudModal(page, 'cadastro-add-localidade', 'crud-form-localidade');
 
     await fillInVisibleModal(page, 'casa-field', 'Casa E2E');
@@ -29,7 +29,7 @@ test.describe('Cadastro - Localidade', () => {
   test('deve editar uma localidade', async ({ page }) => {
     const state = await bootstrapCadastroPage(page);
 
-    await openTab(page, 'Localidade');
+    await openTab(page, 'Salas');
     await clickFirstEditAction(page);
     await fillInVisibleModal(page, 'casa-field', 'Casa Editada');
     await fillInVisibleModal(page, 'sala-field', 'Sala Editada');
@@ -48,7 +48,7 @@ test.describe('Cadastro - Localidade', () => {
   test('deve excluir (inativar) uma localidade', async ({ page }) => {
     const state = await bootstrapCadastroPage(page);
 
-    await openTab(page, 'Localidade');
+    await openTab(page, 'Salas');
     await clickFirstTrashAction(page);
     await acceptConfirm(page);
 
