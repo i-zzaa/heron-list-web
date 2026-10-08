@@ -597,3 +597,210 @@
   font-size: 11px;
   color: var(--violet-800);
 }
+
+/* ------------------------------------------------------------------ */
+/* Visão da recepção (HomeRecepcao.tsx)                                */
+/* ------------------------------------------------------------------ */
+
+/* Atalhos + filtro de unidade na mesma linha do topo. */
+.home-heron .home-topo-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.home-heron .home-recepcao {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.home-heron .rec-baixas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.125rem 1.5rem;
+  border-radius: 0.875rem;
+  background: var(--heron-soft);
+  border: 1px solid #e6d3ec;
+  color: var(--heron-violet-dark);
+}
+
+.home-heron .rec-baixas-total {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.home-heron .rec-baixas-numero {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.home-heron .rec-baixas h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.home-heron .rec-baixas small {
+  font-size: 13px;
+}
+
+.home-heron .rec-baixas-faixas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.home-heron .rec-faixa {
+  padding: 0.375rem 0.75rem;
+  border-radius: 9999px;
+  background: #ffffff;
+  color: #3f3f46;
+  font-size: 13px;
+}
+
+.home-heron .rec-faixa.alerta {
+  color: #9b1c1c;
+}
+
+.home-heron .rec-botao {
+  min-height: 2.5rem;
+  padding: 0 1.125rem;
+  border: none;
+  border-radius: 9999px;
+  background: var(--violet-800);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.home-heron .rec-botao:hover {
+  background: var(--heron-violet-dark);
+}
+
+.home-heron .rec-grade {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.home-heron .rec-grade > .rec-atencao {
+  flex: 3 1 28rem;
+}
+
+.home-heron .rec-grade > .rec-aniversariantes {
+  flex: 2 1 20rem;
+}
+
+.home-heron .rec-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.home-heron .rec-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 3.25rem;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.625rem;
+  border: 1px solid var(--heron-border);
+  background: #ffffff;
+  color: var(--gray-800);
+  text-align: left;
+  font: inherit;
+}
+
+.home-heron button.rec-item {
+  cursor: pointer;
+}
+
+.home-heron button.rec-item:hover {
+  border-color: var(--violet-800);
+}
+
+.home-heron .rec-item.alerta {
+  border-color: #f3c7c7;
+  background: #fff7f7;
+}
+
+.home-heron .rec-item-texto {
+  display: flex;
+  flex-direction: column;
+}
+
+.home-heron .rec-item-texto b {
+  font-size: 14px;
+}
+
+.home-heron .rec-item-texto small,
+.home-heron .rec-aniversario small {
+  color: #52525b;
+  font-size: 12px;
+}
+
+.home-heron .rec-item-qtd {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--violet-800);
+}
+
+.home-heron .rec-item.alerta .rec-item-qtd {
+  color: #9b1c1c;
+}
+
+/* Aniversariante do dia em amarelo; texto escuro para manter o contraste. */
+.home-heron .rec-aniversario-hoje {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem 1rem;
+  border-radius: 0.75rem;
+  background: #fde68a;
+  color: #713f12;
+}
+
+.home-heron .rec-aniversario-hoje > i {
+  font-size: 24px;
+}
+
+.home-heron .rec-aniversario-hoje > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.home-heron .rec-aniversario-hoje b {
+  font-size: 16px;
+}
+
+.home-heron .rec-aniversario-hoje small {
+  font-size: 13px;
+}
+
+.home-heron .rec-aniversario-rotulo {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.home-heron .rec-aniversario {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-top: 0.625rem;
+  border-top: 1px solid var(--heron-divider);
+  font-size: 14px;
+}

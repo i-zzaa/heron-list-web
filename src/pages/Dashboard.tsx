@@ -357,7 +357,7 @@ const getInitials = (name?: string) =>
     .map((part) => part[0]?.toUpperCase())
     .join('') || '?';
 
-const Painel = ({
+export const Painel = ({
   icon,
   titulo,
   subtitulo,
@@ -389,7 +389,7 @@ const Painel = ({
   </section>
 );
 
-const Vazio = ({ texto = 'Sem dados no período' }: { texto?: string }) => (
+export const Vazio = ({ texto = 'Sem dados no período' }: { texto?: string }) => (
   <div className="home-vazio">
     <i className="pi pi-inbox" />
     {texto}
