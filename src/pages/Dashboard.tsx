@@ -1,4 +1,5 @@
 import { ReactNode, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -389,12 +390,35 @@ export const Painel = ({
   </section>
 );
 
-export const Vazio = ({ texto = 'Sem dados no período' }: { texto?: string }) => (
-  <div className="home-vazio">
-    <i className="pi pi-inbox" />
-    {texto}
+// Estado vazio de um card: ícone do assunto, frase curta e, quando fizer
+// sentido, um atalho. `tom="ok"` é para vazio que é boa notícia (pendências).
+export const Vazio = ({
+  icon = 'pi pi-inbox',
+  texto = 'Sem dados no período',
+  acao,
+  tom,
+}: {
+  icon?: string;
+  texto?: string;
+  acao?: { texto: string; onClick: () => void };
+  tom?: 'ok';
+}) => (
+  <div className={`home-vazio ${tom ?? ''}`}>
+    <span className="home-vazio-icone">
+      <i className={icon} />
+    </span>
+    <span>{texto}</span>
+    {acao && (
+      <button type="button" className="home-vazio-acao" onClick={acao.onClick}>
+        {acao.texto} <i className="pi pi-arrow-right" />
+      </button>
+    )}
   </div>
 );
+
+// Lista com todos os valores zerados (ex.: ocupação 0% em todo período)
+// conta como vazia — senão o card mostra barras/gráfico sem nada.
+const temValor = (items: { value: number }[]) => items.some((item) => item.value > 0);
 
 const BarrasHorizontais = ({
   items,
@@ -546,6 +570,7 @@ const PERIODO_SUBTITLE: Record<Periodo, string> = {
 export default function Dashboard() {
   const { hasPermition } = permissionAuth();
   const { renderToast } = useToast();
+  const navigate = useNavigate();
 
   // Endpoint que não trata `periodo` simplesmente ignora o parâmetro e
   // devolve o estado atual (fila, fluxo, convênios), sem quebrar nada.
@@ -711,7 +736,7 @@ export default function Dashboard() {
             {pacientesConvenio.length ? (
               <PacientesPorConvenio convenios={pacientesConvenio} />
             ) : (
-              <Vazio texto="Nenhum paciente ativo" />
+              <Vazio icon="pi pi-id-card" texto="Nenhum paciente ativo" />
             )}
           </Painel>
         )}
@@ -728,7 +753,7 @@ export default function Dashboard() {
                 <Bar options={chartBarOptions} data={especialidadeChart} />
               </div>
             ) : (
-              <Vazio />
+              <Vazio icon="pi pi-chart-bar" texto="Nenhuma sessão realizada no período" />
             )}
           </Painel>
         )}
@@ -762,7 +787,11 @@ export default function Dashboard() {
                 </DataTable>
               </div>
             ) : (
-              <Vazio texto="Nenhuma sessão para hoje" />
+              <Vazio
+                icon="pi pi-calendar"
+                texto="Agenda livre hoje"
+                acao={pode('agenda') ? { texto: 'Ver agenda', onClick: () => navigate('/agenda') } : undefined}
+              />
             )}
           </Painel>
         )}
@@ -782,7 +811,7 @@ export default function Dashboard() {
                 ))}
               </ul>
             ) : (
-              <Vazio texto="Nenhuma pendência" />
+              <Vazio icon="pi pi-check-circle" texto="Tudo em dia" tom="ok" />
             )}
           </Painel>
         )}
@@ -799,35 +828,39 @@ export default function Dashboard() {
                 <Doughnut options={chartDonutOptions} data={statusChart.chart} />
               </div>
             ) : (
-              <Vazio />
+              <Vazio icon="pi pi-chart-pie" texto="Nenhuma sessão no período" />
             )}
           </Painel>
         )}
 
         {pode('DASHBOARD_OCUPACAO_PERIODO') && (
           <Painel icon="pi pi-clock" titulo="Ocupação por período" subtitulo="Horários ocupados" className="s4">
-            {ocupacao.length ? <BarrasHorizontais items={ocupacao} sufixo="%" /> : <Vazio />}
+            {temValor(ocupacao) ? (
+              <BarrasHorizontais items={ocupacao} sufixo="%" />
+            ) : (
+              <Vazio icon="pi pi-clock" texto="Nenhum horário ocupado no período" />
+            )}
           </Painel>
         )}
 
         {pode('DASHBOARD_FLUXO_PACIENTES') && (
           <Painel icon="pi pi-sort-amount-down" titulo="Fluxo de pacientes" subtitulo="Da fila à terapia" className="s4">
-            {fluxo.length ? (
+            {temValor(fluxo) ? (
               <div style={{ height: 220 }}>
                 <Bar options={chartHorizontalBarOptions} data={toFunnelChartData(fluxo)} />
               </div>
             ) : (
-              <Vazio />
+              <Vazio icon="pi pi-sort-amount-down" texto="Nenhum paciente em fila ou em terapia" />
             )}
           </Painel>
         )}
 
         {pode('DASHBOARD_FILA_ESPECIALIDADE') && (
           <Painel icon="pi pi-users" titulo="Fila de espera por especialidade" className="s6">
-            {filaEspecialidade.length ? (
+            {temValor(filaEspecialidade) ? (
               <BarrasHorizontais items={filaEspecialidade} />
             ) : (
-              <Vazio texto="Ninguém na fila" />
+              <Vazio icon="pi pi-users" texto="Fila de espera vazia" />
             )}
           </Painel>
         )}
@@ -849,7 +882,7 @@ export default function Dashboard() {
                 ))}
               </ol>
             ) : (
-              <Vazio />
+              <Vazio icon="pi pi-star" texto="Nenhuma sessão registrada no período" />
             )}
           </Painel>
         )}
