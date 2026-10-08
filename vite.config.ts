@@ -7,6 +7,8 @@ export default ({ mode }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
 
   return defineConfig({
+    // VITE_BASE permite servir o app fora da raiz (padrão '/').
+    base: process.env.VITE_BASE || '/',
     plugins: [react(), reactRefresh()],
     server: {
       proxy: {

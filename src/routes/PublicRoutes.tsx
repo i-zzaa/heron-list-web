@@ -5,7 +5,7 @@ import LoginPage from '../pages/Login';
 
 const PublicRoutes: React.FC = () => {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="*" element={<LoginPage />} />
